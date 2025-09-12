@@ -1,0 +1,517 @@
+/* DFD Assistant: Data Flow Atlas Styles */
+
+:root {
+    --color-primary: #2563eb;
+    --color-primary-dark: #1d4ed8;
+    --color-secondary: #64748b;
+    --color-success: #059669;
+    --color-danger: #dc2626;
+    --color-warning: #d97706;
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
+    --color-border: #e2e8f0;
+    --color-text: #1e293b;
+    --color-text-muted: #64748b;
+    --radius-all1: 8px;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: var(--spacing-lg);
+}
+
+/* Header Styles */
+header {
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
+}
+
+header h1 {
+    color: var(--color-primary);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.125rem;
+}
+
+/* Navigation Styles */
+.main-nav {
+    border-bottom: 2px solid var(--color-border);
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-md);
+}
+
+.nav-btn {
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: var(--radius-all1);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-weight: 500;
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+}
+
+.nav-btn.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+/* Section Styles */
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+.section h2 {
+    color: var(--color-text);
+    font-size: 1.875rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Form Styles */
+.dfdc-form {
+    background: var(--color-surface);
+    border-radius: var(--radius-all1);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+}
+
+.form-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    color: var(--color-text);
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    font-size: 1rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--color-primary);
+    outline: none;
+}
+
+.form-group textarea {
+    font-family: inherit;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-end;
+    margin-top: var(--spacing-lg);
+}
+
+/* Button Styles */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+    border: none;
+    border-radius: var(--radius-all1);
+    cursor: pointer;
+    font-weight: 500;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+/* Atlas View Styles */
+.atlas-controls {
+    background: var(--color-surface);
+    border-radius: var(--radius-all1);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.filter-group label {
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.filter-group select {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.atlas-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+}
+
+.dfdc-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dfdc-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.dfdc-card-header {
+    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.dfdc-card-title {
+    color: var(--color-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.dfdc-card-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.card-action-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: var(--spacing-xs);
+    transition: all 0.2s ease;
+}
+
+.card-action-btn:hover {
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+.dfdc-card-meta {
+    display: grid;
+    gap: var(--spacing-sm);
+    grid-template-columns: auto 1fr;
+    margin-bottom: var(--spacing-md);
+}
+
+.dfdc-card-label {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.dfdc-card-value {
+    color: var(--color-text);
+    font-size: 0.875rem;
+}
+
+.dfdc-card-tag {
+    background-color: var(--color-primary);
+    border-radius: var(--radius-all1);
+    color: white;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.dfdc-card-tag.scope-app {
+    background-color: var(--color-success);
+}
+
+.dfdc-card-tag.scope-user {
+    background-color: var(--color-primary);
+}
+
+.dfdc-card-tag.scope-session {
+    background-color: var(--color-warning);
+}
+
+.dfdc-card-notes {
+    background-color: var(--color-background);
+    border-radius: var(--radius-all1);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
+}
+
+/* Import/Export Styles */
+.import-export-grid {
+    display: grid;
+    gap: var(--spacing-xl);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.export-group,
+.import-group,
+.danger-zone {
+    background: var(--color-surface);
+    border-radius: var(--radius-all1);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+}
+
+.danger-zone {
+    border: 2px solid var(--color-danger);
+}
+
+.export-group h3,
+.import-group h3,
+.danger-zone h3 {
+    color: var(--color-text);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.danger-zone h3 {
+    color: var(--color-danger);
+}
+
+.export-group p,
+.import-group p,
+.danger-zone p {
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.data-stats {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: var(--spacing-sm);
+}
+
+.import-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+}
+
+.import-options label {
+    align-items: center;
+    color: var(--color-text);
+    display: flex;
+    font-size: 0.875rem;
+    gap: var(--spacing-xs);
+}
+
+/* Modal Styles */
+.modal {
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--color-surface);
+    border-radius: var(--radius-all1);
+    box-shadow: var(--shadow-md);
+    max-height: 90vh;
+    max-width: 800px;
+    overflow-y: auto;
+    padding: var(--spacing-xl);
+    position: relative;
+    width: 90%;
+}
+
+.modal-close {
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1.5rem;
+    position: absolute;
+    right: var(--spacing-lg);
+    top: var(--spacing-lg);
+}
+
+.modal-close:hover {
+    color: var(--color-text);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .atlas-controls {
+        flex-direction: column;
+    }
+
+    .atlas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .import-export-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .main-nav {
+        flex-wrap: wrap;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.sr-only {
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/* Empty State Styles */
+.empty-state {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.empty-state-description {
+    font-size: 0.875rem;
+    max-width: 400px;
+}
