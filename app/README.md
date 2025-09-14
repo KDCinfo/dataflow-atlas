@@ -2,6 +2,12 @@
 
 **An Atlas of Data Points and Data Flows**
 
+***
+
+> NOTE: **This app is relatively new and is a WIP.**
+
+***
+
 Includes a "DFD collaborator card assistant".
 
 > DFD: Data Flow Diagram
