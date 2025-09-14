@@ -1,7 +1,7 @@
 # DFD Assistant: Data Flow Atlas
 
 ## Project Overview
-This is a **brand new project** for creating a Data Flow Atlas - a web-based tool for manually cataloging and organizing application data flows across multiple layers (Pinia stores, browser storage, backend APIs, databases). The goal is to provide a "forest-level perspective" for understanding complex data relationships.
+This is a new project for creating a "Data Flow Atlas" - a web-based tool for manually cataloging and organizing application data flows across multiple layers (Pinia stores, browser storage, backend APIs, databases). The goal is to provide a "forest-level perspective" for understanding complex data relationships.
 
 ## Core Concept: DFDC (DFD Collaboration) Cards
 - **Multi-layer data tracking**: stores, localStorage/sessionStorage, API endpoints, database tables
@@ -19,11 +19,14 @@ This is a **brand new project** for creating a Data Flow Atlas - a web-based too
   > border-radius: var(--radiusAll1); /* Must come first. */
   > border-bottom-right-radius: 0; /* This is an inline override. */
 
-## File Structure Context
+## (Historical) File Structure Context
+- `docs/dfd-assistant-instructions-intro.md`: Project overview and goals
+- `docs/dfd-assistant-instructions.md`: Detailed technical specification and schema
+- `docs/dfd-assistant-original-convo.md`: Original conversation re: project genesis
 - App should reside in 'app/' folder (at root).
 
 ## Sample Data Schema Pattern
-Each data element should follow a structure similar to the following (understanding this is the beginning of this project; see related 'dfd-asstant-readme.md' and 'dfd-assistant-atlas.md' for additional details):
+Each data element should follow a structure similar to the following (understanding this is the beginning of this project; see related 'dfd-asstant-readme.md' and 'dfd-assistant-instructions.md' for additional details):
 
 ```json
 {

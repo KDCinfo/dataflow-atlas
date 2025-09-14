@@ -1,11 +1,26 @@
-# DFD Assistant: Data Flow Atlas
+# Data Flow Atlas
 
-A vanilla JavaScript web application for manually cataloging and organizing application data flows across multiple layers (Pinia stores, browser storage, backend APIs, databases).
+**An Atlas of Data Points and Data Flows**
+
+Includes a "DFD collaborator card assistant".
+
+> DFD: Data Flow Diagram
+
+This app is a vanilla JavaScript web application for manually cataloging and organizing application data flows across multiple layers (Pinia stores, browser storage, backend APIs, databases).
+
+***
+
+> Do you know where all your data is at?
+
+A **structured, manually curated system of record** for understanding your app's *data domains and flows*, without drowning in ad-hoc notes or spaghetti diagrams.
+
+Basically an “architectural logbook” for all your app's data layers.
 
 ## Features
 
 ### DFDC (DFD Collaboration) Cards
 - **Three-axis categorization**: What (content type), Where (layer), Who (scope)
+   - Note: This could potentially change based on the progress of the app, but could likely remain core pillars of relationships
 - **Multi-layer data tracking**: stores, localStorage/sessionStorage, API endpoints, database tables
 - **Manual entry and curation** for forest-level perspective
 
@@ -23,6 +38,8 @@ A vanilla JavaScript web application for manually cataloging and organizing appl
 ## Usage
 
 ### Adding DFDC Cards
+
+Note: These are all susceptible to change based on the progress of the app.
 
 1. Navigate to the "Add DFDC Card" tab
 2. Fill in the required fields:
@@ -91,23 +108,24 @@ Each DFDC card follows this structure:
 
 ## Canonical Categories
 
-### App Preferences (App-Scoped, Persisted Locally)
-Font size, color themes, body width - saved in localStorage or appStateStore, not tied to account.
-
-### User Preferences (User-Scoped, Persisted Globally)
-Nightmode, transition styles - saved in DB, optionally mirrored in store, travel with user.
-
-### User Account Settings (Identity/Auth)
+### User Account Settings (Identity/Auth)              | Database
 Email, password, nickname, ID, tokens - always backend-first, mirrored locally as needed.
 
-### App Usage & Runtime State
-isLoading, currentPage, lastMsg - transient only, Pinia store or sessionStorage.
+### User Preferences (User-Scoped, Persisted Globally) | Database
+Nightmode, transition styles - saved in DB, optionally mirrored in store, travel with user.
 
-### Core/Feature Data
+### Core/Feature Data                                  | Database
 Domain-specific data like notes, tasks, projects - stored in DB, mirrored in store for active session.
 
-## Development
+### App Preferences (App-Scoped, Persisted Locally)    | localStorage
+Font size, color themes, body width - saved in localStorage or appStateStore, not tied to account.
 
+### App Usage & Runtime State                          | Pinia / sessionStorage
+isLoading, currentPage, lastMsg - transient only, Pinia store or sessionStorage.
+
+-----
+
+## Development
 This is a vanilla JavaScript application with no build process required. Simply open `index.html` in a web browser or serve the `app/` directory with any web server.
 
 ### File Structure
