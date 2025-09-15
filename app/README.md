@@ -1,10 +1,12 @@
 # Data Flow Atlas
 
-**An Atlas of Data Points and Data Flows**
+**An Atlas of data points, data layers, and data flows** for your web or mobile app.
+
+> Do you know where all your data is at?
 
 ***
 
-> NOTE: **This app is relatively new and is a WIP.**
+> NOTE: **This app is relatively new and is a WIP** as of 2025-09.
 
 ***
 
@@ -12,11 +14,16 @@ Includes a "DFD collaborator card assistant".
 
 > DFD: Data Flow Diagram
 
-This app is a vanilla JavaScript web application for manually cataloging and organizing application data flows across multiple layers (Pinia stores, browser storage, backend APIs, databases).
+This app is a vanilla JavaScript web application for manually cataloging and organizing application data flows across multiple layers.
+
+Some examples might include:
+
+- Nuxt web app or SPA:
+  - Pinia stores, models, composables, middleware, plugins, browser local and session storage, backend APIs, databases, etc.
+- Flutter mobile app:
+  - Shared Preferences, Flutter Secure Storage, models, changeNotifiers, blocs, repositories, backend APIs, databases, server instances, Firebase stores, etc.
 
 ***
-
-> Do you know where all your data is at?
 
 A **structured, manually curated system of record** for understanding your app's *data domains and flows*, without drowning in ad-hoc notes or spaghetti diagrams.
 
