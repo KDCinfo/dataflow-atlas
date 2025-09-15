@@ -1,0 +1,346 @@
+import type { DFDCCard, AtlasFilter } from './types/dfdc.js';
+import { loadCards, exportCards, importCards } from './utils/storage.js';
+import {
+  showNotification,
+  renderDFDCCard,
+  renderEmptyState,
+  createEditForm,
+  clearFormValidation,
+  updateDataStats,
+  downloadJson,
+} from './components/ui.js';
+import {
+  createDFDCCardFromForm,
+  addDFDCCard,
+  updateDFDCCard,
+  deleteDFDCCard,
+  getFilteredCards,
+  clearAllCards,
+} from './components/cardManager.js';
+
+/**
+ * Main Data Flow Atlas application class.
+ */
+export class DFDAtlas {
+  private currentEditField: string | null = null;
+
+  constructor() {
+    this.initializeEventListeners();
+    this.renderAtlas();
+    this.updateStats();
+  }
+
+  /**
+   * Initialize all event listeners for the application.
+   */
+  private initializeEventListeners(): void {
+    // Navigation.
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => this.handleNavigation(e as MouseEvent));
+    });
+
+    // Form submission.
+    const dfdcForm = document.getElementById('dfdc-form') as HTMLFormElement;
+    if (dfdcForm) {
+      dfdcForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleFormSubmit();
+      });
+
+      dfdcForm.addEventListener('reset', () => {
+        setTimeout(() => clearFormValidation(), 0);
+      });
+    }
+
+    // Filters.
+    const filterLayer = document.getElementById('filter-layer') as HTMLSelectElement;
+    const filterScope = document.getElementById('filter-scope') as HTMLSelectElement;
+    const filterCategory = document.getElementById('filter-category') as HTMLSelectElement;
+    const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
+
+    if (filterLayer) filterLayer.addEventListener('change', () => this.applyFilters());
+    if (filterScope) filterScope.addEventListener('change', () => this.applyFilters());
+    if (filterCategory) filterCategory.addEventListener('change', () => this.applyFilters());
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+
+    // Import/Export.
+    const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
+    const importBtn = document.getElementById('import-btn') as HTMLButtonElement;
+    const importFile = document.getElementById('import-file') as HTMLInputElement;
+    const clearAllBtn = document.getElementById('clear-all-btn') as HTMLButtonElement;
+
+    if (exportBtn) exportBtn.addEventListener('click', () => this.exportData());
+    if (importBtn) importBtn.addEventListener('click', () => this.triggerImport());
+    if (importFile) importFile.addEventListener('change', (e) => this.handleImport(e));
+    if (clearAllBtn) clearAllBtn.addEventListener('click', () => this.clearAllData());
+
+    // Modal.
+    const editModal = document.getElementById('edit-modal') as HTMLElement;
+    if (editModal) {
+      editModal.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.id === 'edit-modal' || target.classList.contains('modal-close')) {
+          this.closeModal();
+        }
+      });
+    }
+
+    // Edit form submission.
+    const editForm = document.getElementById('edit-form') as HTMLFormElement;
+    if (editForm) {
+      editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleEditSubmit();
+      });
+    }
+  }
+
+  /**
+   * Handle navigation between sections.
+   */
+  private handleNavigation(e: MouseEvent): void {
+    const target = e.target as HTMLElement;
+    const targetSection = target.id.replace('nav-', '') + '-section';
+
+    // Update nav buttons.
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    target.classList.add('active');
+
+    // Update sections.
+    document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+    const sectionElement = document.getElementById(targetSection);
+    if (sectionElement) {
+      sectionElement.classList.add('active');
+    }
+  }
+
+  /**
+   * Handle form submission for creating new DFDC cards.
+   */
+  private handleFormSubmit(): void {
+    const form = document.getElementById('dfdc-form') as HTMLFormElement;
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const dfdcCard = createDFDCCardFromForm(formData);
+
+    if (addDFDCCard(dfdcCard)) {
+      form.reset();
+      clearFormValidation();
+      this.renderAtlas();
+      this.updateStats();
+    }
+  }
+
+  /**
+   * Open edit modal for a DFDC card.
+   */
+  private editDFDCCard(field: string): void {
+    const cards = loadCards();
+    const card = cards.find(c => c.field === field);
+    if (!card) return;
+
+    this.currentEditField = field;
+    this.populateEditForm(card);
+
+    const modal = document.getElementById('edit-modal');
+    if (modal) {
+      modal.classList.add('active');
+    }
+  }
+
+  /**
+   * Populate the edit form with card data.
+   */
+  private populateEditForm(card: DFDCCard): void {
+    const editForm = document.getElementById('edit-form');
+    if (!editForm) return;
+
+    editForm.innerHTML = createEditForm(card);
+  }
+
+  /**
+   * Handle edit form submission.
+   */
+  private handleEditSubmit(): void {
+    if (!this.currentEditField) return;
+
+    const form = document.getElementById('edit-form') as HTMLFormElement;
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const updatedCard = createDFDCCardFromForm(formData);
+
+    if (updateDFDCCard(this.currentEditField, updatedCard)) {
+      this.closeModal();
+      this.renderAtlas();
+      this.updateStats();
+    }
+  }
+
+  /**
+   * Close the edit modal.
+   */
+  private closeModal(): void {
+    const modal = document.getElementById('edit-modal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+    this.currentEditField = null;
+  }
+
+  /**
+   * Render the atlas view with all DFDC cards.
+   */
+  private renderAtlas(): void {
+    const atlasGrid = document.getElementById('atlas-grid');
+    if (!atlasGrid) return;
+
+    const filters = this.getCurrentFilters();
+    const filteredCards = getFilteredCards(filters);
+
+    if (filteredCards.length === 0) {
+      atlasGrid.innerHTML = renderEmptyState();
+      return;
+    }
+
+    atlasGrid.innerHTML = filteredCards
+      .map(card => renderDFDCCard(card))
+      .join('');
+
+    // Add event listeners to card actions.
+    atlasGrid.querySelectorAll('.card-action-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const action = target.dataset.action;
+        const cardField = target.dataset.cardId;
+
+        if (action === 'edit' && cardField) {
+          this.editDFDCCard(cardField);
+        } else if (action === 'delete' && cardField) {
+          if (deleteDFDCCard(cardField)) {
+            this.renderAtlas();
+            this.updateStats();
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Get current filter values from the UI.
+   */
+  private getCurrentFilters(): AtlasFilter {
+    const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement;
+    const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
+    const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
+
+    return {
+      layer: layerFilter?.value as any || undefined,
+      scope: scopeFilter?.value as any || undefined,
+      category: categoryFilter?.value as any || undefined,
+    };
+  }
+
+  /**
+   * Apply filters to the atlas view.
+   */
+  private applyFilters(): void {
+    this.renderAtlas();
+  }
+
+  /**
+   * Clear all filters.
+   */
+  private clearFilters(): void {
+    const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement;
+    const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
+    const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
+
+    if (layerFilter) layerFilter.value = '';
+    if (scopeFilter) scopeFilter.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+
+    this.renderAtlas();
+  }
+
+  /**
+   * Export data to JSON file.
+   */
+  private exportData(): void {
+    const cards = loadCards();
+    const dataToExport = {
+      version: '1.0',
+      exported: new Date().toISOString(),
+      cards,
+    };
+
+    const filename = `dfd-atlas-${new Date().toISOString().split('T')[0]}.json`;
+    downloadJson(dataToExport, filename);
+    showNotification('Data exported successfully!', 'success');
+  }
+
+  /**
+   * Trigger file input for import.
+   */
+  private triggerImport(): void {
+    const importFile = document.getElementById('import-file') as HTMLInputElement;
+    if (importFile) {
+      importFile.click();
+    }
+  }
+
+  /**
+   * Handle file import.
+   */
+  private handleImport(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        if (!content) return;
+
+        const importMode = document.querySelector('input[name="import-mode"]:checked') as HTMLInputElement;
+        const mode = importMode?.value as any || 'merge';
+
+        importCards(content, mode);
+        this.renderAtlas();
+        this.updateStats();
+        showNotification(`Data imported successfully! (${mode} mode)`, 'success');
+
+        // Reset file input.
+        target.value = '';
+      } catch (error) {
+        showNotification('Error importing file: Invalid JSON format', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /**
+   * Clear all data after confirmation.
+   */
+  private clearAllData(): void {
+    if (clearAllCards()) {
+      this.renderAtlas();
+      this.updateStats();
+    }
+  }
+
+  /**
+   * Update data statistics display.
+   */
+  private updateStats(): void {
+    const cards = loadCards();
+    updateDataStats(cards.length);
+  }
+}
+
+// Initialize the application when DOM is loaded.
+document.addEventListener('DOMContentLoaded', () => {
+  (window as any).dfdAtlas = new DFDAtlas();
+});
