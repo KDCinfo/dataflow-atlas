@@ -10,6 +10,24 @@ import type { DFDCCard } from '../types/dfdc.js';
 export type NotificationType = 'success' | 'error' | 'info';
 
 /**
+ * Safely get DOM element with type assertion.
+ */
+export function getElement<T extends HTMLElement>(id: string): T | null {
+  return document.getElementById(id) as T | null;
+}
+
+/**
+ * Safely get DOM element or throw error if not found.
+ */
+export function requireElement<T extends HTMLElement>(id: string): T {
+  const element = document.getElementById(id) as T | null;
+  if (!element) {
+    throw new Error(`Required element not found: ${id}`);
+  }
+  return element;
+}
+
+/**
  * Show a notification message to the user.
  */
 export function showNotification(message: string, type: NotificationType = 'info'): void {

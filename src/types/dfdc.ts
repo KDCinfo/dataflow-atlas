@@ -55,3 +55,18 @@ export interface AtlasFilter {
   category?: ContentCategory;
   searchTerm?: string;
 }
+
+/**
+ * Type guards for runtime validation.
+ */
+export function isDataLayer(value: string): value is DataLayer {
+  return ['store', 'localStorage', 'sessionStorage', 'api', 'database'].includes(value);
+}
+
+export function isDataScope(value: string): value is DataScope {
+  return ['app', 'user', 'session'].includes(value);
+}
+
+export function isContentCategory(value: string): value is ContentCategory {
+  return ['user-preference', 'account-setting', 'runtime-state', 'feature-data', 'app-preference'].includes(value);
+}

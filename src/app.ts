@@ -119,16 +119,24 @@ export class DFDAtlas {
    */
   private handleFormSubmit(): void {
     const form = document.getElementById('dfdc-form') as HTMLFormElement;
-    if (!form) return;
+    if (!form) {
+      showNotification('Form not found', 'error');
+      return;
+    }
 
-    const formData = new FormData(form);
-    const dfdcCard = createDFDCCardFromForm(formData);
+    try {
+      const formData = new FormData(form);
+      const dfdcCard = createDFDCCardFromForm(formData);
 
-    if (addDFDCCard(dfdcCard)) {
-      form.reset();
-      clearFormValidation();
-      this.renderAtlas();
-      this.updateStats();
+      if (addDFDCCard(dfdcCard)) {
+        form.reset();
+        clearFormValidation();
+        this.renderAtlas();
+        this.updateStats();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      showNotification(`Error creating card: ${message}`, 'error');
     }
   }
 
@@ -163,18 +171,29 @@ export class DFDAtlas {
    * Handle edit form submission.
    */
   private handleEditSubmit(): void {
-    if (!this.currentEditField) return;
+    if (!this.currentEditField) {
+      showNotification('No card selected for editing', 'error');
+      return;
+    }
 
     const form = document.getElementById('edit-form') as HTMLFormElement;
-    if (!form) return;
+    if (!form) {
+      showNotification('Edit form not found', 'error');
+      return;
+    }
 
-    const formData = new FormData(form);
-    const updatedCard = createDFDCCardFromForm(formData);
+    try {
+      const formData = new FormData(form);
+      const updatedCard = createDFDCCardFromForm(formData);
 
-    if (updateDFDCCard(this.currentEditField, updatedCard)) {
-      this.closeModal();
-      this.renderAtlas();
-      this.updateStats();
+      if (updateDFDCCard(this.currentEditField, updatedCard)) {
+        this.closeModal();
+        this.renderAtlas();
+        this.updateStats();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      showNotification(`Error updating card: ${message}`, 'error');
     }
   }
 
@@ -228,18 +247,26 @@ export class DFDAtlas {
   }
 
   /**
-   * Get current filter values from the UI.
+   * Get current filter values from the UI with type safety.
    */
   private getCurrentFilters(): AtlasFilter {
-    const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement;
-    const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
-    const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
+    const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement | null;
+    const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement | null;
+    const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement | null;
 
-    return {
-      layer: layerFilter?.value as any || undefined,
-      scope: scopeFilter?.value as any || undefined,
-      category: categoryFilter?.value as any || undefined,
-    };
+    const filters: AtlasFilter = {};
+
+    if (layerFilter?.value) {
+      filters.layer = layerFilter.value as any; // Validated by form options.
+    }
+    if (scopeFilter?.value) {
+      filters.scope = scopeFilter.value as any; // Validated by form options.
+    }
+    if (categoryFilter?.value) {
+      filters.category = categoryFilter.value as any; // Validated by form options.
+    }
+
+    return filters;
   }
 
   /**
@@ -291,7 +318,7 @@ export class DFDAtlas {
   }
 
   /**
-   * Handle file import.
+   * Handle file import with enhanced error handling.
    */
   private handleImport(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -302,10 +329,18 @@ export class DFDAtlas {
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
-        if (!content) return;
+        if (!content) {
+          showNotification('Error reading file content', 'error');
+          return;
+        }
 
-        const importMode = document.querySelector('input[name="import-mode"]:checked') as HTMLInputElement;
-        const mode = importMode?.value as any || 'merge';
+        const importModeElement = document.querySelector('input[name="import-mode"]:checked') as HTMLInputElement;
+        const mode = importModeElement?.value;
+
+        if (mode !== 'replace' && mode !== 'merge') {
+          showNotification('Invalid import mode selected', 'error');
+          return;
+        }
 
         importCards(content, mode);
         this.renderAtlas();
@@ -315,9 +350,15 @@ export class DFDAtlas {
         // Reset file input.
         target.value = '';
       } catch (error) {
-        showNotification('Error importing file: Invalid JSON format', 'error');
+        const message = error instanceof Error ? error.message : 'Invalid JSON format';
+        showNotification(`Error importing file: ${message}`, 'error');
       }
     };
+
+    reader.onerror = () => {
+      showNotification('Error reading file', 'error');
+    };
+
     reader.readAsText(file);
   }
 

@@ -1,4 +1,5 @@
-import type { DFDCCard, AtlasFilter } from '../types/dfdc.js';
+import type { DFDCCard, AtlasFilter, DataLayer, DataScope, ContentCategory } from '../types/dfdc.js';
+import { isDataLayer, isDataScope, isContentCategory } from '../types/dfdc.js';
 import { loadCards, saveCards } from '../utils/storage.js';
 import { showNotification, generateId } from './ui.js';
 
@@ -15,7 +16,7 @@ interface ValidationResult {
 }
 
 /**
- * Create a DFDC card from form data.
+ * Create a DFDC card from form data with proper type validation.
  */
 export function createDFDCCardFromForm(formData: FormData): DFDCCard {
   const persistsIn = (formData.get('persists_in') as string || '')
@@ -23,14 +24,31 @@ export function createDFDCCardFromForm(formData: FormData): DFDCCard {
     .map(line => line.trim())
     .filter(line => line.length > 0);
 
+  const field = (formData.get('field') as string || '').trim();
+  const layer = formData.get('layer') as string;
+  const scope = formData.get('scope') as string;
+  const category = formData.get('category') as string;
+
+  // Validate types at runtime.
+  if (!isDataLayer(layer)) {
+    throw new Error(`Invalid layer: ${layer}`);
+  }
+  if (!isDataScope(scope)) {
+    throw new Error(`Invalid scope: ${scope}`);
+  }
+
+  const validCategory: ContentCategory | undefined = category && isContentCategory(category)
+    ? category
+    : undefined;
+
   return {
-    field: (formData.get('field') as string || '').trim(),
-    layer: formData.get('layer') as any, // Will be validated.
-    location: (formData.get('location') as string || '').trim(),
-    type: (formData.get('type') as string || '').trim(),
-    scope: formData.get('scope') as any, // Will be validated.
-    purpose: (formData.get('purpose') as string || '').trim(),
-    category: (formData.get('category') as string || '') as any,
+    field,
+    layer,
+    location: (formData.get('location') as string || '').trim() || undefined,
+    type: (formData.get('type') as string || '').trim() || undefined,
+    scope,
+    purpose: (formData.get('purpose') as string || '').trim() || undefined,
+    category: validCategory,
     persists_in: persistsIn.length > 0 ? persistsIn : undefined,
     notes: (formData.get('notes') as string || '').trim() || undefined,
   };
