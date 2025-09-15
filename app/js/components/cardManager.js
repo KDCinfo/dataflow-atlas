@@ -25,7 +25,10 @@ export function createDFDCCardFromForm(formData) {
         : undefined;
     const location = (formData.get('location') || '').trim();
     const type = (formData.get('type') || '').trim();
-    const purpose = (formData.get('purpose') || '').trim();
+    const getterName = (formData.get('getter_name') || '').trim();
+    const getterCode = (formData.get('getter_code') || '').trim();
+    const setterName = (formData.get('setter_name') || '').trim();
+    const setterCode = (formData.get('setter_code') || '').trim();
     const notes = (formData.get('notes') || '').trim();
     const card = {
         field,
@@ -37,10 +40,16 @@ export function createDFDCCardFromForm(formData) {
         card.location = location;
     if (type)
         card.type = type;
-    if (purpose)
-        card.purpose = purpose;
     if (validCategory)
         card.category = validCategory;
+    if (getterName)
+        card.getter_name = getterName;
+    if (getterCode)
+        card.getter_code = getterCode;
+    if (setterName)
+        card.setter_name = setterName;
+    if (setterCode)
+        card.setter_code = setterCode;
     if (persistsIn.length > 0)
         card.persists_in = persistsIn;
     if (notes)
@@ -141,7 +150,8 @@ export function getFilteredCards(filters) {
             const searchableText = [
                 card.field,
                 card.location,
-                card.purpose,
+                card.getter_name,
+                card.setter_name,
                 card.notes,
                 ...(card.persists_in || []),
             ].join(' ').toLowerCase();

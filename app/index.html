@@ -74,35 +74,51 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="purpose">Purpose/Description:</label>
-                        <input type="text" id="purpose" name="purpose"
-                               placeholder="e.g., UI theme preference, Auth credential">
-                    </div>
-
-                    <!-- Additional Fields -->
-                    <div class="form-group">
                         <label for="category">Category:</label>
                         <select id="category" name="category">
                             <option value="">Select Category</option>
-                            <option value="preference">App Preference</option>
                             <option value="user-preference">User Preference</option>
-                            <option value="account">User Account Setting</option>
-                            <option value="auth">Authentication</option>
-                            <option value="runtime">Runtime State</option>
-                            <option value="feature">Core/Feature Data</option>
+                            <option value="account-setting">Account Setting</option>
+                            <option value="runtime-state">Runtime State</option>
+                            <option value="feature-data">Feature Data</option>
+                            <option value="app-preference">App Preference</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="getter_name">Getter Function Name:</label>
+                        <input type="text" id="getter_name" name="getter_name"
+                               placeholder="e.g., getUsername, userStore.getProfile">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="setter_name">Setter Function Name:</label>
+                        <input type="text" id="setter_name" name="setter_name"
+                               placeholder="e.g., setUsername, userStore.setProfile">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="getter_code">Getter Code (optional):</label>
+                        <textarea id="getter_code" name="getter_code" rows="3"
+                                  placeholder="Implementation code for the getter..."></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="setter_code">Setter Code (optional):</label>
+                        <textarea id="setter_code" name="setter_code" rows="3"
+                                  placeholder="Implementation code for the setter..."></textarea>
                     </div>
 
                     <div class="form-group full-width">
                         <label for="persists_in">Also Persists In:</label>
                         <textarea id="persists_in" name="persists_in" rows="2"
-                                  placeholder="Enter related locations (one per line)&#10;e.g., backend.db.users.nightmode&#10;backend.api.userSettings.nightmode"></textarea>
+                                  placeholder="One per line: backend.api.users, localStorage.userData"></textarea>
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="notes">Notes:</label>
-                        <textarea id="notes" name="notes" rows="3"
-                                  placeholder="Additional notes, conflicts, deprecation info, etc."></textarea>
+                        <label for="notes">Notes & Description:</label>
+                        <textarea id="notes" name="notes" rows="4"
+                                  placeholder="Purpose, usage notes, conflicts, deprecation status, etc."></textarea>
                     </div>
                 </div>
 

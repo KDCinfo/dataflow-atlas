@@ -114,6 +114,16 @@ export function renderDFDCCard(card: DFDCCard): string {
        <div class="dfdc-card-value">${card.persists_in.join(', ')}</div>`
     : '';
 
+  const getterSection = card.getter_name
+    ? `<div class="dfdc-card-label">Getter:</div>
+       <div class="dfdc-card-value">${escapeHtml(card.getter_name)}</div>`
+    : '';
+
+  const setterSection = card.setter_name
+    ? `<div class="dfdc-card-label">Setter:</div>
+       <div class="dfdc-card-value">${escapeHtml(card.setter_name)}</div>`
+    : '';
+
   const notesSection = card.notes
     ? `<div class="dfdc-card-notes">${escapeHtml(card.notes)}</div>`
     : '';
@@ -138,9 +148,8 @@ export function renderDFDCCard(card: DFDCCard): string {
         <div class="dfdc-card-label">Type:</div>
         <div class="dfdc-card-value">${escapeHtml(card.type || 'Not specified')}</div>
 
-        <div class="dfdc-card-label">Purpose:</div>
-        <div class="dfdc-card-value">${escapeHtml(card.purpose || 'Not specified')}</div>
-
+        ${getterSection}
+        ${setterSection}
         ${persistsInList}
       </div>
 
@@ -214,11 +223,6 @@ export function createEditForm(card: DFDCCard): string {
       </div>
 
       <div class="form-group">
-        <label for="edit-purpose">Purpose/Description:</label>
-        <input type="text" id="edit-purpose" name="purpose" value="${escapeHtml(card.purpose || '')}">
-      </div>
-
-      <div class="form-group">
         <label for="edit-category">Category:</label>
         <select id="edit-category" name="category">
           <option value="">Select Category</option>
@@ -230,14 +234,34 @@ export function createEditForm(card: DFDCCard): string {
         </select>
       </div>
 
-      <div class="form-group full-width">
-        <label for="edit-persists_in">Also Persists In:</label>
-        <textarea id="edit-persists_in" name="persists_in" rows="2">${(card.persists_in || []).join('\n')}</textarea>
+      <div class="form-group">
+        <label for="edit-getter_name">Getter Function:</label>
+        <input type="text" id="edit-getter_name" name="getter_name" value="${escapeHtml(card.getter_name || '')}" placeholder="e.g., getUsername, userStore.getProfile">
+      </div>
+
+      <div class="form-group">
+        <label for="edit-setter_name">Setter Function:</label>
+        <input type="text" id="edit-setter_name" name="setter_name" value="${escapeHtml(card.setter_name || '')}" placeholder="e.g., setUsername, userStore.setProfile">
       </div>
 
       <div class="form-group full-width">
-        <label for="edit-notes">Notes:</label>
-        <textarea id="edit-notes" name="notes" rows="3">${escapeHtml(card.notes || '')}</textarea>
+        <label for="edit-getter_code">Getter Code (optional):</label>
+        <textarea id="edit-getter_code" name="getter_code" rows="3" placeholder="Implementation code for the getter...">${escapeHtml(card.getter_code || '')}</textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="edit-setter_code">Setter Code (optional):</label>
+        <textarea id="edit-setter_code" name="setter_code" rows="3" placeholder="Implementation code for the setter...">${escapeHtml(card.setter_code || '')}</textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="edit-persists_in">Also Persists In:</label>
+        <textarea id="edit-persists_in" name="persists_in" rows="2" placeholder="One per line: backend.api.users, localStorage.userData">${(card.persists_in || []).join('\n')}</textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="edit-notes">Notes & Description:</label>
+        <textarea id="edit-notes" name="notes" rows="4" placeholder="Purpose, usage notes, conflicts, deprecation status, etc.">${escapeHtml(card.notes || '')}</textarea>
       </div>
     </div>
 

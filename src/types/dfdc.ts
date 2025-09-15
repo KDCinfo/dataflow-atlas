@@ -7,9 +7,12 @@ export interface DFDCCard {
   location?: string;
   type?: string;
   scope: DataScope;
-  purpose?: string;
   category?: ContentCategory;
   persists_in?: string[];
+  getter_name?: string;
+  getter_code?: string;
+  setter_name?: string;
+  setter_code?: string;
   notes?: string;
 }
 

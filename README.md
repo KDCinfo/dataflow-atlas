@@ -33,9 +33,7 @@ The full description of this app can be found in the [app's README.md](app/READM
 
 Note: These are to be moved to '@RELEASES' when complete.
 
-- [ ] Convert JavaScript to TypeScript.
 - [ ] Create a favicon and logo.
-- [ ] In DFDC form: add optional properties for getters and setters.
 - [ ] Deploy a live demo as a sibling to the [Data Clump Flow Analysis App](https://kdcinfo.com/app/dataflow/).
 
 ***
@@ -69,3 +67,5 @@ Note: These are to be moved to '@RELEASES' when complete.
 > 2025-09-13 -- 09-14
 
 - Initial review of generated app with cleanup of all docs and startup notes.
+- [X] Converted JavaScript to TypeScript.
+- [X] In DFDC form: add optional properties for getters and setters.

@@ -43,7 +43,10 @@ export function createDFDCCardFromForm(formData: FormData): DFDCCard {
 
   const location = (formData.get('location') as string || '').trim();
   const type = (formData.get('type') as string || '').trim();
-  const purpose = (formData.get('purpose') as string || '').trim();
+  const getterName = (formData.get('getter_name') as string || '').trim();
+  const getterCode = (formData.get('getter_code') as string || '').trim();
+  const setterName = (formData.get('setter_name') as string || '').trim();
+  const setterCode = (formData.get('setter_code') as string || '').trim();
   const notes = (formData.get('notes') as string || '').trim();
 
   const card: DFDCCard = {
@@ -55,8 +58,11 @@ export function createDFDCCardFromForm(formData: FormData): DFDCCard {
   // Only add optional properties if they have values.
   if (location) card.location = location;
   if (type) card.type = type;
-  if (purpose) card.purpose = purpose;
   if (validCategory) card.category = validCategory;
+  if (getterName) card.getter_name = getterName;
+  if (getterCode) card.getter_code = getterCode;
+  if (setterName) card.setter_name = setterName;
+  if (setterCode) card.setter_code = setterCode;
   if (persistsIn.length > 0) card.persists_in = persistsIn;
   if (notes) card.notes = notes;
 
@@ -173,7 +179,8 @@ export function getFilteredCards(filters: AtlasFilter): DFDCCard[] {
       const searchableText = [
         card.field,
         card.location,
-        card.purpose,
+        card.getter_name,
+        card.setter_name,
         card.notes,
         ...(card.persists_in || []),
       ].join(' ').toLowerCase();
