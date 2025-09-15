@@ -141,7 +141,26 @@ isLoading, currentPage, lastMsg - transient only, Pinia store or sessionStorage.
 ## Development
 This is a vanilla JavaScript application with no build process required. Simply open `index.html` in a web browser or serve the `app/` directory with any web server.
 
-### File Structure
+### New TypeScript File Structure
+```
+├── src/
+│   ├── types/
+│   │   └── dfdc.ts          # DFDC card interfaces
+│   ├── utils/
+│   │   └── storage.ts       # localStorage utilities
+│   ├── components/
+│   │   ├── cardManager.ts   # Card CRUD operations
+│   │   └── ui.ts            # UI interactions
+│   └── app.ts               # Main application logic
+├── app/
+│   ├── index.html
+│   ├── css/
+│   │   └── styles.css
+│   └── js/                  # Compiled TypeScript output
+│       └── app.js
+```
+
+### Old JavaScript File Structure
 ```
 app/
 ├── index.html          # Main application HTML

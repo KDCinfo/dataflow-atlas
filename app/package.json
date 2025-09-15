@@ -23,6 +23,9 @@
   "main": "js/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "tsc --watch"
   },
   "devDependencies": {
     "typescript": "^5.9.2"
