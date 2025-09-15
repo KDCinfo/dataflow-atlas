@@ -9,6 +9,8 @@ import {
   updateDataStats,
   downloadJson,
   initializeDataTypeDropdown,
+  initializeCodeSectionToggle,
+  initializeEditCodeSectionToggle,
 } from './components/ui.js';
 import {
   createDFDCCardFromForm,
@@ -37,6 +39,7 @@ export class DFDAtlas {
    */
   private initializeUI(): void {
     initializeDataTypeDropdown();
+    initializeCodeSectionToggle();
   }
 
   /**
@@ -174,6 +177,9 @@ export class DFDAtlas {
     if (!editForm) return;
 
     editForm.innerHTML = createEditForm(card);
+
+    // Initialize code section toggle for the edit form.
+    initializeEditCodeSectionToggle();
   }
 
   /**

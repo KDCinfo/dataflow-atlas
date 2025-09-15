@@ -98,16 +98,18 @@
                                placeholder="e.g., setUsername, userStore.setProfile">
                     </div>
 
-                    <div class="form-group full-width">
-                        <label for="getter_code">Getter Code (optional):</label>
-                        <textarea id="getter_code" name="getter_code" rows="3"
-                                  placeholder="Implementation code for the getter..."></textarea>
-                    </div>
+                    <div class="code-sections-container">
+                        <div class="form-group full-width code-section hidden" id="getter-code-section">
+                            <label for="getter_code">Getter Code (optional):</label>
+                            <textarea id="getter_code" name="getter_code" rows="3"
+                                      placeholder="Implementation code for the getter..."></textarea>
+                        </div>
 
-                    <div class="form-group full-width">
-                        <label for="setter_code">Setter Code (optional):</label>
-                        <textarea id="setter_code" name="setter_code" rows="3"
-                                  placeholder="Implementation code for the setter..."></textarea>
+                        <div class="form-group full-width code-section hidden" id="setter-code-section">
+                            <label for="setter_code">Setter Code (optional):</label>
+                            <textarea id="setter_code" name="setter_code" rows="3"
+                                      placeholder="Implementation code for the setter..."></textarea>
+                        </div>
                     </div>
 
                     <div class="form-group full-width">

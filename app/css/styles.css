@@ -164,7 +164,41 @@ header h1 {
     margin-top: var(--spacing-lg);
 }
 
-/* Button Styles */
+/* Getter/Setter Code Section Styles */
+.code-section {
+    transition: all 0.3s ease-in-out;
+}
+
+.code-section.hidden {
+    display: none;
+}
+
+.code-sections-container {
+    grid-column: 1 / -1; /* Always span full width in grid */
+    display: block; /* Default to block layout */
+}
+
+/* Responsive layout for code sections */
+@media (min-width: 900px) {
+    .code-sections-container {
+        display: flex;
+        gap: var(--spacing-lg);
+    }
+    
+    .code-sections-container .code-section {
+        flex: 1;
+    }
+    
+    /* When only setter code is visible, align it to the right */
+    .code-sections-container .code-section:first-child.hidden + .code-section:not(.hidden) {
+        margin-left: calc(50% + var(--spacing-lg) / 2);
+    }
+    
+    /* Remove the full-width class effect when in flex layout */
+    .code-sections-container .code-section.full-width {
+        grid-column: unset;
+    }
+}/* Button Styles */
 .btn-primary,
 .btn-secondary,
 .btn-danger {

@@ -36,6 +36,114 @@ export function initializeDataTypeDropdown(): void {
 }
 
 /**
+ * Initialize getter/setter code section visibility management.
+ */
+export function initializeCodeSectionToggle(): void {
+  const getterNameInput = getElement<HTMLInputElement>('getter_name');
+  const setterNameInput = getElement<HTMLInputElement>('setter_name');
+  const getterCodeSection = getElement<HTMLElement>('getter-code-section');
+  const setterCodeSection = getElement<HTMLElement>('setter-code-section');
+
+  if (!getterNameInput || !setterNameInput || !getterCodeSection || !setterCodeSection) {
+    return;
+  }
+
+  // Debounce timers.
+  let getterTimeout: number | undefined;
+  let setterTimeout: number | undefined;
+
+  const toggleSection = (section: HTMLElement, show: boolean): void => {
+    if (show) {
+      section.classList.remove('hidden');
+    } else {
+      section.classList.add('hidden');
+    }
+  };
+
+  const handleGetterChange = (): void => {
+    if (getterTimeout) {
+      window.clearTimeout(getterTimeout);
+    }
+    getterTimeout = window.setTimeout(() => {
+      const hasValue = getterNameInput.value.trim().length > 0;
+      toggleSection(getterCodeSection, hasValue);
+    }, 500);
+  };
+
+  const handleSetterChange = (): void => {
+    if (setterTimeout) {
+      window.clearTimeout(setterTimeout);
+    }
+    setterTimeout = window.setTimeout(() => {
+      const hasValue = setterNameInput.value.trim().length > 0;
+      toggleSection(setterCodeSection, hasValue);
+    }, 500);
+  };
+
+  // Add event listeners.
+  getterNameInput.addEventListener('input', handleGetterChange);
+  setterNameInput.addEventListener('input', handleSetterChange);
+
+  // Initial check.
+  handleGetterChange();
+  handleSetterChange();
+}
+
+/**
+ * Initialize getter/setter code section visibility management for edit forms.
+ */
+export function initializeEditCodeSectionToggle(): void {
+  const getterNameInput = getElement<HTMLInputElement>('edit-getter_name');
+  const setterNameInput = getElement<HTMLInputElement>('edit-setter_name');
+  const getterCodeSection = getElement<HTMLElement>('edit-getter-code-section');
+  const setterCodeSection = getElement<HTMLElement>('edit-setter-code-section');
+
+  if (!getterNameInput || !setterNameInput || !getterCodeSection || !setterCodeSection) {
+    return;
+  }
+
+  // Debounce timers.
+  let getterTimeout: number | undefined;
+  let setterTimeout: number | undefined;
+
+  const toggleSection = (section: HTMLElement, show: boolean): void => {
+    if (show) {
+      section.classList.remove('hidden');
+    } else {
+      section.classList.add('hidden');
+    }
+  };
+
+  const handleGetterChange = (): void => {
+    if (getterTimeout) {
+      window.clearTimeout(getterTimeout);
+    }
+    getterTimeout = window.setTimeout(() => {
+      const hasValue = getterNameInput.value.trim().length > 0;
+      toggleSection(getterCodeSection, hasValue);
+    }, 500);
+  };
+
+  const handleSetterChange = (): void => {
+    if (setterTimeout) {
+      window.clearTimeout(setterTimeout);
+    }
+    setterTimeout = window.setTimeout(() => {
+      const hasValue = setterNameInput.value.trim().length > 0;
+      toggleSection(setterCodeSection, hasValue);
+    }, 500);
+  };
+
+  // Add event listeners.
+  getterNameInput.addEventListener('input', handleGetterChange);
+  setterNameInput.addEventListener('input', handleSetterChange);
+
+  // Initial check.
+  handleGetterChange();
+  handleSetterChange();
+}
+
+/**
  * Notification types for user feedback.
  */
 export type NotificationType = 'success' | 'error' | 'info';
@@ -278,14 +386,16 @@ export function createEditForm(card: DFDCCard): string {
         <input type="text" id="edit-setter_name" name="setter_name" value="${escapeHtml(card.setter_name || '')}" placeholder="e.g., setUsername, userStore.setProfile">
       </div>
 
-      <div class="form-group full-width">
-        <label for="edit-getter_code">Getter Code (optional):</label>
-        <textarea id="edit-getter_code" name="getter_code" rows="3" placeholder="Implementation code for the getter...">${escapeHtml(card.getter_code || '')}</textarea>
-      </div>
+      <div class="code-sections-container">
+        <div class="form-group full-width code-section ${card.getter_name ? '' : 'hidden'}" id="edit-getter-code-section">
+          <label for="edit-getter_code">Getter Code (optional):</label>
+          <textarea id="edit-getter_code" name="getter_code" rows="3" placeholder="Implementation code for the getter...">${escapeHtml(card.getter_code || '')}</textarea>
+        </div>
 
-      <div class="form-group full-width">
-        <label for="edit-setter_code">Setter Code (optional):</label>
-        <textarea id="edit-setter_code" name="setter_code" rows="3" placeholder="Implementation code for the setter...">${escapeHtml(card.setter_code || '')}</textarea>
+        <div class="form-group full-width code-section ${card.setter_name ? '' : 'hidden'}" id="edit-setter-code-section">
+          <label for="edit-setter_code">Setter Code (optional):</label>
+          <textarea id="edit-setter_code" name="setter_code" rows="3" placeholder="Implementation code for the setter...">${escapeHtml(card.setter_code || '')}</textarea>
+        </div>
       </div>
 
       <div class="form-group full-width">
