@@ -11,6 +11,7 @@ import {
   initializeDataTypeDropdown,
   initializeCodeSectionToggle,
   initializeEditCodeSectionToggle,
+  initializeLocationDropdown,
 } from './components/ui.js';
 import {
   createDFDCCardFromForm,
@@ -20,6 +21,7 @@ import {
   getFilteredCards,
   clearAllCards,
 } from './components/cardManager.js';
+import { initializeSettingsPanel } from './components/settingsPanel.js';
 
 /**
  * Main Data Flow Atlas application class.
@@ -40,6 +42,8 @@ export class DFDAtlas {
   private initializeUI(): void {
     initializeDataTypeDropdown();
     initializeCodeSectionToggle();
+    initializeSettingsPanel();
+    initializeLocationDropdown();
   }
 
   /**

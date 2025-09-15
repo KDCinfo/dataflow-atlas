@@ -1,5 +1,6 @@
 import type { DFDCCard } from '../types/dfdc.js';
 import { DATA_TYPES } from '../types/dfdc.js';
+import { getUniqueLocations } from '../utils/settings.js';
 
 /**
  * UI utility functions and components for the Data Flow Atlas.
@@ -33,6 +34,40 @@ export function initializeDataTypeDropdown(): void {
       typeSelect.appendChild(option);
     });
   }
+}
+
+/**
+ * Initialize location dropdown/input hybrid.
+ */
+export function initializeLocationDropdown(): void {
+  const locationInput = getElement<HTMLInputElement>('location');
+  if (!locationInput) return;
+
+  // Convert input to datalist for hybrid functionality.
+  const datalist = document.createElement('datalist');
+  datalist.id = 'location-options';
+  locationInput.setAttribute('list', 'location-options');
+  locationInput.parentElement?.appendChild(datalist);
+
+  // Populate with existing locations.
+  updateLocationOptions();
+}
+
+/**
+ * Update location dropdown options.
+ */
+export function updateLocationOptions(): void {
+  const datalist = document.getElementById('location-options');
+  if (!datalist) return;
+
+  const locations = getUniqueLocations();
+  datalist.innerHTML = '';
+
+  locations.forEach(location => {
+    const option = document.createElement('option');
+    option.value = location;
+    datalist.appendChild(option);
+  });
 }
 
 /**
@@ -351,7 +386,10 @@ export function createEditForm(card: DFDCCard): string {
 
       <div class="form-group">
         <label for="edit-location">Specific Location:</label>
-        <input type="text" id="edit-location" name="location" value="${escapeHtml(card.location || '')}">
+        <input type="text" id="edit-location" name="location" value="${escapeHtml(card.location || '')}" list="edit-location-options">
+        <datalist id="edit-location-options">
+          ${getUniqueLocations().map(location => `<option value="${escapeHtml(location)}"></option>`).join('')}
+        </datalist>
       </div>
 
       <div class="form-group">

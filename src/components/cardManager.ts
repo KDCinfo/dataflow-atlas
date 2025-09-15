@@ -1,7 +1,8 @@
 import type { DFDCCard, AtlasFilter, ContentCategory } from '../types/dfdc.js';
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfdc.js';
 import { loadCards, saveCards } from '../utils/storage.js';
-import { showNotification } from './ui.js';
+import { addLocation } from '../utils/settings.js';
+import { showNotification, updateLocationOptions } from './ui.js';
 
 /**
  * Card management operations for DFDC cards.
@@ -112,6 +113,13 @@ export function addDFDCCard(card: DFDCCard): boolean {
 
   const newCards = [...existingCards, card];
   saveCards(newCards);
+
+  // Save location to settings if provided.
+  if (card.location) {
+    addLocation(card.location);
+    updateLocationOptions();
+  }
+
   showNotification('DFDC card added successfully!', 'success');
   return true;
 }
@@ -139,6 +147,13 @@ export function updateDFDCCard(originalField: string, updatedCard: DFDCCard): bo
 
   existingCards[cardIndex] = updatedCard;
   saveCards(existingCards);
+
+  // Save location to settings if provided.
+  if (updatedCard.location) {
+    addLocation(updatedCard.location);
+    updateLocationOptions();
+  }
+
   showNotification('DFDC card updated successfully!', 'success');
   return true;
 }

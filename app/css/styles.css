@@ -90,6 +90,10 @@ header h1 {
     color: white;
 }
 
+.nav-btn.settings-btn {
+    margin-left: auto; /* Push settings to the right */
+}
+
 /* Section Styles */
 .section {
     display: none;
@@ -184,16 +188,16 @@ header h1 {
         display: flex;
         gap: var(--spacing-lg);
     }
-    
+
     .code-sections-container .code-section {
         flex: 1;
     }
-    
+
     /* When only setter code is visible, align it to the right */
     .code-sections-container .code-section:first-child.hidden + .code-section:not(.hidden) {
         margin-left: calc(50% + var(--spacing-lg) / 2);
     }
-    
+
     /* Remove the full-width class effect when in flex layout */
     .code-sections-container .code-section.full-width {
         grid-column: unset;
@@ -475,6 +479,94 @@ header h1 {
 
 .modal-close:hover {
     color: var(--color-text);
+}
+
+/* Settings Modal Styles */
+.settings-content {
+    margin-bottom: var(--spacing-lg);
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.settings-section {
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.settings-section h4 {
+    color: var(--color-text);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.settings-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.settings-item:last-child {
+    margin-bottom: 0;
+}
+
+.settings-item label {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.settings-item .setting-description {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: var(--spacing-xs);
+}
+
+.settings-input {
+    max-width: 200px;
+    min-width: 150px;
+}
+
+/* Location Manager Styles */
+.location-manager {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    max-height: 200px;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+}
+
+.location-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-xs);
+}
+
+.location-item:hover {
+    background-color: var(--color-background);
+}
+
+.location-delete {
+    background: none;
+    border: none;
+    color: var(--color-danger);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: var(--spacing-xs);
+}
+
+.location-delete:hover {
+    background-color: var(--color-danger);
+    border-radius: var(--radius-all1);
+    color: white;
 }
 
 /* Responsive Design */
