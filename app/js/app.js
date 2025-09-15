@@ -190,7 +190,7 @@ export class DFDAtlas {
             return;
         }
         atlasGrid.innerHTML = filteredCards
-            .map(card => renderDFDCCard(card))
+            .map((card) => renderDFDCCard(card))
             .join('');
         // Add event listeners to card actions.
         atlasGrid.querySelectorAll('.card-action-btn').forEach(btn => {

@@ -1,7 +1,7 @@
-import type { DFDCCard, AtlasFilter, DataLayer, DataScope, ContentCategory } from '../types/dfdc.js';
+import type { DFDCCard, AtlasFilter, ContentCategory } from '../types/dfdc.js';
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfdc.js';
 import { loadCards, saveCards } from '../utils/storage.js';
-import { showNotification, generateId } from './ui.js';
+import { showNotification } from './ui.js';
 
 /**
  * Card management operations for DFDC cards.
@@ -41,17 +41,26 @@ export function createDFDCCardFromForm(formData: FormData): DFDCCard {
     ? category
     : undefined;
 
-  return {
+  const location = (formData.get('location') as string || '').trim();
+  const type = (formData.get('type') as string || '').trim();
+  const purpose = (formData.get('purpose') as string || '').trim();
+  const notes = (formData.get('notes') as string || '').trim();
+
+  const card: DFDCCard = {
     field,
     layer,
-    location: (formData.get('location') as string || '').trim() || undefined,
-    type: (formData.get('type') as string || '').trim() || undefined,
     scope,
-    purpose: (formData.get('purpose') as string || '').trim() || undefined,
-    category: validCategory,
-    persists_in: persistsIn.length > 0 ? persistsIn : undefined,
-    notes: (formData.get('notes') as string || '').trim() || undefined,
   };
+
+  // Only add optional properties if they have values.
+  if (location) card.location = location;
+  if (type) card.type = type;
+  if (purpose) card.purpose = purpose;
+  if (validCategory) card.category = validCategory;
+  if (persistsIn.length > 0) card.persists_in = persistsIn;
+  if (notes) card.notes = notes;
+
+  return card;
 }
 
 /**

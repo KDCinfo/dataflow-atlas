@@ -23,17 +23,29 @@ export function createDFDCCardFromForm(formData) {
     const validCategory = category && isContentCategory(category)
         ? category
         : undefined;
-    return {
+    const location = (formData.get('location') || '').trim();
+    const type = (formData.get('type') || '').trim();
+    const purpose = (formData.get('purpose') || '').trim();
+    const notes = (formData.get('notes') || '').trim();
+    const card = {
         field,
         layer,
-        location: (formData.get('location') || '').trim() || undefined,
-        type: (formData.get('type') || '').trim() || undefined,
         scope,
-        purpose: (formData.get('purpose') || '').trim() || undefined,
-        category: validCategory,
-        persists_in: persistsIn.length > 0 ? persistsIn : undefined,
-        notes: (formData.get('notes') || '').trim() || undefined,
     };
+    // Only add optional properties if they have values.
+    if (location)
+        card.location = location;
+    if (type)
+        card.type = type;
+    if (purpose)
+        card.purpose = purpose;
+    if (validCategory)
+        card.category = validCategory;
+    if (persistsIn.length > 0)
+        card.persists_in = persistsIn;
+    if (notes)
+        card.notes = notes;
+    return card;
 }
 /**
  * Validate a DFDC card before adding to the atlas.

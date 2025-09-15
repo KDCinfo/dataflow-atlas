@@ -1,5 +1,5 @@
 import type { DFDCCard, AtlasFilter } from './types/dfdc.js';
-import { loadCards, exportCards, importCards } from './utils/storage.js';
+import { loadCards, importCards } from './utils/storage.js';
 import {
   showNotification,
   renderDFDCCard,
@@ -224,7 +224,7 @@ export class DFDAtlas {
     }
 
     atlasGrid.innerHTML = filteredCards
-      .map(card => renderDFDCCard(card))
+      .map((card: DFDCCard) => renderDFDCCard(card))
       .join('');
 
     // Add event listeners to card actions.
