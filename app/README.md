@@ -29,6 +29,22 @@ A **structured, manually curated system of record** for understanding your app's
 
 Basically an “architectural logbook” for all your app's data layers.
 
+***
+
+**TOC**
+
+## Features
+## Usage
+## Data Schema
+## Three-Axis System
+## Canonical Categories
+## Development Setup
+## Development
+## Browser Compatibility
+## Contributing
+
+***
+
 ## Features
 
 ### DFDC (DFD Collaboration) Cards
@@ -138,36 +154,94 @@ isLoading, currentPage, lastMsg - transient only, Pinia store or sessionStorage.
 
 -----
 
-## Development
-This is a vanilla JavaScript application with no build process required. Simply open `index.html` in a web browser or serve the `app/` directory with any web server.
+## Development Setup
 
-### New TypeScript File Structure
+### Prerequisites
+- Node.js (v16 or higher)
+- npm
+
+### Getting Started
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/KDCinfo/dataflow-atlas.git
+   cd dataflow-atlas
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   cd app
+   npm install
+   ```
+
+3. **Build the application:**
+   ```bash
+   npm run build
+   ```
+
+   Or for development with auto-rebuild:
+   ```bash
+   npm run watch
+   ```
+
+4. **Serve the application:**
+   Use any web server to serve the `app/` directory:
+   - **Python:** `python -m http.server 8000`
+   - **Node.js:** `npx serve .`
+   - **VS Code:** Use Live Server extension
+   - **nginx/Apache:** Point to the `app/` directory
+
+   Then open `http://localhost:8000` in your browser.
+
+### Project Structure
+
 ```
-├── src/
+dataflow-atlas/
+├── src/                    # TypeScript source files
 │   ├── types/
-│   │   └── dfdc.ts          # DFDC card interfaces
+│   │   └── dfdc.ts        # DFDC card interfaces and type guards
 │   ├── utils/
-│   │   └── storage.ts       # localStorage utilities
+│   │   └── storage.ts     # localStorage utilities
 │   ├── components/
-│   │   ├── cardManager.ts   # Card CRUD operations
-│   │   └── ui.ts            # UI interactions
-│   └── app.ts               # Main application logic
+│   │   ├── cardManager.ts # Card CRUD operations
+│   │   └── ui.ts          # UI interactions and rendering
+│   └── app.ts             # Main application logic
+├── tsconfig.json          # TypeScript configuration
 ├── app/
-│   ├── index.html
-│   ├── css/
-│   │   └── styles.css
-│   └── js/                  # Compiled TypeScript output
-│       └── app.js
+│   ├── js/                # Compiled JavaScript (generated, not in git)
+│   ├── css/               # Stylesheets
+│   ├── index.html         # Main application
+│   └── package.json       # Dependencies and build scripts
+└── docs/                  # Documentation
 ```
 
-### Old JavaScript File Structure
+**Important:** The `app/js/` directory is generated during build and not included in version control. You must run the build process to generate the JavaScript files.
+
+## Development
+This TypeScript application requires a build step. The TypeScript source files in `src/` are compiled to JavaScript in `app/js/` using the build commands above.
+
+### Current TypeScript Structure
 ```
-app/
-├── index.html          # Main application HTML
+src/                        # TypeScript source files
+├── types/
+│   └── dfdc.ts            # DFDC card interfaces and type guards
+├── utils/
+│   └── storage.ts         # localStorage utilities with type safety
+├── components/
+│   ├── cardManager.ts     # Card CRUD operations and validation
+│   └── ui.ts              # UI interactions and rendering
+└── app.ts                 # Main application class
+
+app/                        # Deployable web application
+├── index.html             # Main application HTML
 ├── css/
-│   └── styles.css      # Application styles
-└── js/
-    └── app.js          # Application logic
+│   └── styles.css         # Application styles
+├── js/                    # Compiled TypeScript output (generated)
+│   ├── app.js
+│   ├── components/
+│   ├── types/
+│   └── utils/
+└── package.json           # Dependencies and build scripts
 ```
 
 ## Browser Compatibility
