@@ -1,8 +1,39 @@
 import type { DFDCCard } from '../types/dfdc.js';
+import { DATA_TYPES } from '../types/dfdc.js';
 
 /**
  * UI utility functions and components for the Data Flow Atlas.
  */
+
+/**
+ * Initialize data type dropdown with predefined options.
+ */
+export function initializeDataTypeDropdown(): void {
+  const typeSelect = getElement<HTMLSelectElement>('type');
+  if (typeSelect && typeSelect.tagName === 'SELECT') {
+    // Clear existing options except the first placeholder.
+    const placeholder = typeSelect.querySelector('option[value=""]');
+    typeSelect.innerHTML = '';
+
+    // Add placeholder back.
+    if (placeholder) {
+      typeSelect.appendChild(placeholder);
+    } else {
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Select Type';
+      typeSelect.appendChild(placeholderOption);
+    }
+
+    // Add DATA_TYPES options.
+    DATA_TYPES.forEach(type => {
+      const option = document.createElement('option');
+      option.value = type;
+      option.textContent = type;
+      typeSelect.appendChild(option);
+    });
+  }
+}
 
 /**
  * Notification types for user feedback.
@@ -192,7 +223,10 @@ export function createEditForm(card: DFDCCard): string {
 
       <div class="form-group">
         <label for="edit-type">Data Type:</label>
-        <input type="text" id="edit-type" name="type" value="${escapeHtml(card.type || '')}">
+        <select id="edit-type" name="type">
+          <option value="">Select Type</option>
+          ${DATA_TYPES.map(type => `<option value="${type}" ${card.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+        </select>
       </div>
 
       <div class="form-group">

@@ -8,6 +8,7 @@ import {
   clearFormValidation,
   updateDataStats,
   downloadJson,
+  initializeDataTypeDropdown,
 } from './components/ui.js';
 import {
   createDFDCCardFromForm,
@@ -26,8 +27,16 @@ export class DFDAtlas {
 
   constructor() {
     this.initializeEventListeners();
+    this.initializeUI();
     this.renderAtlas();
     this.updateStats();
+  }
+
+  /**
+   * Initialize UI components.
+   */
+  private initializeUI(): void {
+    initializeDataTypeDropdown();
   }
 
   /**

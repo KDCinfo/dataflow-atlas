@@ -1,4 +1,40 @@
 /**
+ * Common data types for DFDC cards.
+ */
+export const DATA_TYPES = [
+  'string',
+  'number',
+  'boolean',
+  'object',
+  'array',
+  'Date',
+  'null',
+  'undefined',
+  'string[]',
+  'number[]',
+  'boolean[]',
+  'object[]',
+  'string | null',
+  'number | null',
+  'boolean | null',
+  'JSON',
+  'FormData',
+  'File',
+  'Blob',
+  'URL',
+  'RegExp',
+  'Map',
+  'Set',
+  'WeakMap',
+  'WeakSet',
+  'Promise',
+  'Function',
+  'any',
+] as const;
+
+export type DataType = typeof DATA_TYPES[number];
+
+/**
  * Core DFDC card interface for data flow documentation.
  */
 export interface DFDCCard {
