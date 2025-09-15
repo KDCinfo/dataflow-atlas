@@ -36,6 +36,7 @@ Note: These are to be moved to '@RELEASES' when complete.
 - [ ] Convert JavaScript to TypeScript.
 - [ ] Create a favicon and logo.
 - [ ] In DFDC form: add optional properties for getters and setters.
+- [ ] Deploy a live demo as a sibling to the [Data Clump Flow Analysis App](https://kdcinfo.com/app/dataflow/).
 
 ***
 

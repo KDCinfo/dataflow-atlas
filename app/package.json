@@ -1,0 +1,30 @@
+{
+  "name": "dataflow_atlas",
+  "version": "0.0.1",
+  "description": "A web-based application for manually cataloging and organizing application data flows across multiple layers.",
+  "keywords": [
+    "dataflow-atlas",
+    "dataflow",
+    "data atlas",
+    "dataflow atlas",
+    "dataflow mapping"
+  ],
+  "homepage": "https://github.com/KDCinfo/dataflow-atlas#readme",
+  "bugs": {
+    "url": "https://github.com/KDCinfo/dataflow-atlas/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KDCinfo/dataflow-atlas.git"
+  },
+  "license": "ISC",
+  "author": "keithdc.com",
+  "type": "module",
+  "main": "js/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
