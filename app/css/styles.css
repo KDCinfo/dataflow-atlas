@@ -2,7 +2,8 @@
 
 :root {
     --color-primary: #2563eb;
-    --color-primary-dark: #1d4ed8;
+    /* --color-primary-dark: #1d4ed8; */
+    --color-primary-dark: darkblue;
     --color-secondary: #64748b;
     --color-success: #059669;
     --color-danger: #dc2626;
@@ -17,6 +18,7 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
+    --spacing-xmd: 0.75rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
@@ -230,6 +232,8 @@ header h1 {
 
 .btn-secondary:hover {
     background-color: #475569;
+    color: cyan;
+    outline: 1px solid cyan;
 }
 
 .btn-danger {
@@ -451,41 +455,54 @@ header h1 {
     width: 100%;
     z-index: 1000;
 }
-
 .modal.active {
     display: flex;
 }
 
+.modal-h3 {
+    margin-bottom: var(--spacing-xl);
+}
 .modal-content {
     background: var(--color-surface);
     border-radius: var(--radius-all1);
-    box-shadow: var(--shadow-md);
+    /* box-shadow: var(--shadow-md); */
+    box-shadow: 0px 0px 9px cyan;
     max-height: 90vh;
     max-width: 800px;
+    /* outline: 1px solid blue; */
     overflow-y: auto;
-    padding: var(--spacing-xl);
+    /* padding: var(--spacing-xl); */
+    padding: var(--spacing-lg) var(--spacing-xl);
     position: relative;
     width: 90%;
 }
 
 .modal-close {
-    color: var(--color-text-muted);
+    /* color: var(--color-text-muted); */
     cursor: pointer;
     font-size: 1.5rem;
     position: absolute;
     right: var(--spacing-lg);
+    margin-right: var(--spacing-xmd);
+    /* margin-right: var(--spacing-xs); */
     top: var(--spacing-lg);
 }
-
+/*
 .modal-close:hover {
     color: var(--color-text);
 }
+ */
 
 /* Settings Modal Styles */
 .settings-content {
     margin-bottom: var(--spacing-lg);
     max-height: 60vh;
     overflow-y: auto;
+}
+.settings-content {
+    border-radius: var(--spacing-md);
+    box-shadow: 0px 0px 9px cyan;
+    padding: var(--spacing-xmd) var(--spacing-md);
 }
 
 .settings-section {

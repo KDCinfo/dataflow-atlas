@@ -67,7 +67,7 @@ export function populateSettingsContent(): void {
       ` : ''}
     </div>
 
-    <div class="settings-section">
+    <div class="settings-section hidden">
       <h4>General Settings</h4>
       <div class="settings-item">
         <div>
