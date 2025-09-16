@@ -223,6 +223,7 @@ header h1 {
 
 .btn-primary:hover {
     background-color: var(--color-primary-dark);
+    box-shadow: 0 0 15px darkcyan;
 }
 
 .btn-secondary {
@@ -477,10 +478,13 @@ header h1 {
     width: 90%;
 }
 
+.btn-primary.modal-save,
+.modal-close {
+    font-size: 1.1rem;
+}
 .modal-close {
     /* color: var(--color-text-muted); */
     cursor: pointer;
-    font-size: 1.5rem;
     position: absolute;
     right: var(--spacing-lg);
     margin-right: var(--spacing-xmd);

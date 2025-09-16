@@ -448,7 +448,7 @@ export function createEditForm(card: DFDCCard): string {
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn-primary">Update DFDC Card</button>
+      <button type="submit" class="btn-primary modal-save">Update DFDC Card</button>
       <button type="button" class="btn-secondary modal-close">Cancel</button>
     </div>
   `;
