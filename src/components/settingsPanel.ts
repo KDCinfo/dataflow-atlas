@@ -16,6 +16,12 @@ export function openSettingsModal(): void {
   const modal = getElement('settings-modal');
   if (!modal) return;
 
+  // Store the current active tab before opening settings
+  const dfdAtlas = (window as any).dfdAtlas;
+  if (dfdAtlas && typeof dfdAtlas.storeCurrentActiveTab === 'function') {
+    dfdAtlas.storeCurrentActiveTab();
+  }
+
   populateSettingsContent();
   modal.classList.add('active');
 }
@@ -28,6 +34,12 @@ export function closeSettingsModal(): void {
   if (!modal) return;
 
   modal.classList.remove('active');
+
+  // Restore the previously active tab
+  const dfdAtlas = (window as any).dfdAtlas;
+  if (dfdAtlas && typeof dfdAtlas.restorePreviousActiveTab === 'function') {
+    dfdAtlas.restorePreviousActiveTab();
+  }
 }
 
 /**
@@ -180,7 +192,9 @@ export function initializeSettingsPanel(): void {
   // Settings navigation button.
   const settingsNavBtn = getElement('nav-settings');
   if (settingsNavBtn) {
-    settingsNavBtn.addEventListener('click', () => {
+    settingsNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       openSettingsModal();
     });
   }

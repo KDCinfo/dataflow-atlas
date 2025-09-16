@@ -28,6 +28,7 @@ import { initializeSettingsPanel } from './components/settingsPanel.js';
  */
 export class DFDAtlas {
   private currentEditField: string | null = null;
+  private previousActiveTab: string = 'nav-add'; // Default to add tab
 
   constructor() {
     this.initializeEventListeners();
@@ -44,6 +45,17 @@ export class DFDAtlas {
     initializeCodeSectionToggle();
     initializeSettingsPanel();
     initializeLocationDropdown();
+    this.initializePreviousActiveTab();
+  }
+
+  /**
+   * Initialize the previous active tab based on current state.
+   */
+  private initializePreviousActiveTab(): void {
+    const currentActive = document.querySelector('.nav-btn.active:not(#nav-settings)');
+    if (currentActive) {
+      this.previousActiveTab = currentActive.id;
+    }
   }
 
   /**
@@ -116,6 +128,12 @@ export class DFDAtlas {
    */
   private handleNavigation(e: MouseEvent): void {
     const target = e.target as HTMLElement;
+
+    // Handle settings button separately - don't change active tab
+    if (target.id === 'nav-settings') {
+      return; // Settings modal opening is handled by settingsPanel.ts
+    }
+
     const targetSection = target.id.replace('nav-', '') + '-section';
 
     // Update nav buttons.
@@ -127,6 +145,27 @@ export class DFDAtlas {
     const sectionElement = document.getElementById(targetSection);
     if (sectionElement) {
       sectionElement.classList.add('active');
+    }
+  }
+
+  /**
+   * Store the currently active tab before opening Settings.
+   */
+  public storeCurrentActiveTab(): void {
+    const currentActive = document.querySelector('.nav-btn.active:not(#nav-settings)');
+    if (currentActive) {
+      this.previousActiveTab = currentActive.id;
+    }
+  }
+
+  /**
+   * Restore the previously active tab.
+   */
+  public restorePreviousActiveTab(): void {
+    const targetButton = document.getElementById(this.previousActiveTab);
+    if (targetButton) {
+      // Simulate a click on the previous tab to restore state
+      targetButton.click();
     }
   }
 
