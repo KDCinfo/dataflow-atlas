@@ -1,18 +1,27 @@
 /* DFD Assistant: Data Flow Atlas Styles */
 
 :root {
-    --color-primary: #2563eb;
+    /* --color-primary: #2563eb; */
+    --color-primary: #00ffff;
     /* --color-primary-dark: #1d4ed8; */
     --color-primary-dark: darkblue;
     --color-secondary: #64748b;
     --color-success: #059669;
     --color-danger: #dc2626;
     --color-warning: #d97706;
-    --color-background: #f8fafc;
-    --color-surface: #ffffff;
+    /* --color-background: #f8fafc; */
+    --color-background: #003030;
+    /* --color-surface: #ffffff; */
+    /* --color-surface: #001818; */
+    --color-surface: #002020;
     --color-border: #e2e8f0;
-    --color-text: #1e293b;
-    --color-text-muted: #64748b;
+    /* --color-text: #1e293b; */
+    --color-text: #f0e68c; /* khaki */
+    /* --color-h2: #c0c000; */
+    /* --color-h2: #bdb76b; */
+    --color-subheading: #bdb76b; /* darkkhaki */
+    /* --color-text-muted: #64748b; */
+    --color-text-muted: #74849b;
     --radius-all1: 8px;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -83,9 +92,15 @@ header img.logo-img {
 }
 header img.logo-img:hover {
     border-radius: 50%;
-    box-shadow: rgb(0, 255, 0) 0px 0px 15px;
+    box-shadow: #00ffff 0px 0px 15px;
 }
 
+/* header h2, .section h2 {} */
+.subheading {
+    /* color: var(--color-text); */
+    /* color: var(--color-h2); */
+    color: var(--color-subheading);
+}
 .subtitle {
     color: var(--color-text-muted);
     font-size: 1.125rem;
@@ -102,7 +117,7 @@ header img.logo-img:hover {
 
 .nav-btn {
     background: transparent;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     border-radius: var(--radius-all1);
     color: var(--color-text-muted);
     cursor: pointer;
@@ -113,13 +128,16 @@ header img.logo-img:hover {
 
 .nav-btn:hover {
     background-color: var(--color-surface);
-    color: var(--color-text);
+    /* border: 1px solid var(--color-primary); */
+    border: 1px solid #008b8b; /* darkcyan */
+    color: var(--color-subheading);
 }
 
 .nav-btn.active {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
-    color: white;
+    /* background-color: var(--color-primary); */
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    color: var(--color-text);
 }
 
 .nav-btn.settings-btn {
@@ -130,13 +148,10 @@ header img.logo-img:hover {
 .section {
     display: none;
 }
-
 .section.active {
     display: block;
 }
-
 .section h2 {
-    color: var(--color-text);
     font-size: 1.875rem;
     font-weight: 600;
     /* margin-bottom: var(--spacing-lg); */
@@ -254,7 +269,8 @@ header img.logo-img:hover {
 
 .btn-primary:hover {
     background-color: var(--color-primary-dark);
-    box-shadow: 0 0 15px darkcyan;
+    /* box-shadow: 0 0 15px darkcyan; */
+    box-shadow: 0 0 15px cyan;
 }
 
 .btn-secondary {
