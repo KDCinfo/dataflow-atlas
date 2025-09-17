@@ -515,20 +515,36 @@ header img.logo-img:hover {
 
 .btn-primary.modal-save,
 .modal-close {
-    font-size: 1.1rem;
-}
-.modal-close {
     cursor: pointer;
-    position: absolute;
-    right: var(--spacing-lg);
+    font-size: 1.1rem;
     margin-right: var(--spacing-xmd);
+}
+
+/* Modal "X" Close Button */
+.modal-content > button {
+    background-color: var(--color-secondary);
+    border: 1px solid lightgray;
+    border-radius: 15px;
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: sans-serif, monospace;
+    font-size: 1.5rem;
+    height: 30px;
+    justify-content: center;
+    line-height: 0;
+    padding: 16px 18px;
+    position: absolute;
+    right: var(--spacing-xl);
+    text-align: center;
     top: var(--spacing-lg);
+    width: 30px;
 }
-/*
-.modal-close:hover {
-    color: var(--color-text);
+.modal-content > button:hover {
+    background-color: #475569;
+    color: cyan;
+    outline: 1px solid cyan;
 }
- */
 
 /* Settings Modal Styles */
 .settings-content {
