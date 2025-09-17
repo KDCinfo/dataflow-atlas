@@ -46,14 +46,19 @@ body {
 /* Header Styles */
 header {
     margin-bottom: var(--spacing-xl);
+    position: relative;
     text-align: center;
 }
-
 header h1 {
     color: var(--color-primary);
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: var(--spacing-sm);
+}
+header img.logo-img {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .subtitle {
