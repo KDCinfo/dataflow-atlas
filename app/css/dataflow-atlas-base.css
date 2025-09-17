@@ -1,26 +1,17 @@
-/* DFD Assistant: Data Flow Atlas Styles */
+/* Data Flow Atlas | Styles */
 
 :root {
-    /* --color-primary: #2563eb; */
     --color-primary: #00ffff;
-    /* --color-primary-dark: #1d4ed8; */
     --color-primary-dark: darkblue;
     --color-secondary: #64748b;
     --color-success: #059669;
     --color-danger: #dc2626;
     --color-warning: #d97706;
-    /* --color-background: #f8fafc; */
     --color-background: #003030;
-    /* --color-surface: #ffffff; */
-    /* --color-surface: #001818; */
     --color-surface: #002020;
     --color-border: #e2e8f0;
-    /* --color-text: #1e293b; */
     --color-text: #f0e68c; /* khaki */
-    /* --color-h2: #c0c000; */
-    /* --color-h2: #bdb76b; */
     --color-subheading: #bdb76b; /* darkkhaki */
-    /* --color-text-muted: #64748b; */
     --color-text-muted: #74849b;
     --radius-all1: 8px;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -97,8 +88,6 @@ header img.logo-img:hover {
 
 /* header h2, .section h2 {} */
 .subheading {
-    /* color: var(--color-text); */
-    /* color: var(--color-h2); */
     color: var(--color-subheading);
 }
 .subtitle {
@@ -128,13 +117,11 @@ header img.logo-img:hover {
 
 .nav-btn:hover {
     background-color: var(--color-surface);
-    /* border: 1px solid var(--color-primary); */
     border: 1px solid #008b8b; /* darkcyan */
     color: var(--color-subheading);
 }
 
 .nav-btn.active {
-    /* background-color: var(--color-primary); */
     background-color: var(--color-surface);
     border: 2px solid var(--color-primary);
     color: var(--color-text);
@@ -154,7 +141,6 @@ header img.logo-img:hover {
 .section h2 {
     font-size: 1.875rem;
     font-weight: 600;
-    /* margin-bottom: var(--spacing-lg); */
     margin-bottom: var(--spacing-md);
 }
 
@@ -269,7 +255,6 @@ header img.logo-img:hover {
 
 .btn-primary:hover {
     background-color: var(--color-primary-dark);
-    /* box-shadow: 0 0 15px darkcyan; */
     box-shadow: 0 0 15px cyan;
 }
 
@@ -513,13 +498,10 @@ header img.logo-img:hover {
 .modal-content {
     background: var(--color-surface);
     border-radius: var(--radius-all1);
-    /* box-shadow: var(--shadow-md); */
     box-shadow: 0px 0px 9px cyan;
     max-height: 90vh;
     max-width: 800px;
-    /* outline: 1px solid blue; */
     overflow-y: auto;
-    /* padding: var(--spacing-xl); */
     padding: var(--spacing-lg) var(--spacing-xl);
     position: relative;
     width: 90%;
@@ -530,12 +512,10 @@ header img.logo-img:hover {
     font-size: 1.1rem;
 }
 .modal-close {
-    /* color: var(--color-text-muted); */
     cursor: pointer;
     position: absolute;
     right: var(--spacing-lg);
     margin-right: var(--spacing-xmd);
-    /* margin-right: var(--spacing-xs); */
     top: var(--spacing-lg);
 }
 /*
