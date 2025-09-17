@@ -1,250 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Flow Atlas | Do you know where all your data is at?</title>
-    <link rel="stylesheet" href="css/dataflow-atlas-base.css">
-    <meta name="description" content="A web app for curating application data points, data flows, and data layers.">
-    <meta name="keywords" content="data flow, data atlas, data flow atlas, DFDC, data flows, application data, cataloging, organization">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <!-- facebook -->
-    <meta name="title" property="og:title" content="Data Flow Atlas | Do you know where all your data is at?">
-    <meta name="description" property="og:description" content="A web app for curating application data points, data flows, and data layers.">
-    <meta name="image" property="og:image" content="https://kdcinfo.com/app/dataflow-atlas/img/icon1202.png">
-    <meta name="url" property="og:url" content="https://kdcinfo.com/app/dataflow-atlas/">
-    <meta name="type" property="og:type" content="website">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Flow Atlas | Do you know where all your data is at?</title>
+  <link rel="stylesheet" href="css/dataflow-atlas-base.css">
+  <meta name="description" content="A web app for curating application data points, data flows, and data layers.">
+  <meta name="keywords" content="data flow, data atlas, data flow atlas, DFDC, data flows, application data, cataloging, organization">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- facebook -->
+  <meta name="title" property="og:title" content="Data Flow Atlas | Do you know where all your data is at?">
+  <meta name="description" property="og:description" content="A web app for curating application data points, data flows, and data layers.">
+  <meta name="image" property="og:image" content="https://kdcinfo.com/app/dataflow-atlas/img/icon1202.png">
+  <meta name="url" property="og:url" content="https://kdcinfo.com/app/dataflow-atlas/">
+  <meta name="type" property="og:type" content="website">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Data Flow Atlas | Do you know where all your data is at?</h1>
-            <a href="https://github.com/KDCinfo/dataflow-atlas/tree/main/app"
-                class="readme-link" title="Readme and Code" target="_dataFlowAtlas"
-            >
-                <img src="./img/icon140.png" class="logo-img" alt="Data Flow Atlas 140px Logo" />
-            </a>
-            <p class="subtitle">A web app that allows the curation of application data points, data flows, and data layers</p>
-        </header>
+  <div class="container">
+    <header>
+      <div class="header-wrapper">
+        <h1>Data Flow Atlas</h1>
+        <h2>Do you know where all your data is at?</h2>
+        <p class="subtitle">A web app that allows the curation of application data points, data flows, and data layers</p>
+      </div>
+      <a href="https://github.com/KDCinfo/dataflow-atlas/tree/main/app"
+        class="readme-link" title="Readme and Code" target="_dataFlowAtlas"
+      >
+        <img src="./img/icon140.png" class="logo-img" alt="Data Flow Atlas 140px Logo" />
+      </a>
+    </header>
 
-        <nav class="main-nav">
-            <button id="nav-add" class="nav-btn active">Add DFDC Card</button>
-            <button id="nav-view" class="nav-btn">View Atlas</button>
-            <button id="nav-import" class="nav-btn">Import/Export</button>
-            <button id="nav-settings" class="nav-btn settings-btn">Settings</button>
-        </nav>
+    <nav class="main-nav">
+      <button id="nav-add" class="nav-btn active">Add DFDC Card</button>
+      <button id="nav-view" class="nav-btn">View Atlas</button>
+      <button id="nav-import" class="nav-btn">Import/Export</button>
+      <button id="nav-settings" class="nav-btn settings-btn">Settings</button>
+    </nav>
 
-        <!-- Add DFDC Card Section -->
-        <section id="add-section" class="section active">
-            <h2>Create New DFDC Card</h2>
-            <form id="dfdc-form" class="dfdc-form">
-                <div class="form-grid">
-                    <!-- What (Content Type) -->
-                    <div class="form-group">
-                        <label for="field">Field/Key Name:</label>
-                        <input type="text" id="field" name="field" required
-                               placeholder="e.g., nightmode, userToken, email">
-                    </div>
+    <!-- Add DFDC Card Section -->
+    <section id="add-section" class="section active">
+      <h2>Create New DFDC Card</h2>
+      <form id="dfdc-form" class="dfdc-form">
+        <div class="form-grid">
+          <!-- What (Content Type) -->
+          <div class="form-group">
+            <label for="field">Field/Key Name:</label>
+            <input type="text" id="field" name="field" required
+                 placeholder="e.g., nightmode, userToken, email">
+          </div>
 
-                    <div class="form-group">
-                        <label for="type">Data Type:</label>
-                        <select id="type" name="type">
-                            <option value="">Select Type</option>
-                        </select>
-                    </div>
+          <div class="form-group">
+            <label for="type">Data Type:</label>
+            <select id="type" name="type">
+              <option value="">Select Type</option>
+            </select>
+          </div>
 
-                    <!-- Where (Layer) -->
-                    <div class="form-group">
-                        <label for="layer">Primary Layer:</label>
-                        <select id="layer" name="layer" required>
-                            <option value="">Select Layer</option>
-                            <option value="store">Pinia Store</option>
-                            <option value="localStorage">Local Storage</option>
-                            <option value="sessionStorage">Session Storage</option>
-                            <option value="api">Backend API</option>
-                            <option value="database">Database</option>
-                        </select>
-                    </div>
+          <!-- Where (Layer) -->
+          <div class="form-group">
+            <label for="layer">Primary Layer:</label>
+            <select id="layer" name="layer" required>
+              <option value="">Select Layer</option>
+              <option value="store">Pinia Store</option>
+              <option value="localStorage">Local Storage</option>
+              <option value="sessionStorage">Session Storage</option>
+              <option value="api">Backend API</option>
+              <option value="database">Database</option>
+            </select>
+          </div>
 
-                    <div class="form-group">
-                        <label for="location">Specific Location:</label>
-                        <input type="text" id="location" name="location"
-                               placeholder="e.g., appStateStore.nightmode, users.email">
-                    </div>
+          <div class="form-group">
+            <label for="location">Specific Location:</label>
+            <input type="text" id="location" name="location"
+                 placeholder="e.g., appStateStore.nightmode, users.email">
+          </div>
 
-                    <!-- Who (Scope) -->
-                    <div class="form-group">
-                        <label for="scope">Scope:</label>
-                        <select id="scope" name="scope" required>
-                            <option value="">Select Scope</option>
-                            <option value="app">App-level (device/browser)</option>
-                            <option value="user">User-level (account)</option>
-                            <option value="session">Session-level (temporary)</option>
-                        </select>
-                    </div>
+          <!-- Who (Scope) -->
+          <div class="form-group">
+            <label for="scope">Scope:</label>
+            <select id="scope" name="scope" required>
+              <option value="">Select Scope</option>
+              <option value="app">App-level (device/browser)</option>
+              <option value="user">User-level (account)</option>
+              <option value="session">Session-level (temporary)</option>
+            </select>
+          </div>
 
-                    <div class="form-group">
-                        <label for="category">Category:</label>
-                        <select id="category" name="category">
-                            <option value="">Select Category</option>
-                            <option value="user-preference">User Preference</option>
-                            <option value="account-setting">Account Setting</option>
-                            <option value="runtime-state">Runtime State</option>
-                            <option value="feature-data">Feature Data</option>
-                            <option value="app-preference">App Preference</option>
-                        </select>
-                    </div>
+          <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" name="category">
+              <option value="">Select Category</option>
+              <option value="user-preference">User Preference</option>
+              <option value="account-setting">Account Setting</option>
+              <option value="runtime-state">Runtime State</option>
+              <option value="feature-data">Feature Data</option>
+              <option value="app-preference">App Preference</option>
+            </select>
+          </div>
 
-                    <div class="form-group">
-                        <label for="getter_name">Getter Function Name:</label>
-                        <input type="text" id="getter_name" name="getter_name"
-                               placeholder="e.g., getUsername, userStore.getProfile">
-                    </div>
+          <div class="form-group">
+            <label for="getter_name">Getter Function Name:</label>
+            <input type="text" id="getter_name" name="getter_name"
+                 placeholder="e.g., getUsername, userStore.getProfile">
+          </div>
 
-                    <div class="form-group">
-                        <label for="setter_name">Setter Function Name:</label>
-                        <input type="text" id="setter_name" name="setter_name"
-                               placeholder="e.g., setUsername, userStore.setProfile">
-                    </div>
+          <div class="form-group">
+            <label for="setter_name">Setter Function Name:</label>
+            <input type="text" id="setter_name" name="setter_name"
+                 placeholder="e.g., setUsername, userStore.setProfile">
+          </div>
 
-                    <div class="code-sections-container">
-                        <div class="form-group full-width code-section hidden" id="getter-code-section">
-                            <label for="getter_code">Getter Code (optional):</label>
-                            <textarea id="getter_code" name="getter_code" rows="3"
-                                      placeholder="Implementation code for the getter..."></textarea>
-                        </div>
-
-                        <div class="form-group full-width code-section hidden" id="setter-code-section">
-                            <label for="setter_code">Setter Code (optional):</label>
-                            <textarea id="setter_code" name="setter_code" rows="3"
-                                      placeholder="Implementation code for the setter..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="persists_in">Also Persists In:</label>
-                        <textarea id="persists_in" name="persists_in" rows="2"
-                                  placeholder="One per line: backend.api.users, localStorage.userData"></textarea>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="notes">Notes & Description:</label>
-                        <textarea id="notes" name="notes" rows="4"
-                                  placeholder="Purpose, usage notes, conflicts, deprecation status, etc."></textarea>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Add DFDC Card</button>
-                    <button type="reset" class="btn-secondary">Clear Form</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- View Atlas Section -->
-        <section id="view-section" class="section">
-            <h2>Data Flow Atlas</h2>
-            <div class="atlas-controls">
-                <div class="filter-group">
-                    <label for="filter-layer">Filter by Layer:</label>
-                    <select id="filter-layer">
-                        <option value="">All Layers</option>
-                        <option value="store">Pinia Store</option>
-                        <option value="localStorage">Local Storage</option>
-                        <option value="sessionStorage">Session Storage</option>
-                        <option value="api">Backend API</option>
-                        <option value="database">Database</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-scope">Filter by Scope:</label>
-                    <select id="filter-scope">
-                        <option value="">All Scopes</option>
-                        <option value="app">App-level</option>
-                        <option value="user">User-level</option>
-                        <option value="session">Session-level</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-category">Filter by Category:</label>
-                    <select id="filter-category">
-                        <option value="">All Categories</option>
-                        <option value="preference">App Preference</option>
-                        <option value="user-preference">User Preference</option>
-                        <option value="account">User Account Setting</option>
-                        <option value="auth">Authentication</option>
-                        <option value="runtime">Runtime State</option>
-                        <option value="feature">Core/Feature Data</option>
-                    </select>
-                </div>
-                <button id="clear-filters" class="btn-secondary">Clear Filters</button>
+          <div class="code-sections-container">
+            <div class="form-group full-width code-section hidden" id="getter-code-section">
+              <label for="getter_code">Getter Code (optional):</label>
+              <textarea id="getter_code" name="getter_code" rows="3"
+                    placeholder="Implementation code for the getter..."></textarea>
             </div>
-            <div id="atlas-grid" class="atlas-grid">
-                <!-- DFDC cards will be dynamically populated here -->
-            </div>
-        </section>
 
-        <!-- Import/Export Section -->
-        <section id="import-section" class="section">
-            <h2>Import/Export Data</h2>
-            <div class="import-export-grid">
-                <div class="export-group">
-                    <h3>Export Atlas Data</h3>
-                    <p>Download your complete data flow atlas as a JSON file.</p>
-                    <button id="export-btn" class="btn-primary">Export to JSON</button>
-                    <div class="data-stats">
-                        <span id="card-count">0 DFDC cards</span>
-                    </div>
-                </div>
-                <div class="import-group">
-                    <h3>Import Atlas Data</h3>
-                    <p>Upload a previously exported JSON file to restore or merge data.</p>
-                    <input type="file" id="import-file" accept=".json" style="display: none;">
-                    <button id="import-btn" class="btn-secondary">Import from JSON</button>
-                    <div class="import-options">
-                        <label>
-                            <input type="radio" name="import-mode" value="replace" checked>
-                            Replace existing data
-                        </label>
-                        <label>
-                            <input type="radio" name="import-mode" value="merge">
-                            Merge with existing data
-                        </label>
-                    </div>
-                </div>
-                <div class="danger-zone">
-                    <h3>Danger Zone</h3>
-                    <p>This will permanently delete all DFDC cards from your atlas.</p>
-                    <button id="clear-all-btn" class="btn-danger">Clear All Data</button>
-                </div>
+            <div class="form-group full-width code-section hidden" id="setter-code-section">
+              <label for="setter_code">Setter Code (optional):</label>
+              <textarea id="setter_code" name="setter_code" rows="3"
+                    placeholder="Implementation code for the setter..."></textarea>
             </div>
-        </section>
-    </div>
+          </div>
 
-    <!-- Modal for editing DFDC cards -->
-    <div id="edit-modal" class="modal">
-        <div class="modal-content">
-            <h3 class="modal-h3">Edit DFDC Card</h3>
-            <form id="edit-form" class="dfdc-form">
-                <!-- Form fields will be populated dynamically -->
-            </form>
+          <div class="form-group full-width">
+            <label for="persists_in">Also Persists In:</label>
+            <textarea id="persists_in" name="persists_in" rows="2"
+                  placeholder="One per line: backend.api.users, localStorage.userData"></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="notes">Notes & Description:</label>
+            <textarea id="notes" name="notes" rows="4"
+                  placeholder="Purpose, usage notes, conflicts, deprecation status, etc."></textarea>
+          </div>
         </div>
-    </div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <h3 class="modal-h3">Settings</h3>
-            <div id="settings-content" class="settings-content">
-                <!-- Settings tabs and panels will be populated dynamically -->
-            </div>
-            <div class="form-actions">
-                <button id="settings-save" class="btn-primary modal-save">Save Settings</button>
-                <button id="settings-cancel" class="btn-secondary modal-close">Cancel</button>
-            </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Add DFDC Card</button>
+          <button type="reset" class="btn-secondary">Clear Form</button>
         </div>
-    </div>
+      </form>
+    </section>
 
-    <script type="module" src="js/app.js"></script>
+    <!-- View Atlas Section -->
+    <section id="view-section" class="section">
+      <h2>Data Flow Atlas</h2>
+      <div class="atlas-controls">
+        <div class="filter-group">
+          <label for="filter-layer">Filter by Layer:</label>
+          <select id="filter-layer">
+            <option value="">All Layers</option>
+            <option value="store">Pinia Store</option>
+            <option value="localStorage">Local Storage</option>
+            <option value="sessionStorage">Session Storage</option>
+            <option value="api">Backend API</option>
+            <option value="database">Database</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-scope">Filter by Scope:</label>
+          <select id="filter-scope">
+            <option value="">All Scopes</option>
+            <option value="app">App-level</option>
+            <option value="user">User-level</option>
+            <option value="session">Session-level</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-category">Filter by Category:</label>
+          <select id="filter-category">
+            <option value="">All Categories</option>
+            <option value="preference">App Preference</option>
+            <option value="user-preference">User Preference</option>
+            <option value="account">User Account Setting</option>
+            <option value="auth">Authentication</option>
+            <option value="runtime">Runtime State</option>
+            <option value="feature">Core/Feature Data</option>
+          </select>
+        </div>
+        <button id="clear-filters" class="btn-secondary">Clear Filters</button>
+      </div>
+      <div id="atlas-grid" class="atlas-grid">
+        <!-- DFDC cards will be dynamically populated here -->
+      </div>
+    </section>
+
+    <!-- Import/Export Section -->
+    <section id="import-section" class="section">
+      <h2>Import/Export Data</h2>
+      <div class="import-export-grid">
+        <div class="export-group">
+          <h3>Export Atlas Data</h3>
+          <p>Download your complete data flow atlas as a JSON file.</p>
+          <button id="export-btn" class="btn-primary">Export to JSON</button>
+          <div class="data-stats">
+            <span id="card-count">0 DFDC cards</span>
+          </div>
+        </div>
+        <div class="import-group">
+          <h3>Import Atlas Data</h3>
+          <p>Upload a previously exported JSON file to restore or merge data.</p>
+          <input type="file" id="import-file" accept=".json" style="display: none;">
+          <button id="import-btn" class="btn-secondary">Import from JSON</button>
+          <div class="import-options">
+            <label>
+              <input type="radio" name="import-mode" value="replace" checked>
+              Replace existing data
+            </label>
+            <label>
+              <input type="radio" name="import-mode" value="merge">
+              Merge with existing data
+            </label>
+          </div>
+        </div>
+        <div class="danger-zone">
+          <h3>Danger Zone</h3>
+          <p>This will permanently delete all DFDC cards from your atlas.</p>
+          <button id="clear-all-btn" class="btn-danger">Clear All Data</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal for editing DFDC cards -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="modal-h3">Edit DFDC Card</h3>
+      <form id="edit-form" class="dfdc-form">
+        <!-- Form fields will be populated dynamically -->
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="modal-h3">Settings</h3>
+      <div id="settings-content" class="settings-content">
+        <!-- Settings tabs and panels will be populated dynamically -->
+      </div>
+      <div class="form-actions">
+        <button id="settings-save" class="btn-primary modal-save">Save Settings</button>
+        <button id="settings-cancel" class="btn-secondary modal-close">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
