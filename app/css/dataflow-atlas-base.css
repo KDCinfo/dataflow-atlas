@@ -45,8 +45,24 @@ body {
 
 /* Header Styles */
 header {
-    margin-bottom: var(--spacing-xl);
+    align-items: end;
+    border-bottom: 1px dotted var(--color-primary);
+    display: flex;
+    gap: 7px;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
     position: relative;
+    text-align: center;
+}
+header .header-wrapper {
+    align-self: center;
+    display: inline-block;
+    flex: 1 1 140px;
+    font-size: 1.14rem;
+    font-weight: 500;
+    line-height: 1.2;
+    margin: 0px;
+    min-width: 0px;
     text-align: center;
 }
 header h1 {
@@ -55,10 +71,19 @@ header h1 {
     font-weight: 700;
     margin-bottom: var(--spacing-sm);
 }
+header a {
+    float: right;
+}
 header img.logo-img {
-    position: absolute;
-    right: 0;
-    top: 0;
+    display: inline-block;
+    flex: 0 0 100px;
+    height: 100px;
+    object-fit: contain;
+    width: 100px;
+}
+header img.logo-img:hover {
+    border-radius: 50%;
+    box-shadow: rgb(0, 255, 0) 0px 0px 15px;
 }
 
 .subtitle {
@@ -71,7 +96,7 @@ header img.logo-img {
     border-bottom: 2px solid var(--color-border);
     display: flex;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-xmd);
     padding-bottom: var(--spacing-md);
 }
 
@@ -114,7 +139,8 @@ header img.logo-img {
     color: var(--color-text);
     font-size: 1.875rem;
     font-weight: 600;
-    margin-bottom: var(--spacing-lg);
+    /* margin-bottom: var(--spacing-lg); */
+    margin-bottom: var(--spacing-md);
 }
 
 /* Form Styles */
@@ -122,7 +148,7 @@ header img.logo-img {
     background: var(--color-surface);
     border-radius: var(--radius-all1);
     box-shadow: var(--shadow-md);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .form-grid {
@@ -629,6 +655,9 @@ header img.logo-img {
 /* Utility Classes */
 .hidden {
     display: none !important;
+}
+.no-wrap {
+    white-space: nowrap;
 }
 
 .sr-only {

@@ -98,12 +98,12 @@ export function populateSettingsContent(): void {
       </div>
     </div>
 
-    <div class="settings-section">
+    <div class="settings-section hidden">
       <h4>Tips & Information</h4>
       <div class="settings-item">
         <div>
           <label>Getting Started Guide</label>
-          <div class="setting-description">Learn how to use the Data Flow Atlas effectively</div>
+          <div class="setting-description">Tips, tricks, and insights on using the Data Flow Atlas.</div>
         </div>
         <button id="show-tips-btn" class="btn-secondary">Show Tips</button>
       </div>
