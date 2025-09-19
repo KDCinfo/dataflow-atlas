@@ -71,6 +71,19 @@ export function updateLocationOptions(): void {
 }
 
 /**
+ * Update all layer dropdown options in forms.
+ */
+export function updateLayerOptions(): void {
+  // Find all layer select elements (they have names ending with "layer")
+  const layerSelects = document.querySelectorAll('select[name="layer"]') as NodeListOf<HTMLSelectElement>;
+
+  layerSelects.forEach(select => {
+    const currentValue = select.value;
+    select.innerHTML = generateLayerOptions(currentValue);
+  });
+}
+
+/**
  * Generate grouped layer options HTML.
  */
 function generateLayerOptions(selectedLayer?: string): string {
