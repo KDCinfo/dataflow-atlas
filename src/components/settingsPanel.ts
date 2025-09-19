@@ -55,8 +55,8 @@ export function closeSettingsModal(): void {
 function generateDataLayerManagementSection(): string {
   const { endpoints, throughpoints } = getDataLayersByType();
 
-  // Check session storage for collapsed state (defaults to collapsed for testing)
-  const isExpanded = sessionStorage.getItem('dfa-layer-mgmt-expanded') === 'true';
+  // Check localStorage for collapsed state (defaults to collapsed)
+  const isExpanded = localStorage.getItem('dfa-layer-management-expanded') === 'true';
 
   return `
     <div class="settings-section">
@@ -124,33 +124,39 @@ export function populateSettingsContent(): void {
   if (!container) return;
 
   const locations = getUniqueLocations();
+  const isLocationsExpanded = localStorage.getItem('dfa-layer-names-expanded') !== 'false'; // Default to expanded
 
   container.innerHTML = `
     <div class="settings-section">
-      <h4>Specific Locations</h4>
-      <p class="setting-description">Manage the list of specific locations for your DFDC cards. These will appear as dropdown options when creating or editing cards.</p>
+      <h4 class="collapsible-header" data-target="layer-names">
+        <span class="expand-icon ${isLocationsExpanded ? 'expanded' : ''}">${isLocationsExpanded ? '▼' : '►'}</span>
+        Layer Object Names
+      </h4>
+      <div id="layer-names" class="collapsible-content ${isLocationsExpanded ? 'expanded' : ''}">
+        <p class="setting-description">Manage the list of 'layer object names' for your DFDC cards. These will appear as dropdown options when creating or editing cards.</p>
 
-      <div class="settings-item">
-        <label>Add New Location:</label>
-        <div style="display: flex; gap: var(--spacing-sm);">
-          <input type="text" id="new-location-input" class="settings-input" placeholder="e.g., userStore.profile">
-          <button id="add-location-btn" class="btn-secondary">Add</button>
-        </div>
-      </div>
-
-      ${locations.length > 0 ? `
         <div class="settings-item">
-          <label>Existing Locations:</label>
-          <div class="location-manager">
-            ${locations.map(location => `
-              <div class="location-item">
-                <span>${escapeHtml(location)}</span>
-                <button class="location-delete" data-location="${escapeHtml(location)}">Remove</button>
-              </div>
-            `).join('')}
+          <label>Add New Location:</label>
+          <div style="display: flex; gap: var(--spacing-sm);">
+            <input type="text" id="new-location-input" class="settings-input" placeholder="e.g., userStore.profile">
+            <button id="add-location-btn" class="btn-secondary">Add</button>
           </div>
         </div>
-      ` : ''}
+
+        ${locations.length > 0 ? `
+          <div class="settings-item">
+            <label>Existing Names:</label>
+            <div class="location-manager">
+              ${locations.map(location => `
+                <div class="location-item">
+                  <span>${escapeHtml(location)}</span>
+                  <button class="location-delete" data-location="${escapeHtml(location)}">Remove</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
     </div>
 
     ${generateDataLayerManagementSection()}
@@ -323,12 +329,12 @@ function toggleCollapsibleSection(sectionId: string): void {
     content.classList.remove('expanded');
     icon.classList.remove('expanded');
     icon.textContent = '►';
-    sessionStorage.setItem(`dfa-${sectionId}-expanded`, 'false');
+    localStorage.setItem(`dfa-${sectionId}-expanded`, 'false');
   } else {
     content.classList.add('expanded');
     icon.classList.add('expanded');
     icon.textContent = '▼';
-    sessionStorage.setItem(`dfa-${sectionId}-expanded`, 'true');
+    localStorage.setItem(`dfa-${sectionId}-expanded`, 'true');
   }
 }
 
