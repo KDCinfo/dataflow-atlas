@@ -10,7 +10,7 @@ import {
   DataLayerType,
   type DataLayer,
 } from '../utils/settings.js';
-import { getElement, updateLocationOptions } from './ui.js';
+import { getElement, updateLocationOptions, updateLayerOptions } from './ui.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -303,6 +303,9 @@ function setupSettingsEventListeners(): void {
       const layer: DataLayer = { name, id, type };
       saveDataLayer(layer);
 
+      // Update dropdowns in real-time
+      updateLayerOptions();
+
       // Clear inputs
       layerNameInput.value = '';
       layerTypeSelect.value = '';
@@ -393,10 +396,14 @@ function handleEditDataLayer(layerId: string): void {
   const newName = prompt(`Edit layer name:`, layer.name);
   if (newName === null || !newName.trim()) return; // User cancelled or empty
 
-  const newType = prompt(`Edit layer type (endpoint/throughpoint):`, layer.type);
-  if (newType === null || (newType !== 'endpoint' && newType !== 'throughpoint')) {
+  // Anything that starts with a 't' will be a throughpoint.
+  // Everything else will be an endpoint.
+  const newTypePrompt = prompt(`Layer type ['e'ndpoint / 't'hroughpoint]:`, layer.type.charAt(0));
+  if (newTypePrompt === null) return; // User cancelled
+  const newType = newTypePrompt.trim().toLowerCase().startsWith('t') ? 'throughpoint' : 'endpoint';
+  if (newType !== 'endpoint' && newType !== 'throughpoint') {
     if (newType !== null) {
-      alert('Type must be either "endpoint" or "throughpoint"');
+      alert('Type must be either "e", "t", "endpoint" or "throughpoint"');
     }
     return;
   }
@@ -415,6 +422,9 @@ function handleEditDataLayer(layerId: string): void {
 
   saveDataLayer(updatedLayer, layer.id);
 
+  // Update dropdowns in real-time
+  updateLayerOptions();
+
   // Refresh the settings panel
   populateSettingsContent();
 }
@@ -430,6 +440,9 @@ function handleDeleteDataLayer(layerId: string): void {
 
   if (confirm(`Delete data layer "${layer.name}"?`)) {
     deleteDataLayer(layerId);
+
+    // Update dropdowns in real-time
+    updateLayerOptions();
 
     // Refresh the settings panel
     populateSettingsContent();
