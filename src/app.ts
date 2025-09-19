@@ -72,14 +72,14 @@ export class DFDAtlas {
     });
 
     // Form submission.
-    const dfdcForm = document.getElementById('dfdc-form') as HTMLFormElement;
-    if (dfdcForm) {
-      dfdcForm.addEventListener('submit', (e) => {
+    const dfaForm = document.getElementById('dfa-form') as HTMLFormElement;
+    if (dfaForm) {
+      dfaForm.addEventListener('submit', (e) => {
         e.preventDefault();
         this.handleFormSubmit();
       });
 
-      dfdcForm.addEventListener('reset', () => {
+      dfaForm.addEventListener('reset', () => {
         setTimeout(() => clearFormValidation(), 0);
       });
     }
@@ -88,7 +88,7 @@ export class DFDAtlas {
     const resetFormBtn = document.getElementById('reset-form') as HTMLButtonElement;
     if (resetFormBtn) {
       resetFormBtn.addEventListener('click', () => {
-        dfdcForm?.reset();
+        dfaForm?.reset();
         clearFormValidation();
       });
     }
@@ -183,10 +183,10 @@ export class DFDAtlas {
   }
 
   /**
-   * Handle form submission for creating new DFDC cards.
+   * Handle form submission for creating new DFA cards.
    */
   private handleFormSubmit(): void {
-    const form = document.getElementById('dfdc-form') as HTMLFormElement;
+    const form = document.getElementById('dfa-form') as HTMLFormElement;
     if (!form) {
       showNotification('Form not found', 'error');
       return;
@@ -209,7 +209,7 @@ export class DFDAtlas {
   }
 
   /**
-   * Open edit modal for a DFDC card.
+   * Open edit modal for a DFA card.
    */
   private editDFACard(field: string): void {
     const cards = loadCards();
@@ -230,7 +230,7 @@ export class DFDAtlas {
    * Populate the create form with dynamic content.
    */
   private populateCreateForm(): void {
-    const createForm = document.getElementById('dfdc-form');
+    const createForm = document.getElementById('dfa-form');
     if (!createForm) return;
 
     createForm.innerHTML = createDFAForm('create');
@@ -295,7 +295,7 @@ export class DFDAtlas {
   }
 
   /**
-   * Render the atlas view with all DFDC cards.
+   * Render the atlas view with all DFA cards.
    */
   private renderAtlas(): void {
     const atlasGrid = document.getElementById('atlas-grid');

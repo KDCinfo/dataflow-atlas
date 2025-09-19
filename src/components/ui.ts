@@ -521,7 +521,7 @@ export function escapeHtml(text: string): string {
 }
 
 /**
- * Generate a unique ID for DFDC cards.
+ * Generate a unique ID for DFA cards.
  */
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -556,7 +556,7 @@ export function formatCategory(category: string): string {
 }
 
 /**
- * Render a single DFDC card as HTML.
+ * Render a single DFA card as HTML.
  */
 export function renderDFACard(card: DFACard): string {
   const persistsInList = card.persists_in && card.persists_in.length > 0
@@ -620,10 +620,10 @@ export function renderEmptyState(): string {
   return `
     <div class="empty-state">
       <div class="empty-state-icon">📋</div>
-      <div class="empty-state-title">No DFDC Cards Found</div>
+      <div class="empty-state-title">No DFA Cards Found</div>
       <div class="empty-state-description">
-        Start building your Data Flow Atlas by adding your first DFDC card.
-        Use the "Add DFDC Card" tab to get started.
+        Start building your Data Flow Atlas by adding your first DFA card.
+        Use the "Add DFA Card" tab to get started.
       </div>
     </div>
   `;
@@ -644,7 +644,7 @@ export function clearFormValidation(): void {
  * Update data statistics display.
  */
 export function updateDataStats(cardCount: number): void {
-  const countText = cardCount === 1 ? '1 DFDC card' : `${cardCount} DFDC cards`;
+  const countText = cardCount === 1 ? '1 DFA card' : `${cardCount} DFA cards`;
   const countElement = document.getElementById('card-count');
   if (countElement) {
     countElement.textContent = countText;

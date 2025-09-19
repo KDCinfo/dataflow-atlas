@@ -108,7 +108,7 @@ function generateDataLayerManagementSection(): string {
         Data Layer Management
       </h4>
       <div id="layer-management" class="collapsible-content ${isExpanded ? 'expanded' : ''}">
-        <p class="setting-description">Manage the data layers available when creating DFDC cards. Layers are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
+        <p class="setting-description">Manage the data layers available when creating DFA cards. Layers are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
 
         <div class="settings-item">
           <label>Add New Data Layer:</label>
@@ -176,7 +176,7 @@ export function populateSettingsContent(): void {
         Layer Object Names
       </h4>
       <div id="layer-names" class="collapsible-content ${isLocationsExpanded ? 'expanded' : ''}">
-        <p class="setting-description">Manage the list of 'layer object names' for your DFDC cards. These will appear as dropdown options when creating or editing cards.</p>
+        <p class="setting-description">Manage the list of 'layer object names' for your DFA cards. These will appear as dropdown options when creating or editing cards.</p>
 
         <div class="settings-item">
           <label>Add New Location:</label>

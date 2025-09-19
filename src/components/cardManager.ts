@@ -5,14 +5,14 @@ import { addLocation, getSettings } from '../utils/settings.js';
 import { showNotification, updateLocationOptions } from './ui.js';
 
 /**
- * Card management operations for DFDC cards.
+ * Card management operations for DFA cards.
  */
 
 /**
- * Generate a unique ID for a DFDC card.
+ * Generate a unique ID for a DFA card.
  */
 function generateCardId(): string {
-  return `dfdc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `dfa-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**
@@ -24,7 +24,7 @@ interface ValidationResult {
 }
 
 /**
- * Create a DFDC card from form data with proper type validation.
+ * Create a DFA card from form data with proper type validation.
  */
 export function createDFACardFromForm(formData: FormData, existingCard?: DFACard): DFACard {
   const persistsIn = (formData.get('persists_in') as string || '')
@@ -89,7 +89,7 @@ export function createDFACardFromForm(formData: FormData, existingCard?: DFACard
 }
 
 /**
- * Validate a DFDC card before adding to the atlas.
+ * Validate a DFA card before adding to the atlas.
  */
 export function validateDFACard(card: DFACard, existingCards: DFACard[] = []): ValidationResult {
   const errors: string[] = [];
@@ -112,7 +112,7 @@ export function validateDFACard(card: DFACard, existingCards: DFACard[] = []): V
 
   // Check for duplicate field names.
   if (existingCards.some(existing => existing.field === card.field)) {
-    errors.push('A DFDC card with this field name already exists');
+    errors.push('A DFA card with this field name already exists');
   }
 
   return {
@@ -122,7 +122,7 @@ export function validateDFACard(card: DFACard, existingCards: DFACard[] = []): V
 }
 
 /**
- * Add a new DFDC card to the collection.
+ * Add a new DFA card to the collection.
  */
 export function addDFACard(card: DFACard): boolean {
   const existingCards = loadCards();
@@ -142,12 +142,12 @@ export function addDFACard(card: DFACard): boolean {
     updateLocationOptions();
   }
 
-  showNotification('DFDC card added successfully!', 'success');
+  showNotification('DFA card added successfully!', 'success');
   return true;
 }
 
 /**
- * Update an existing DFDC card.
+ * Update an existing DFA card.
  */
 export function updateDFACard(originalField: string, updatedCard: DFACard): boolean {
   const existingCards = loadCards();
@@ -176,15 +176,15 @@ export function updateDFACard(originalField: string, updatedCard: DFACard): bool
     updateLocationOptions();
   }
 
-  showNotification('DFDC card updated successfully!', 'success');
+  showNotification('DFA card updated successfully!', 'success');
   return true;
 }
 
 /**
- * Delete a DFDC card from the collection.
+ * Delete a DFA card from the collection.
  */
 export function deleteDFACard(field: string): boolean {
-  if (!confirm('Are you sure you want to delete this DFDC card? This action cannot be undone.')) {
+  if (!confirm('Are you sure you want to delete this DFA card? This action cannot be undone.')) {
     return false;
   }
 
@@ -197,7 +197,7 @@ export function deleteDFACard(field: string): boolean {
   }
 
   saveCards(filteredCards);
-  showNotification('DFDC card deleted successfully!', 'success');
+  showNotification('DFA card deleted successfully!', 'success');
   return true;
 }
 
@@ -229,10 +229,10 @@ export function getFilteredCards(filters: AtlasFilter): DFACard[] {
 }
 
 /**
- * Clear all DFDC cards after confirmation.
+ * Clear all DFA cards after confirmation.
  */
 export function clearAllCards(): boolean {
-  const confirmation = prompt('Type "DELETE ALL" to confirm clearing all DFDC cards:');
+  const confirmation = prompt('Type "DELETE ALL" to confirm clearing all DFA cards:');
   if (confirmation !== 'DELETE ALL') {
     return false;
   }

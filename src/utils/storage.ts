@@ -1,13 +1,13 @@
 import type { DFACard, ImportMode } from '../types/dfa.js';
 
 /**
- * Storage key for DFDC cards in localStorage.
+ * Storage key for DFA cards in localStorage.
  */
 // const STORAGE_KEY = 'dataflow-atlas-cards';
 export const STORAGE_KEY = 'dfa_default';
 
 /**
- * Load DFDC cards from localStorage.
+ * Load DFA cards from localStorage.
  */
 export function loadCards(): DFACard[] {
   try {
@@ -23,7 +23,7 @@ export function loadCards(): DFACard[] {
 }
 
 /**
- * Save DFDC cards to localStorage.
+ * Save DFA cards to localStorage.
  */
 export function saveCards(cards: DFACard[]): void {
   try {
