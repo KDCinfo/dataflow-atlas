@@ -167,7 +167,7 @@ export function populateSettingsContent(): void {
   if (!container) return;
 
   const locations = getUniqueLocations();
-  const isLocationsExpanded = isPanelExpanded('layer-names', true); // Default to expanded
+  const isLocationsExpanded = isPanelExpanded('layer-names', false); // Default to collapsed
 
   container.innerHTML = `
     <div class="settings-section">
