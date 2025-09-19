@@ -82,14 +82,14 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
     <div class="form-grid">
       <!-- What (Content Type) -->
       <div class="form-group">
-        <label for="${idPrefix}field">${isEdit ? 'Field/Key Name:' : 'Field/Key Name:'}</label>
+        <label class="required" for="${idPrefix}field">${isEdit ? 'Field/Key Name:' : 'Field/Key Name:'} *</label>
         <input type="text" id="${idPrefix}field" name="field" ${isEdit ? `value="${escapeHtml(c.field || '')}"` : ''} required
                placeholder="e.g., nightmode, userToken, email">
       </div>
 
       <div class="form-group">
-        <label for="${idPrefix}type">Data Type:</label>
-        <select id="${idPrefix}type" name="type">
+        <label class="required" for="${idPrefix}type">Data Type: *</label>
+        <select id="${idPrefix}type" name="type" required>
           <option value="">Select Type</option>
           ${DATA_TYPES.map(type => `<option value="${type}" ${c.type === type ? 'selected' : ''}>${type}</option>`).join('')}
         </select>
@@ -97,7 +97,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
 
       <!-- Where (Layer) -->
       <div class="form-group">
-        <label for="${idPrefix}layer">Data Layer:</label>
+        <label class="required" for="${idPrefix}layer">Data Layer: *</label>
         <select id="${idPrefix}layer" name="layer" required>
           <option value="">Select Layer</option>
           <option value="store" ${c.layer === 'store' ? 'selected' : ''}>Pinia Store</option>
@@ -109,9 +109,9 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
       </div>
 
       <div class="form-group">
-        <label for="${idPrefix}location">Layer Object Name:</label>
+        <label class="required" for="${idPrefix}location">Layer Object Name: *</label>
         <input type="text" id="${idPrefix}location" name="location" ${isEdit ? `value="${escapeHtml(c.location || '')}"` : ''} list="${idPrefix}location-options"
-               placeholder="e.g., appStateStore.nightmode, users.email">
+               placeholder="e.g., appStateStore.nightmode, users.email" required>
         <datalist id="${idPrefix}location-options">
           ${getUniqueLocations().map(location => `<option value="${escapeHtml(location)}"></option>`).join('')}
         </datalist>
@@ -146,7 +146,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
       <!-- Who (Scope) -->
       <div class="form-group">
         <label for="${idPrefix}scope">Scope:</label>
-        <select id="${idPrefix}scope" name="scope" required>
+        <select id="${idPrefix}scope" name="scope">
           <option value="">Select Scope</option>
           <option value="app" ${c.scope === 'app' ? 'selected' : ''}>App-level (device/browser)</option>
           <option value="user" ${c.scope === 'user' ? 'selected' : ''}>User-level (account)</option>
