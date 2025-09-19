@@ -2,6 +2,11 @@ import {
   getUniqueLocations,
   addLocation,
   removeLocation,
+  getDataLayersByType,
+  saveDataLayer,
+  deleteDataLayer,
+  dataLayerExists,
+  type DataLayer,
 } from '../utils/settings.js';
 import { getElement, updateLocationOptions } from './ui.js';
 
@@ -43,6 +48,72 @@ export function closeSettingsModal(): void {
 }
 
 /**
+ * Generate the data layer management section HTML.
+ */
+function generateDataLayerManagementSection(): string {
+  const { endpoints, throughpoints } = getDataLayersByType();
+  
+  return `
+    <div class="settings-section">
+      <h4>Data Layer Management</h4>
+      <p class="setting-description">Manage the data layers available when creating DFDC cards. Layers are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
+
+      <div class="settings-item">
+        <label>Add New Data Layer:</label>
+        <div class="data-layer-form">
+          <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name (e.g., 'Pinia Store')">
+          <input type="text" id="new-layer-value-input" class="settings-input" placeholder="Value (e.g., 'store')">
+          <select id="new-layer-type-select" class="settings-input">
+            <option value="">Select Type</option>
+            <option value="endpoint">Endpoint - Data belongs to...</option>
+            <option value="throughpoint">Throughpoint - Data passes through...</option>
+          </select>
+          <button id="add-layer-btn" class="btn-secondary">Add Layer</button>
+        </div>
+      </div>
+
+      ${endpoints.length > 0 ? `
+        <div class="settings-item">
+          <label>Endpoints (Data belongs to...):</label>
+          <div class="layer-manager">
+            ${endpoints.map(layer => `
+              <div class="layer-item" data-layer-value="${escapeHtml(layer.value)}">
+                <span class="layer-info">
+                  <strong>${escapeHtml(layer.name)}</strong> <em>(${escapeHtml(layer.value)})</em>
+                </span>
+                <div class="layer-actions">
+                  <button class="layer-edit btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Edit</button>
+                  <button class="layer-delete btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Delete</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${throughpoints.length > 0 ? `
+        <div class="settings-item">
+          <label>Throughpoints (Data passes through...):</label>
+          <div class="layer-manager">
+            ${throughpoints.map(layer => `
+              <div class="layer-item" data-layer-value="${escapeHtml(layer.value)}">
+                <span class="layer-info">
+                  <strong>${escapeHtml(layer.name)}</strong> <em>(${escapeHtml(layer.value)})</em>
+                </span>
+                <div class="layer-actions">
+                  <button class="layer-edit btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Edit</button>
+                  <button class="layer-delete btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Delete</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
  * Populate the settings modal content.
  */
 export function populateSettingsContent(): void {
@@ -78,6 +149,8 @@ export function populateSettingsContent(): void {
         </div>
       ` : ''}
     </div>
+
+    ${generateDataLayerManagementSection()}
 
     <div class="settings-section hidden">
       <h4>General Settings</h4>
@@ -154,6 +227,64 @@ function setupSettingsEventListeners(): void {
     });
   });
 
+  // Data layer management.
+  const addLayerBtn = getElement('add-layer-btn');
+  const layerNameInput = getElement<HTMLInputElement>('new-layer-name-input');
+  const layerValueInput = getElement<HTMLInputElement>('new-layer-value-input');
+  const layerTypeSelect = getElement<HTMLSelectElement>('new-layer-type-select');
+
+  if (addLayerBtn && layerNameInput && layerValueInput && layerTypeSelect) {
+    const handleAddLayer = (): void => {
+      const name = layerNameInput.value.trim();
+      const value = layerValueInput.value.trim();
+      const type = layerTypeSelect.value as 'endpoint' | 'throughpoint';
+
+      if (!name || !value || !type) {
+        alert('Please fill in all fields for the new data layer.');
+        return;
+      }
+
+      if (dataLayerExists(value)) {
+        alert(`A data layer with value "${value}" already exists. Please choose a different value.`);
+        return;
+      }
+
+      const layer: DataLayer = { name, value, type };
+      saveDataLayer(layer);
+
+      // Clear inputs
+      layerNameInput.value = '';
+      layerValueInput.value = '';
+      layerTypeSelect.value = '';
+
+      // Refresh the settings panel
+      populateSettingsContent();
+    };
+
+    addLayerBtn.addEventListener('click', handleAddLayer);
+  }
+
+  // Edit/Delete layer buttons.
+  document.querySelectorAll('.layer-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const layerValue = target.getAttribute('data-layer-value');
+      if (layerValue) {
+        handleEditDataLayer(layerValue);
+      }
+    });
+  });
+
+  document.querySelectorAll('.layer-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const layerValue = target.getAttribute('data-layer-value');
+      if (layerValue) {
+        handleDeleteDataLayer(layerValue);
+      }
+    });
+  });
+
   // Tips button.
   const tipsBtn = getElement('show-tips-btn');
   if (tipsBtn) {
@@ -161,6 +292,63 @@ function setupSettingsEventListeners(): void {
       // TODO: Implement tips modal.
       alert('Tips modal coming soon!');
     });
+  }
+}
+
+/**
+ * Handle editing a data layer.
+ */
+function handleEditDataLayer(layerValue: string): void {
+  const { endpoints, throughpoints } = getDataLayersByType();
+  const layer = [...endpoints, ...throughpoints].find(l => l.value === layerValue);
+  
+  if (!layer) return;
+
+  const newName = prompt(`Edit layer name:`, layer.name);
+  if (newName === null) return; // User cancelled
+  
+  const newValue = prompt(`Edit layer value:`, layer.value);
+  if (newValue === null) return; // User cancelled
+
+  const newType = prompt(`Edit layer type (endpoint/throughpoint):`, layer.type);
+  if (newType === null || (newType !== 'endpoint' && newType !== 'throughpoint')) {
+    if (newType !== null) {
+      alert('Type must be either "endpoint" or "throughpoint"');
+    }
+    return;
+  }
+
+  if (newValue !== layer.value && dataLayerExists(newValue)) {
+    alert(`A data layer with value "${newValue}" already exists. Please choose a different value.`);
+    return;
+  }
+
+  const updatedLayer: DataLayer = {
+    name: newName.trim(),
+    value: newValue.trim(),
+    type: newType as 'endpoint' | 'throughpoint',
+  };
+
+  saveDataLayer(updatedLayer, layer.value);
+  
+  // Refresh the settings panel
+  populateSettingsContent();
+}
+
+/**
+ * Handle deleting a data layer.
+ */
+function handleDeleteDataLayer(layerValue: string): void {
+  const { endpoints, throughpoints } = getDataLayersByType();
+  const layer = [...endpoints, ...throughpoints].find(l => l.value === layerValue);
+  
+  if (!layer) return;
+
+  if (confirm(`Delete data layer "${layer.name}" (${layer.value})?`)) {
+    deleteDataLayer(layerValue);
+    
+    // Refresh the settings panel
+    populateSettingsContent();
   }
 }
 

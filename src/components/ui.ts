@@ -1,6 +1,6 @@
 import type { DFDCCard } from '../types/dfdc.js';
 import { DATA_TYPES } from '../types/dfdc.js';
-import { getUniqueLocations } from '../utils/settings.js';
+import { getUniqueLocations, getDataLayersByType } from '../utils/settings.js';
 
 /**
  * UI utility functions and components for the Data Flow Atlas.
@@ -71,6 +71,35 @@ export function updateLocationOptions(): void {
 }
 
 /**
+ * Generate grouped layer options HTML.
+ */
+function generateLayerOptions(selectedLayer?: string): string {
+  const { endpoints, throughpoints } = getDataLayersByType();
+  
+  let html = '<option value="">Select Layer</option>';
+  
+  if (endpoints.length > 0) {
+    html += '<optgroup label="Endpoints - Data belongs to...">';
+    endpoints.forEach(layer => {
+      const selected = selectedLayer === layer.value ? 'selected' : '';
+      html += `<option value="${layer.value}" ${selected}>${layer.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  
+  if (throughpoints.length > 0) {
+    html += '<optgroup label="Throughpoints - Data passes through...">';
+    throughpoints.forEach(layer => {
+      const selected = selectedLayer === layer.value ? 'selected' : '';
+      html += `<option value="${layer.value}" ${selected}>${layer.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  
+  return html;
+}
+
+/**
  * Create a unified form for both create and edit modes.
  */
 export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string {
@@ -99,12 +128,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
       <div class="form-group">
         <label class="required" for="${idPrefix}layer">Data Layer: *</label>
         <select id="${idPrefix}layer" name="layer" required>
-          <option value="">Select Layer</option>
-          <option value="store" ${c.layer === 'store' ? 'selected' : ''}>Pinia Store</option>
-          <option value="localStorage" ${c.layer === 'localStorage' ? 'selected' : ''}>Local Storage</option>
-          <option value="sessionStorage" ${c.layer === 'sessionStorage' ? 'selected' : ''}>Session Storage</option>
-          <option value="api" ${c.layer === 'api' ? 'selected' : ''}>Backend API</option>
-          <option value="database" ${c.layer === 'database' ? 'selected' : ''}>Database</option>
+          ${generateLayerOptions(c?.layer)}
         </select>
       </div>
 
