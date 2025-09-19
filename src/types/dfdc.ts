@@ -37,7 +37,8 @@ export type DataType = typeof DATA_TYPES[number];
 /**
  * Core DFDC card interface for data flow documentation.
  */
-export interface DFDCCard {
+export interface DFACard {
+  id: string; // Unique identifier (string is optimal for flexibility and web standards)
   field: string;
   layer: string; // Data layer name - kept as string for compatibility with existing form handling
   location: string;

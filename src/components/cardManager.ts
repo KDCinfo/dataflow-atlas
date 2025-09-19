@@ -1,4 +1,4 @@
-import type { DFDCCard, AtlasFilter, ContentCategory, DataScope } from '../types/dfdc.js';
+import type { DFACard, AtlasFilter, ContentCategory, DataScope } from '../types/dfdc.js';
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfdc.js';
 import { loadCards, saveCards } from '../utils/storage.js';
 import { addLocation, getSettings } from '../utils/settings.js';
@@ -26,7 +26,7 @@ interface ValidationResult {
 /**
  * Create a DFDC card from form data with proper type validation.
  */
-export function createDFDCCardFromForm(formData: FormData, existingCard?: DFDCCard): DFDCCard {
+export function createDFACardFromForm(formData: FormData, existingCard?: DFACard): DFACard {
   const persistsIn = (formData.get('persists_in') as string || '')
     .split('\n')
     .map(line => line.trim())
@@ -64,7 +64,7 @@ export function createDFDCCardFromForm(formData: FormData, existingCard?: DFDCCa
   const notes = (formData.get('notes') as string || '').trim();
   const linkedTo = (formData.get('linkedTo') as string || '').trim();
 
-  const card: DFDCCard = {
+  const card: DFACard = {
     id: existingCard?.id || generateCardId(), // Preserve existing ID or generate new one
     field,
     layer,
@@ -91,7 +91,7 @@ export function createDFDCCardFromForm(formData: FormData, existingCard?: DFDCCa
 /**
  * Validate a DFDC card before adding to the atlas.
  */
-export function validateDFDCCard(card: DFDCCard, existingCards: DFDCCard[] = []): ValidationResult {
+export function validateDFACard(card: DFACard, existingCards: DFACard[] = []): ValidationResult {
   const errors: string[] = [];
 
   if (!card.field) {
@@ -124,9 +124,9 @@ export function validateDFDCCard(card: DFDCCard, existingCards: DFDCCard[] = [])
 /**
  * Add a new DFDC card to the collection.
  */
-export function addDFDCCard(card: DFDCCard): boolean {
+export function addDFACard(card: DFACard): boolean {
   const existingCards = loadCards();
-  const validation = validateDFDCCard(card, existingCards);
+  const validation = validateDFACard(card, existingCards);
 
   if (!validation.isValid) {
     showNotification(`Validation errors: ${validation.errors.join(', ')}`, 'error');
@@ -149,7 +149,7 @@ export function addDFDCCard(card: DFDCCard): boolean {
 /**
  * Update an existing DFDC card.
  */
-export function updateDFDCCard(originalField: string, updatedCard: DFDCCard): boolean {
+export function updateDFACard(originalField: string, updatedCard: DFACard): boolean {
   const existingCards = loadCards();
   const cardIndex = existingCards.findIndex(card => card.field === originalField);
 
@@ -160,7 +160,7 @@ export function updateDFDCCard(originalField: string, updatedCard: DFDCCard): bo
 
   // For validation, exclude the current card being updated.
   const otherCards = existingCards.filter(card => card.field !== originalField);
-  const validation = validateDFDCCard(updatedCard, otherCards);
+  const validation = validateDFACard(updatedCard, otherCards);
 
   if (!validation.isValid) {
     showNotification(`Validation errors: ${validation.errors.join(', ')}`, 'error');
@@ -183,7 +183,7 @@ export function updateDFDCCard(originalField: string, updatedCard: DFDCCard): bo
 /**
  * Delete a DFDC card from the collection.
  */
-export function deleteDFDCCard(field: string): boolean {
+export function deleteDFACard(field: string): boolean {
   if (!confirm('Are you sure you want to delete this DFDC card? This action cannot be undone.')) {
     return false;
   }
@@ -204,7 +204,7 @@ export function deleteDFDCCard(field: string): boolean {
 /**
  * Get filtered cards based on filter criteria.
  */
-export function getFilteredCards(filters: AtlasFilter): DFDCCard[] {
+export function getFilteredCards(filters: AtlasFilter): DFACard[] {
   const allCards = loadCards();
 
   return allCards.filter(card => {

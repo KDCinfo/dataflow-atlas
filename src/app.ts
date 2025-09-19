@@ -1,8 +1,8 @@
-import type { DFDCCard, AtlasFilter } from './types/dfdc.js';
+import type { DFACard, AtlasFilter } from './types/dfdc.js';
 import { loadCards, importCards } from './utils/storage.js';
 import {
   showNotification,
-  renderDFDCCard,
+  renderDFACard,
   renderEmptyState,
   createDFAForm,
   clearFormValidation,
@@ -15,10 +15,10 @@ import {
   initializeLocationDropdown,
 } from './components/ui.js';
 import {
-  createDFDCCardFromForm,
-  addDFDCCard,
-  updateDFDCCard,
-  deleteDFDCCard,
+  createDFACardFromForm,
+  addDFACard,
+  updateDFACard,
+  deleteDFACard,
   getFilteredCards,
   clearAllCards,
 } from './components/cardManager.js';
@@ -29,7 +29,7 @@ import { initializeSettingsPanel } from './components/settingsPanel.js';
  */
 export class DFDAtlas {
   private currentEditField: string | null = null;
-  private currentEditCard: DFDCCard | null = null;
+  private currentEditCard: DFACard | null = null;
   private previousActiveTab: string = 'nav-add'; // Default to add tab
 
   constructor() {
@@ -194,9 +194,9 @@ export class DFDAtlas {
 
     try {
       const formData = new FormData(form);
-      const dfdcCard = createDFDCCardFromForm(formData);
+      const dfaCard = createDFACardFromForm(formData);
 
-      if (addDFDCCard(dfdcCard)) {
+      if (addDFACard(dfaCard)) {
         form.reset();
         clearFormValidation();
         this.renderAtlas();
@@ -211,7 +211,7 @@ export class DFDAtlas {
   /**
    * Open edit modal for a DFDC card.
    */
-  private editDFDCCard(field: string): void {
+  private editDFACard(field: string): void {
     const cards = loadCards();
     const card = cards.find(c => c.field === field);
     if (!card) return;
@@ -239,7 +239,7 @@ export class DFDAtlas {
   /**
    * Populate the edit form with card data.
    */
-  private populateEditForm(card: DFDCCard): void {
+  private populateEditForm(card: DFACard): void {
     const editForm = document.getElementById('edit-form');
     if (!editForm) return;
 
@@ -269,9 +269,9 @@ export class DFDAtlas {
 
     try {
       const formData = new FormData(form);
-      const updatedCard = createDFDCCardFromForm(formData, this.currentEditCard || undefined);
+      const updatedCard = createDFACardFromForm(formData, this.currentEditCard || undefined);
 
-      if (updateDFDCCard(this.currentEditField, updatedCard)) {
+      if (updateDFACard(this.currentEditField, updatedCard)) {
         this.closeModal();
         this.renderAtlas();
         this.updateStats();
@@ -310,7 +310,7 @@ export class DFDAtlas {
     }
 
     atlasGrid.innerHTML = filteredCards
-      .map((card: DFDCCard) => renderDFDCCard(card))
+      .map((card: DFACard) => renderDFACard(card))
       .join('');
 
     // Add event listeners to card actions.
@@ -321,9 +321,9 @@ export class DFDAtlas {
         const cardField = target.dataset.cardId;
 
         if (action === 'edit' && cardField) {
-          this.editDFDCCard(cardField);
+          this.editDFACard(cardField);
         } else if (action === 'delete' && cardField) {
-          if (deleteDFDCCard(cardField)) {
+          if (deleteDFACard(cardField)) {
             this.renderAtlas();
             this.updateStats();
           }

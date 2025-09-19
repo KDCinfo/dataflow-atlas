@@ -1,4 +1,4 @@
-import type { DFDCCard, ImportMode } from '../types/dfdc.js';
+import type { DFACard, ImportMode } from '../types/dfdc.js';
 
 /**
  * Storage key for DFDC cards in localStorage.
@@ -9,7 +9,7 @@ export const STORAGE_KEY = 'dfa_default';
 /**
  * Load DFDC cards from localStorage.
  */
-export function loadCards(): DFDCCard[] {
+export function loadCards(): DFACard[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return [];
@@ -25,7 +25,7 @@ export function loadCards(): DFDCCard[] {
 /**
  * Save DFDC cards to localStorage.
  */
-export function saveCards(cards: DFDCCard[]): void {
+export function saveCards(cards: DFACard[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cards, null, 2));
   } catch (error) {
@@ -36,15 +36,15 @@ export function saveCards(cards: DFDCCard[]): void {
 /**
  * Import cards from JSON data with merge or replace mode.
  */
-export function importCards(jsonData: string, mode: ImportMode): DFDCCard[] {
+export function importCards(jsonData: string, mode: ImportMode): DFACard[] {
   try {
-    const importedCards: DFDCCard[] = JSON.parse(jsonData);
+    const importedCards: DFACard[] = JSON.parse(jsonData);
 
     if (!Array.isArray(importedCards)) {
       throw new Error('Invalid JSON format: expected array of cards');
     }
 
-    let finalCards: DFDCCard[];
+    let finalCards: DFACard[];
 
     if (mode === 'replace') {
       finalCards = importedCards;

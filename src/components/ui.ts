@@ -1,4 +1,4 @@
-import type { DFDCCard } from '../types/dfdc.js';
+import type { DFACard } from '../types/dfdc.js';
 import { DATA_TYPES } from '../types/dfdc.js';
 import { getUniqueLocations, getDataLayersByType } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
@@ -189,10 +189,10 @@ function generateLayerOptions(selectedLayer?: string): string {
 /**
  * Create a unified form for both create and edit modes.
  */
-export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string {
+export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
   const isEdit = mode === 'edit';
   const idPrefix = isEdit ? 'edit-' : '';
-  const c = card || {} as Partial<DFDCCard>; // Use card data or empty object
+  const c = card || {} as Partial<DFACard>; // Use card data or empty object
 
   return `
     <div class="form-grid">
@@ -558,7 +558,7 @@ export function formatCategory(category: string): string {
 /**
  * Render a single DFDC card as HTML.
  */
-export function renderDFDCCard(card: DFDCCard): string {
+export function renderDFACard(card: DFACard): string {
   const persistsInList = card.persists_in && card.persists_in.length > 0
     ? `<div class="dfdc-card-label">Also persists in:</div>
        <div class="dfdc-card-value">${card.persists_in.join(', ')}</div>`
