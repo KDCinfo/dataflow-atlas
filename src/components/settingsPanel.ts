@@ -16,6 +16,49 @@ import { getElement, updateLocationOptions } from './ui.js';
  * Settings panel management for Data Flow Atlas.
  */
 
+const PANEL_STATES_KEY = 'dfa__settings_panel_states';
+
+/**
+ * Get the current panel states from localStorage.
+ */
+function getPanelStates(): Record<string, boolean> {
+  try {
+    const stored = localStorage.getItem(PANEL_STATES_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch (error) {
+    console.warn('Failed to load panel states:', error);
+    return {};
+  }
+}
+
+/**
+ * Save panel states to localStorage.
+ */
+function savePanelStates(states: Record<string, boolean>): void {
+  try {
+    localStorage.setItem(PANEL_STATES_KEY, JSON.stringify(states));
+  } catch (error) {
+    console.error('Failed to save panel states:', error);
+  }
+}
+
+/**
+ * Get whether a panel is expanded (with default fallback).
+ */
+function isPanelExpanded(panelId: string, defaultExpanded = false): boolean {
+  const states = getPanelStates();
+  return states[panelId] !== undefined ? states[panelId] : defaultExpanded;
+}
+
+/**
+ * Set a panel's expanded state.
+ */
+function setPanelExpanded(panelId: string, expanded: boolean): void {
+  const states = getPanelStates();
+  states[panelId] = expanded;
+  savePanelStates(states);
+}
+
 /**
  * Open the settings modal.
  */
@@ -56,7 +99,7 @@ function generateDataLayerManagementSection(): string {
   const { endpoints, throughpoints } = getDataLayersByType();
 
   // Check localStorage for collapsed state (defaults to collapsed)
-  const isExpanded = localStorage.getItem('dfa-layer-management-expanded') === 'true';
+  const isExpanded = isPanelExpanded('layer-management', false);
 
   return `
     <div class="settings-section">
@@ -124,7 +167,7 @@ export function populateSettingsContent(): void {
   if (!container) return;
 
   const locations = getUniqueLocations();
-  const isLocationsExpanded = localStorage.getItem('dfa-layer-names-expanded') !== 'false'; // Default to expanded
+  const isLocationsExpanded = isPanelExpanded('layer-names', true); // Default to expanded
 
   container.innerHTML = `
     <div class="settings-section">
@@ -329,12 +372,12 @@ function toggleCollapsibleSection(sectionId: string): void {
     content.classList.remove('expanded');
     icon.classList.remove('expanded');
     icon.textContent = '►';
-    localStorage.setItem(`dfa-${sectionId}-expanded`, 'false');
+    setPanelExpanded(sectionId, false);
   } else {
     content.classList.add('expanded');
     icon.classList.add('expanded');
     icon.textContent = '▼';
-    localStorage.setItem(`dfa-${sectionId}-expanded`, 'true');
+    setPanelExpanded(sectionId, true);
   }
 }
 
