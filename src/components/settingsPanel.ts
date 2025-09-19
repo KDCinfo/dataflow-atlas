@@ -6,6 +6,8 @@ import {
   saveDataLayer,
   deleteDataLayer,
   dataLayerExists,
+  generateLayerId,
+  DataLayerType,
   type DataLayer,
 } from '../utils/settings.js';
 import { getElement, updateLocationOptions } from './ui.js';
@@ -52,63 +54,64 @@ export function closeSettingsModal(): void {
  */
 function generateDataLayerManagementSection(): string {
   const { endpoints, throughpoints } = getDataLayersByType();
-  
+
+  // Check session storage for collapsed state (defaults to collapsed for testing)
+  const isExpanded = sessionStorage.getItem('dfa-layer-mgmt-expanded') === 'true';
+
   return `
     <div class="settings-section">
-      <h4>Data Layer Management</h4>
-      <p class="setting-description">Manage the data layers available when creating DFDC cards. Layers are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
+      <h4 class="collapsible-header" data-target="layer-management">
+        <span class="expand-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '►'}</span>
+        Data Layer Management
+      </h4>
+      <div id="layer-management" class="collapsible-content ${isExpanded ? 'expanded' : ''}">
+        <p class="setting-description">Manage the data layers available when creating DFDC cards. Layers are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
 
-      <div class="settings-item">
-        <label>Add New Data Layer:</label>
-        <div class="data-layer-form">
-          <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name (e.g., 'Pinia Store')">
-          <input type="text" id="new-layer-value-input" class="settings-input" placeholder="Value (e.g., 'store')">
-          <select id="new-layer-type-select" class="settings-input">
-            <option value="">Select Type</option>
-            <option value="endpoint">Endpoint - Data belongs to...</option>
-            <option value="throughpoint">Throughpoint - Data passes through...</option>
-          </select>
-          <button id="add-layer-btn" class="btn-secondary">Add Layer</button>
+        <div class="settings-item">
+          <label>Add New Data Layer:</label>
+          <div class="data-layer-form">
+            <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name (e.g., 'Pinia Store')">
+                        <select id="new-layer-type-select" class="form-control">
+              <option value="">Choose classification...</option>
+              <option value="${DataLayerType.Endpoint}">Endpoint - Data belongs to...</option>
+              <option value="${DataLayerType.Throughpoint}">Throughpoint - Data passes through...</option>
+            </select>
+            <button id="add-layer-btn" class="btn-secondary">Add Layer</button>
+          </div>
+        </div>
+
+        <div class="layers-grid">
+          <div class="layers-column">
+            <h5>Endpoints - <span class="no-wrap">Data belongs to...</span></h5>
+            <div class="layer-list">
+              ${endpoints.length > 0 ? endpoints.map(layer => `
+                <div class="layer-item-compact" data-layer-id="${escapeHtml(layer.id)}">
+                  <span class="layer-name">${escapeHtml(layer.name)}</span>
+                  <div class="layer-actions">
+                    <button class="layer-edit btn-compact" data-layer-id="${escapeHtml(layer.id)}">Edit</button>
+                    <button class="layer-delete btn-compact" data-layer-id="${escapeHtml(layer.id)}">Delete</button>
+                  </div>
+                </div>
+              `).join('') : '<div class="empty-layer-list">No endpoints defined</div>'}
+            </div>
+          </div>
+
+          <div class="layers-column">
+            <h5>Thrupoints - <span class="no-wrap">Data passes through...</span></h5>
+            <div class="layer-list">
+              ${throughpoints.length > 0 ? throughpoints.map(layer => `
+                <div class="layer-item-compact" data-layer-id="${escapeHtml(layer.id)}">
+                  <span class="layer-name">${escapeHtml(layer.name)}</span>
+                  <div class="layer-actions">
+                    <button class="layer-edit btn-compact" data-layer-id="${escapeHtml(layer.id)}">Edit</button>
+                    <button class="layer-delete btn-compact" data-layer-id="${escapeHtml(layer.id)}">Delete</button>
+                  </div>
+                </div>
+              `).join('') : '<div class="empty-layer-list">No throughpoints defined</div>'}
+            </div>
+          </div>
         </div>
       </div>
-
-      ${endpoints.length > 0 ? `
-        <div class="settings-item">
-          <label>Endpoints (Data belongs to...):</label>
-          <div class="layer-manager">
-            ${endpoints.map(layer => `
-              <div class="layer-item" data-layer-value="${escapeHtml(layer.value)}">
-                <span class="layer-info">
-                  <strong>${escapeHtml(layer.name)}</strong> <em>(${escapeHtml(layer.value)})</em>
-                </span>
-                <div class="layer-actions">
-                  <button class="layer-edit btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Edit</button>
-                  <button class="layer-delete btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Delete</button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-
-      ${throughpoints.length > 0 ? `
-        <div class="settings-item">
-          <label>Throughpoints (Data passes through...):</label>
-          <div class="layer-manager">
-            ${throughpoints.map(layer => `
-              <div class="layer-item" data-layer-value="${escapeHtml(layer.value)}">
-                <span class="layer-info">
-                  <strong>${escapeHtml(layer.name)}</strong> <em>(${escapeHtml(layer.value)})</em>
-                </span>
-                <div class="layer-actions">
-                  <button class="layer-edit btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Edit</button>
-                  <button class="layer-delete btn-secondary" data-layer-value="${escapeHtml(layer.value)}">Delete</button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
     </div>
   `;
 }
@@ -230,31 +233,29 @@ function setupSettingsEventListeners(): void {
   // Data layer management.
   const addLayerBtn = getElement('add-layer-btn');
   const layerNameInput = getElement<HTMLInputElement>('new-layer-name-input');
-  const layerValueInput = getElement<HTMLInputElement>('new-layer-value-input');
   const layerTypeSelect = getElement<HTMLSelectElement>('new-layer-type-select');
 
-  if (addLayerBtn && layerNameInput && layerValueInput && layerTypeSelect) {
+  if (addLayerBtn && layerNameInput && layerTypeSelect) {
     const handleAddLayer = (): void => {
       const name = layerNameInput.value.trim();
-      const value = layerValueInput.value.trim();
-      const type = layerTypeSelect.value as 'endpoint' | 'throughpoint';
+      const type = layerTypeSelect.value as DataLayerType;
 
-      if (!name || !value || !type) {
+      if (!name || !type) {
         alert('Please fill in all fields for the new data layer.');
         return;
       }
 
-      if (dataLayerExists(value)) {
-        alert(`A data layer with value "${value}" already exists. Please choose a different value.`);
+      const id = generateLayerId(name);
+      if (dataLayerExists(id)) {
+        alert(`A data layer with this name already exists. Please choose a different name.`);
         return;
       }
 
-      const layer: DataLayer = { name, value, type };
+      const layer: DataLayer = { name, id, type };
       saveDataLayer(layer);
 
       // Clear inputs
       layerNameInput.value = '';
-      layerValueInput.value = '';
       layerTypeSelect.value = '';
 
       // Refresh the settings panel
@@ -268,9 +269,9 @@ function setupSettingsEventListeners(): void {
   document.querySelectorAll('.layer-edit').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      const layerValue = target.getAttribute('data-layer-value');
-      if (layerValue) {
-        handleEditDataLayer(layerValue);
+      const layerId = target.getAttribute('data-layer-id');
+      if (layerId) {
+        handleEditDataLayer(layerId);
       }
     });
   });
@@ -278,9 +279,20 @@ function setupSettingsEventListeners(): void {
   document.querySelectorAll('.layer-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      const layerValue = target.getAttribute('data-layer-value');
-      if (layerValue) {
-        handleDeleteDataLayer(layerValue);
+      const layerId = target.getAttribute('data-layer-id');
+      if (layerId) {
+        handleDeleteDataLayer(layerId);
+      }
+    });
+  });
+
+  // Collapsible sections
+  document.querySelectorAll('.collapsible-header').forEach(header => {
+    header.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const targetId = target.getAttribute('data-target') || target.parentElement?.getAttribute('data-target');
+      if (targetId) {
+        toggleCollapsibleSection(targetId);
       }
     });
   });
@@ -296,19 +308,41 @@ function setupSettingsEventListeners(): void {
 }
 
 /**
+ * Toggle collapsible section and save state.
+ */
+function toggleCollapsibleSection(sectionId: string): void {
+  const content = document.getElementById(sectionId);
+  const header = document.querySelector(`[data-target="${sectionId}"]`);
+  const icon = header?.querySelector('.expand-icon');
+
+  if (!content || !header || !icon) return;
+
+  const isExpanded = content.classList.contains('expanded');
+
+  if (isExpanded) {
+    content.classList.remove('expanded');
+    icon.classList.remove('expanded');
+    icon.textContent = '►';
+    sessionStorage.setItem(`dfa-${sectionId}-expanded`, 'false');
+  } else {
+    content.classList.add('expanded');
+    icon.classList.add('expanded');
+    icon.textContent = '▼';
+    sessionStorage.setItem(`dfa-${sectionId}-expanded`, 'true');
+  }
+}
+
+/**
  * Handle editing a data layer.
  */
-function handleEditDataLayer(layerValue: string): void {
+function handleEditDataLayer(layerId: string): void {
   const { endpoints, throughpoints } = getDataLayersByType();
-  const layer = [...endpoints, ...throughpoints].find(l => l.value === layerValue);
-  
+  const layer = [...endpoints, ...throughpoints].find(l => l.id === layerId);
+
   if (!layer) return;
 
   const newName = prompt(`Edit layer name:`, layer.name);
-  if (newName === null) return; // User cancelled
-  
-  const newValue = prompt(`Edit layer value:`, layer.value);
-  if (newValue === null) return; // User cancelled
+  if (newName === null || !newName.trim()) return; // User cancelled or empty
 
   const newType = prompt(`Edit layer type (endpoint/throughpoint):`, layer.type);
   if (newType === null || (newType !== 'endpoint' && newType !== 'throughpoint')) {
@@ -318,19 +352,20 @@ function handleEditDataLayer(layerValue: string): void {
     return;
   }
 
-  if (newValue !== layer.value && dataLayerExists(newValue)) {
-    alert(`A data layer with value "${newValue}" already exists. Please choose a different value.`);
+  const newId = generateLayerId(newName.trim());
+  if (newId !== layer.id && dataLayerExists(newId)) {
+    alert(`A data layer with this name already exists. Please choose a different name.`);
     return;
   }
 
   const updatedLayer: DataLayer = {
     name: newName.trim(),
-    value: newValue.trim(),
-    type: newType as 'endpoint' | 'throughpoint',
+    id: newId,
+    type: newType as DataLayerType,
   };
 
-  saveDataLayer(updatedLayer, layer.value);
-  
+  saveDataLayer(updatedLayer, layer.id);
+
   // Refresh the settings panel
   populateSettingsContent();
 }
@@ -338,21 +373,19 @@ function handleEditDataLayer(layerValue: string): void {
 /**
  * Handle deleting a data layer.
  */
-function handleDeleteDataLayer(layerValue: string): void {
+function handleDeleteDataLayer(layerId: string): void {
   const { endpoints, throughpoints } = getDataLayersByType();
-  const layer = [...endpoints, ...throughpoints].find(l => l.value === layerValue);
-  
+  const layer = [...endpoints, ...throughpoints].find(l => l.id === layerId);
+
   if (!layer) return;
 
-  if (confirm(`Delete data layer "${layer.name}" (${layer.value})?`)) {
-    deleteDataLayer(layerValue);
-    
+  if (confirm(`Delete data layer "${layer.name}"?`)) {
+    deleteDataLayer(layerId);
+
     // Refresh the settings panel
     populateSettingsContent();
   }
-}
-
-/**
+}/**
  * Initialize settings panel functionality.
  */
 export function initializeSettingsPanel(): void {

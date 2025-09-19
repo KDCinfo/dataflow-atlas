@@ -75,27 +75,27 @@ export function updateLocationOptions(): void {
  */
 function generateLayerOptions(selectedLayer?: string): string {
   const { endpoints, throughpoints } = getDataLayersByType();
-  
+
   let html = '<option value="">Select Layer</option>';
-  
+
   if (endpoints.length > 0) {
     html += '<optgroup label="Endpoints - Data belongs to...">';
     endpoints.forEach(layer => {
-      const selected = selectedLayer === layer.value ? 'selected' : '';
-      html += `<option value="${layer.value}" ${selected}>${layer.name}</option>`;
+      const selected = selectedLayer === layer.name ? 'selected' : '';
+      html += `<option value="${layer.name}" ${selected}>${layer.name}</option>`;
     });
     html += '</optgroup>';
   }
-  
+
   if (throughpoints.length > 0) {
     html += '<optgroup label="Throughpoints - Data passes through...">';
     throughpoints.forEach(layer => {
-      const selected = selectedLayer === layer.value ? 'selected' : '';
-      html += `<option value="${layer.value}" ${selected}>${layer.name}</option>`;
+      const selected = selectedLayer === layer.name ? 'selected' : '';
+      html += `<option value="${layer.name}" ${selected}>${layer.name}</option>`;
     });
     html += '</optgroup>';
   }
-  
+
   return html;
 }
 

@@ -744,6 +744,125 @@ header img.logo-img:hover {
     min-width: 150px;
 }
 
+/* Collapsible sections */
+.collapsible-header {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    color: var(--color-primary);
+}
+
+.expand-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 0.8em;
+    width: 12px;
+}
+
+.expand-icon.expanded {
+    transform: rotate(0deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.collapsible-content.expanded {
+    max-height: 2000px; /* Adjust as needed */
+}
+
+/* Side-by-side layers grid */
+.layers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+.layers-column {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    padding: var(--spacing-sm);
+    background: var(--color-surface);
+}
+
+.layers-column h5 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-primary);
+    font-size: 0.9rem;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-xs);
+}
+
+.layer-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.layer-item-compact {
+    align-items: center;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    display: flex;
+    font-size: 0.85rem;
+    justify-content: space-between;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+.layer-name {
+    color: var(--color-text);
+    font-weight: 500;
+}
+.layer-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.btn-compact {
+    background: var(--color-secondary);
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: background-color 0.2s ease;
+}
+.btn-compact:hover {
+    background: var(--color-primary-dark);
+}
+.btn-compact.layer-delete:hover {
+    background: var(--color-danger);
+}
+
+.empty-layer-list {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: var(--spacing-sm);
+}
+
+@media (max-width: 768px) {
+    .layer-item-compact {
+        flex-direction: column;
+        align-items: start;
+        padding: 0.25rem 0.5rem 0.5rem;
+    }
+    .layer-actions {
+        align-self: end;
+    }
+}
+
+/* Legacy layer manager styles (if still used elsewhere) */
 .layer-manager {
     display: flex;
     flex-direction: column;
@@ -772,11 +891,6 @@ header img.logo-img:hover {
 .layer-info em {
     color: var(--color-text-muted);
     font-size: 0.875rem;
-}
-
-.layer-actions {
-    display: flex;
-    gap: var(--spacing-xs);
 }
 
 .layer-actions .btn-secondary {
