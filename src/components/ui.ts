@@ -560,43 +560,43 @@ export function formatCategory(category: string): string {
  */
 export function renderDFACard(card: DFACard): string {
   const persistsInList = card.persists_in && card.persists_in.length > 0
-    ? `<div class="dfdc-card-label">Also persists in:</div>
-       <div class="dfdc-card-value">${card.persists_in.join(', ')}</div>`
+    ? `<div class="dfa-card-label">Also persists in:</div>
+       <div class="dfa-card-value">${card.persists_in.join(', ')}</div>`
     : '';
 
   const getterSection = card.getter_name
-    ? `<div class="dfdc-card-label">Getter:</div>
-       <div class="dfdc-card-value">${escapeHtml(card.getter_name)}</div>`
+    ? `<div class="dfa-card-label">Getter:</div>
+       <div class="dfa-card-value">${escapeHtml(card.getter_name)}</div>`
     : '';
 
   const setterSection = card.setter_name
-    ? `<div class="dfdc-card-label">Setter:</div>
-       <div class="dfdc-card-value">${escapeHtml(card.setter_name)}</div>`
+    ? `<div class="dfa-card-label">Setter:</div>
+       <div class="dfa-card-value">${escapeHtml(card.setter_name)}</div>`
     : '';
 
   const notesSection = card.notes
-    ? `<div class="dfdc-card-notes">${escapeHtml(card.notes)}</div>`
+    ? `<div class="dfa-card-notes">${escapeHtml(card.notes)}</div>`
     : '';
 
   return `
-    <div class="dfdc-card">
-      <div class="dfdc-card-header">
-        <h3 class="dfdc-card-title">${escapeHtml(card.field)}</h3>
-        <div class="dfdc-card-actions">
+    <div class="dfa-card">
+      <div class="dfa-card-header">
+        <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
+        <div class="dfa-card-actions">
           <button class="card-action-btn" data-action="edit" data-card-id="${card.field}" title="Edit">✏️</button>
           <button class="card-action-btn" data-action="delete" data-card-id="${card.field}" title="Delete">🗑️</button>
         </div>
       </div>
 
-      <div class="dfdc-card-meta">
-        <div class="dfdc-card-label">Layer:</div>
-        <div class="dfdc-card-value">${escapeHtml(card.layer)}</div>
+      <div class="dfa-card-meta">
+        <div class="dfa-card-label">Layer:</div>
+        <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
 
-        <div class="dfdc-card-label">Location:</div>
-        <div class="dfdc-card-value">${escapeHtml(card.location || 'Not specified')}</div>
+        <div class="dfa-card-label">Location:</div>
+        <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
 
-        <div class="dfdc-card-label">Type:</div>
-        <div class="dfdc-card-value">${escapeHtml(card.type || 'Not specified')}</div>
+        <div class="dfa-card-label">Type:</div>
+        <div class="dfa-card-value">${escapeHtml(card.type || 'Not specified')}</div>
 
         ${getterSection}
         ${setterSection}
@@ -604,8 +604,8 @@ export function renderDFACard(card: DFACard): string {
       </div>
 
       <div style="margin-top: 1rem;">
-        <span class="dfdc-card-tag scope-${card.scope || 'none'}">${formatScope(card.scope)}</span>
-        ${card.category ? `<span class="dfdc-card-tag">${formatCategory(card.category)}</span>` : ''}
+        <span class="dfa-card-tag scope-${card.scope || 'none'}">${formatScope(card.scope)}</span>
+        ${card.category ? `<span class="dfa-card-tag">${formatCategory(card.category)}</span>` : ''}
       </div>
 
       ${notesSection}

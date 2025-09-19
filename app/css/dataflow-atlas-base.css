@@ -148,8 +148,7 @@ header img.logo-img:hover {
 }
 
 /* Form Styles */
-.dfa-form,
-.dfdc-form {
+.dfa-form {
     background: var(--color-surface);
     border-radius: var(--radius-all1);
     box-shadow: var(--shadow-md);
@@ -322,8 +321,7 @@ header img.logo-img:hover {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 }
 
-.dfa-card,
-.dfdc-card {
+.dfa-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-all1);
@@ -333,29 +331,25 @@ header img.logo-img:hover {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.dfa-card:hover,
-.dfdc-card:hover {
+.dfa-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
 }
 
-.dfa-card-header,
-.dfdc-card-header {
+.dfa-card-header {
     align-items: flex-start;
     display: flex;
     justify-content: space-between;
     margin-bottom: var(--spacing-md);
 }
 
-.dfa-card-title,
-.dfdc-card-title {
+.dfa-card-title {
     color: var(--color-primary);
     font-size: 1.25rem;
     font-weight: 600;
 }
 
-.dfa-card-actions,
-.dfdc-card-actions {
+.dfa-card-actions {
     display: flex;
     gap: var(--spacing-xs);
 }
@@ -376,29 +370,25 @@ header img.logo-img:hover {
     color: var(--color-text);
 }
 
-.dfa-card-meta,
-.dfdc-card-meta {
+.dfa-card-meta {
     display: grid;
     gap: var(--spacing-sm);
     grid-template-columns: auto 1fr;
     margin-bottom: var(--spacing-md);
 }
 
-.dfa-card-label,
-.dfdc-card-label {
+.dfa-card-label {
     color: var(--color-text-muted);
     font-size: 0.875rem;
     font-weight: 500;
 }
 
-.dfa-card-value,
-.dfdc-card-value {
+.dfa-card-value {
     color: var(--color-text);
     font-size: 0.875rem;
 }
 
-.dfa-card-tag,
-.dfdc-card-tag {
+.dfa-card-tag {
     background-color: var(--color-primary);
     border-radius: var(--radius-all1);
     color: white;
@@ -408,23 +398,19 @@ header img.logo-img:hover {
     padding: var(--spacing-xs) var(--spacing-sm);
 }
 
-.dfa-card-tag.scope-app,
-.dfdc-card-tag.scope-app {
+.dfa-card-tag.scope-app {
     background-color: var(--color-success);
 }
 
-.dfa-card-tag.scope-user,
-.dfdc-card-tag.scope-user {
+.dfa-card-tag.scope-user {
     background-color: var(--color-primary);
 }
 
-.dfa-card-tag.scope-session,
-.dfdc-card-tag.scope-session {
+.dfa-card-tag.scope-session {
     background-color: var(--color-warning);
 }
 
-.dfa-card-notes,
-.dfdc-card-notes {
+.dfa-card-notes {
     background-color: var(--color-background);
     border-radius: var(--radius-all1);
     color: var(--color-text-muted);
