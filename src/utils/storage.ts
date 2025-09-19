@@ -1,4 +1,4 @@
-import type { DFACard, ImportMode } from '../types/dfdc.js';
+import type { DFACard, ImportMode } from '../types/dfa.js';
 
 /**
  * Storage key for DFDC cards in localStorage.

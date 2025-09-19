@@ -1,5 +1,5 @@
 /**
- * Common data types for DFDC cards.
+ * Common data types for DFA cards.
  */
 export const DATA_TYPES = [
   'string',
@@ -35,7 +35,7 @@ export const DATA_TYPES = [
 export type DataType = typeof DATA_TYPES[number];
 
 /**
- * Core DFDC card interface for data flow documentation.
+ * Core DFA card interface for data flow documentation.
  */
 export interface DFACard {
   id: string; // Unique identifier (string is optimal for flexibility and web standards)

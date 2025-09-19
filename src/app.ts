@@ -1,4 +1,4 @@
-import type { DFACard, AtlasFilter } from './types/dfdc.js';
+import type { DFACard, AtlasFilter } from './types/dfa.js';
 import { loadCards, importCards } from './utils/storage.js';
 import {
   showNotification,

@@ -1,5 +1,5 @@
-import type { DFACard } from '../types/dfdc.js';
-import { DATA_TYPES } from '../types/dfdc.js';
+import type { DFACard } from '../types/dfa.js';
+import { DATA_TYPES } from '../types/dfa.js';
 import { getUniqueLocations, getDataLayersByType } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
 

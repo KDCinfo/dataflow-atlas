@@ -1,5 +1,5 @@
-import type { DFACard, AtlasFilter, ContentCategory, DataScope } from '../types/dfdc.js';
-import { isDataLayer, isDataScope, isContentCategory } from '../types/dfdc.js';
+import type { DFACard, AtlasFilter, ContentCategory, DataScope } from '../types/dfa.js';
+import { isDataLayer, isDataScope, isContentCategory } from '../types/dfa.js';
 import { loadCards, saveCards } from '../utils/storage.js';
 import { addLocation, getSettings } from '../utils/settings.js';
 import { showNotification, updateLocationOptions } from './ui.js';
