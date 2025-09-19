@@ -39,16 +39,17 @@ export type DataType = typeof DATA_TYPES[number];
  */
 export interface DFDCCard {
   field: string;
-  layer: DataLayer;
-  location?: string;
-  type?: string;
-  scope: DataScope;
+  layer: string; // Data layer name - kept as string for compatibility with existing form handling
+  location: string;
+  type: string;
+  scope?: DataScope; // Made optional to match current form layout
   category?: ContentCategory;
   persists_in?: string[];
   getter_name?: string;
   getter_code?: string;
   setter_name?: string;
   setter_code?: string;
+  linkedTo?: string; // Connected card ID (string matches the id field type)
   notes?: string;
 }
 
@@ -97,9 +98,13 @@ export interface AtlasFilter {
 
 /**
  * Type guards for runtime validation.
+ * Note: isDataLayer now needs to be called with current settings context
+ * since layers are dynamically configurable rather than hardcoded.
  */
-export function isDataLayer(value: string): value is DataLayer {
-  return ['store', 'localStorage', 'sessionStorage', 'api', 'database'].includes(value);
+export function isDataLayer(value: string, validLayers?: string[]): value is DataLayer {
+  // If no valid layers provided, use legacy hardcoded values for backward compatibility.
+  const layers = validLayers || ['store', 'localStorage', 'sessionStorage', 'api', 'database'];
+  return layers.includes(value);
 }
 
 export function isDataScope(value: string): value is DataScope {

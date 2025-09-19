@@ -3,6 +3,8 @@
  * Handles localStorage and sessionStorage for various application settings.
  */
 
+import { STORAGE_KEY } from './storage.js';
+
 export enum DataLayerType {
   Endpoint = 'endpoint',
   Throughpoint = 'throughpoint'
@@ -19,8 +21,6 @@ export interface SettingsConfig {
   dataLayers: DataLayer[];
   categories: string[];
   dataTypes: string[];
-  // Legacy support - will be migrated to dataLayers
-  layers?: string[];
 }
 
 const SETTINGS_KEY = 'dfa__settings';
@@ -59,20 +59,8 @@ export function getSettings(): SettingsConfig {
     if (stored) {
       const parsed = JSON.parse(stored) as SettingsConfig;
 
-      // Handle migration from old layers structure
-      let dataLayers = parsed.dataLayers || [];
-      if (dataLayers.length === 0 && parsed.layers && parsed.layers.length > 0) {
-        // Migrate old layers to new structure with best-guess classifications
-        dataLayers = parsed.layers.map(layerName => {
-          const defaultLayer = DEFAULT_DATA_LAYERS.find(dl => dl.id === layerName || dl.name === layerName);
-          return defaultLayer || { name: layerName, id: generateLayerId(layerName), type: DataLayerType.Endpoint };
-        });
-      }
-
       // Ensure we have default layers if none exist
-      if (dataLayers.length === 0) {
-        dataLayers = [...DEFAULT_DATA_LAYERS];
-      }
+      const dataLayers = parsed.dataLayers?.length > 0 ? parsed.dataLayers : [...DEFAULT_DATA_LAYERS];
 
       return {
         locations: parsed.locations || [],
@@ -114,7 +102,7 @@ export function getUniqueLocations(): string[] {
 
   // Add locations from existing cards.
   try {
-    const cards = JSON.parse(localStorage.getItem('dfdcCards') || '[]');
+    const cards = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     cards.forEach((card: any) => {
       if (card.location && card.location.trim()) {
         existingLocations.add(card.location.trim());

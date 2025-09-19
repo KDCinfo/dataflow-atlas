@@ -11,6 +11,7 @@ import {
   initializeDataTypeDropdown,
   initializeCodeSectionToggle,
   initializeEditCodeSectionToggle,
+  initializeConnectionFieldToggle,
   initializeLocationDropdown,
 } from './components/ui.js';
 import {
@@ -28,6 +29,7 @@ import { initializeSettingsPanel } from './components/settingsPanel.js';
  */
 export class DFDAtlas {
   private currentEditField: string | null = null;
+  private currentEditCard: DFDCCard | null = null;
   private previousActiveTab: string = 'nav-add'; // Default to add tab
 
   constructor() {
@@ -44,6 +46,7 @@ export class DFDAtlas {
     this.populateCreateForm();
     initializeDataTypeDropdown();
     initializeCodeSectionToggle();
+    initializeConnectionFieldToggle('create');
     initializeSettingsPanel();
     initializeLocationDropdown();
     this.initializePreviousActiveTab();
@@ -78,6 +81,15 @@ export class DFDAtlas {
 
       dfdcForm.addEventListener('reset', () => {
         setTimeout(() => clearFormValidation(), 0);
+      });
+    }
+
+    // Reset form button.
+    const resetFormBtn = document.getElementById('reset-form') as HTMLButtonElement;
+    if (resetFormBtn) {
+      resetFormBtn.addEventListener('click', () => {
+        dfdcForm?.reset();
+        clearFormValidation();
       });
     }
 
@@ -205,6 +217,7 @@ export class DFDAtlas {
     if (!card) return;
 
     this.currentEditField = field;
+    this.currentEditCard = card;
     this.populateEditForm(card);
 
     const modal = document.getElementById('edit-modal');
@@ -234,6 +247,9 @@ export class DFDAtlas {
 
     // Initialize code section toggle for the edit form.
     initializeEditCodeSectionToggle();
+
+    // Initialize connection field visibility for throughpoints.
+    initializeConnectionFieldToggle('edit');
   }
 
   /**
@@ -253,7 +269,7 @@ export class DFDAtlas {
 
     try {
       const formData = new FormData(form);
-      const updatedCard = createDFDCCardFromForm(formData);
+      const updatedCard = createDFDCCardFromForm(formData, this.currentEditCard || undefined);
 
       if (updateDFDCCard(this.currentEditField, updatedCard)) {
         this.closeModal();
@@ -275,6 +291,7 @@ export class DFDAtlas {
       modal.classList.remove('active');
     }
     this.currentEditField = null;
+    this.currentEditCard = null;
   }
 
   /**

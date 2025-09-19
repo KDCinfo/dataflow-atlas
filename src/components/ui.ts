@@ -1,6 +1,7 @@
 import type { DFDCCard } from '../types/dfdc.js';
 import { DATA_TYPES } from '../types/dfdc.js';
 import { getUniqueLocations, getDataLayersByType } from '../utils/settings.js';
+import { loadCards } from '../utils/storage.js';
 
 /**
  * UI utility functions and components for the Data Flow Atlas.
@@ -71,6 +72,23 @@ export function updateLocationOptions(): void {
 }
 
 /**
+ * Update connection dropdown options in forms.
+ */
+export function updateConnectionOptions(): void {
+  // Update connection options for both create and edit forms
+  const createLinkedTo = document.querySelector('select[name="linkedTo"]:not([id*="edit"])') as HTMLSelectElement;
+  const editLinkedTo = document.querySelector('select[name="linkedTo"][id*="edit"]') as HTMLSelectElement;
+
+  [createLinkedTo, editLinkedTo].forEach(select => {
+    if (select) {
+      const currentValue = select.value;
+      const currentCardId = select.closest('form')?.dataset?.cardId; // We'll need to set this for edit forms
+      select.innerHTML = generateConnectionOptions(currentCardId, currentValue);
+    }
+  });
+}
+
+/**
  * Update all layer dropdown options in forms.
  */
 export function updateLayerOptions(): void {
@@ -81,6 +99,62 @@ export function updateLayerOptions(): void {
     const currentValue = select.value;
     select.innerHTML = generateLayerOptions(currentValue);
   });
+}
+
+/**
+ * Generate connection options for throughpoint linking.
+ */
+function generateConnectionOptions(currentCardId?: string, selectedConnection?: string): string {
+  const cards = loadCards();
+  const { endpoints, throughpoints } = getDataLayersByType();
+
+  // Get layer names for filtering
+  const endpointNames = endpoints.map(layer => layer.name);
+  const throughpointNames = throughpoints.map(layer => layer.name);
+
+  // Filter out current card and cards that might create circular references
+  const availableCards = cards.filter(card => {
+    // Exclude the current card being edited
+    if (currentCardId && card.id === currentCardId) return false;
+
+    // Exclude cards that are already linked to the current card (prevent circular links)
+    if (currentCardId && card.linkedTo === currentCardId) return false;
+
+    return true;
+  });
+
+  let html = '<option value="">Select connection (optional)</option>';
+
+  if (availableCards.length === 0) {
+    html += '<option disabled>No cards available to connect to</option>';
+    return html;
+  }
+
+  // Group by endpoints and throughpoints
+  const endpointCards = availableCards.filter(card => endpointNames.includes(card.layer));
+  const throughpointCards = availableCards.filter(card => throughpointNames.includes(card.layer));
+
+  if (endpointCards.length > 0) {
+    html += '<optgroup label="Endpoints">';
+    endpointCards.forEach(card => {
+      const selected = selectedConnection === card.id ? 'selected' : '';
+      const displayName = card.location ? `${card.field} (${card.location})` : card.field;
+      html += `<option value="${card.id}" ${selected}>${escapeHtml(displayName)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  if (throughpointCards.length > 0) {
+    html += '<optgroup label="Throughpoints">';
+    throughpointCards.forEach(card => {
+      const selected = selectedConnection === card.id ? 'selected' : '';
+      const displayName = card.location ? `${card.field} (${card.location})` : card.field;
+      html += `<option value="${card.id}" ${selected}>${escapeHtml(displayName)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  return html;
 }
 
 /**
@@ -143,6 +217,15 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
         <select id="${idPrefix}layer" name="layer" required>
           ${generateLayerOptions(c?.layer)}
         </select>
+      </div>
+
+      <!-- Connected To (for throughpoints) -->
+      <div class="form-group" id="${idPrefix}connected-to-group" style="display: none;">
+        <label for="${idPrefix}linkedTo">Connected To:</label>
+        <select id="${idPrefix}linkedTo" name="linkedTo">
+          ${generateConnectionOptions(c?.id, c?.linkedTo)}
+        </select>
+        <small class="form-help">Optional: Link this throughpoint to another card</small>
       </div>
 
       <div class="form-group">
@@ -216,12 +299,15 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string 
       </div>
     </div>
 
-    ${isEdit ? `
     <div class="form-actions">
-      <button type="submit" class="btn-primary">Update DFA Card</button>
-      <button type="button" class="btn-secondary modal-close">Cancel</button>
+      ${isEdit ? `
+        <button type="submit" class="btn-primary">Update DFA Card</button>
+        <button type="button" class="btn-secondary modal-close">Cancel</button>
+      ` : `
+        <button type="submit" class="btn-primary">Save DFA Card</button>
+        <button type="button" id="reset-form" class="btn-secondary">Reset Form</button>
+      `}
     </div>
-    ` : ''}
   `;
 }
 
@@ -277,6 +363,40 @@ export function initializeCodeSectionToggle(): void {
   // Initial check.
   handleGetterChange();
   handleSetterChange();
+}
+
+/**
+ * Initialize connection field visibility based on data layer type.
+ */
+export function initializeConnectionFieldToggle(mode: 'create' | 'edit' = 'create'): void {
+  const prefix = mode === 'edit' ? 'edit-' : '';
+  const layerSelect = getElement<HTMLSelectElement>(`${prefix}layer`);
+  const connectionGroup = getElement<HTMLElement>(`${prefix}connected-to-group`);
+
+  if (!layerSelect || !connectionGroup) return;
+
+  const { throughpoints } = getDataLayersByType();
+  const throughpointNames = throughpoints.map(layer => layer.name);
+
+  const toggleConnectionField = (): void => {
+    const selectedLayer = layerSelect.value;
+    const isThroughpoint = throughpointNames.includes(selectedLayer);
+
+    if (isThroughpoint) {
+      connectionGroup.style.display = '';
+    } else {
+      connectionGroup.style.display = 'none';
+      // Clear the linkedTo value if switching away from throughpoint
+      const linkedToSelect = getElement<HTMLSelectElement>(`${prefix}linkedTo`);
+      if (linkedToSelect) linkedToSelect.value = '';
+    }
+  };
+
+  // Set initial state
+  toggleConnectionField();
+
+  // Add event listener for changes
+  layerSelect.addEventListener('change', toggleConnectionField);
 }
 
 /**
@@ -388,7 +508,7 @@ export function showNotification(message: string, type: NotificationType = 'info
         document.body.removeChild(notification);
       }
     }, 300);
-  }, 3000);
+  }, 15000);
 }
 
 /**
@@ -410,7 +530,8 @@ export function generateId(): string {
 /**
  * Format scope value for display.
  */
-export function formatScope(scope: string): string {
+export function formatScope(scope?: string): string {
+  if (!scope) return 'No scope';
   const scopeMap: Record<string, string> = {
     'app': 'App-level',
     'user': 'User-level',
@@ -483,7 +604,7 @@ export function renderDFDCCard(card: DFDCCard): string {
       </div>
 
       <div style="margin-top: 1rem;">
-        <span class="dfdc-card-tag scope-${card.scope}">${formatScope(card.scope)}</span>
+        <span class="dfdc-card-tag scope-${card.scope || 'none'}">${formatScope(card.scope)}</span>
         ${card.category ? `<span class="dfdc-card-tag">${formatCategory(card.category)}</span>` : ''}
       </div>
 

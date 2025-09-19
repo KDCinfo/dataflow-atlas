@@ -1,12 +1,19 @@
-import type { DFDCCard, AtlasFilter, ContentCategory } from '../types/dfdc.js';
+import type { DFDCCard, AtlasFilter, ContentCategory, DataScope } from '../types/dfdc.js';
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfdc.js';
 import { loadCards, saveCards } from '../utils/storage.js';
-import { addLocation } from '../utils/settings.js';
+import { addLocation, getSettings } from '../utils/settings.js';
 import { showNotification, updateLocationOptions } from './ui.js';
 
 /**
  * Card management operations for DFDC cards.
  */
+
+/**
+ * Generate a unique ID for a DFDC card.
+ */
+function generateCardId(): string {
+  return `dfdc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
 /**
  * Validation result interface.
@@ -19,7 +26,7 @@ interface ValidationResult {
 /**
  * Create a DFDC card from form data with proper type validation.
  */
-export function createDFDCCardFromForm(formData: FormData): DFDCCard {
+export function createDFDCCardFromForm(formData: FormData, existingCard?: DFDCCard): DFDCCard {
   const persistsIn = (formData.get('persists_in') as string || '')
     .split('\n')
     .map(line => line.trim())
@@ -30,13 +37,19 @@ export function createDFDCCardFromForm(formData: FormData): DFDCCard {
   const scope = formData.get('scope') as string;
   const category = formData.get('category') as string;
 
+  // Get valid layer names from current settings.
+  const settings = getSettings();
+  const validLayerNames = settings.dataLayers.map(layer => layer.name);
+
   // Validate types at runtime.
-  if (!isDataLayer(layer)) {
+  if (!isDataLayer(layer, validLayerNames)) {
     throw new Error(`Invalid layer: ${layer}`);
   }
-  if (!isDataScope(scope)) {
+  if (scope && !isDataScope(scope)) {
     throw new Error(`Invalid scope: ${scope}`);
   }
+
+  const validScope: DataScope | undefined = scope && isDataScope(scope) ? scope : undefined;
 
   const validCategory: ContentCategory | undefined = category && isContentCategory(category)
     ? category
@@ -49,22 +62,27 @@ export function createDFDCCardFromForm(formData: FormData): DFDCCard {
   const setterName = (formData.get('setter_name') as string || '').trim();
   const setterCode = (formData.get('setter_code') as string || '').trim();
   const notes = (formData.get('notes') as string || '').trim();
+  const linkedTo = (formData.get('linkedTo') as string || '').trim();
 
   const card: DFDCCard = {
+    id: existingCard?.id || generateCardId(), // Preserve existing ID or generate new one
     field,
     layer,
-    scope,
+    location,
+    type,
   };
 
   // Only add optional properties if they have values.
   if (location) card.location = location;
   if (type) card.type = type;
+  if (validScope) card.scope = validScope;
   if (validCategory) card.category = validCategory;
   if (getterName) card.getter_name = getterName;
   if (getterCode) card.getter_code = getterCode;
   if (setterName) card.setter_name = setterName;
   if (setterCode) card.setter_code = setterCode;
   if (persistsIn.length > 0) card.persists_in = persistsIn;
+  if (linkedTo) card.linkedTo = linkedTo;
   if (notes) card.notes = notes;
 
   return card;
@@ -84,8 +102,12 @@ export function validateDFDCCard(card: DFDCCard, existingCards: DFDCCard[] = [])
     errors.push('Layer is required');
   }
 
-  if (!card.scope) {
-    errors.push('Scope is required');
+  if (!card.location) {
+    errors.push('Location is required');
+  }
+
+  if (!card.type) {
+    errors.push('A Data Type is required');
   }
 
   // Check for duplicate field names.

@@ -4,10 +4,10 @@ import type { DFDCCard, ImportMode } from '../types/dfdc.js';
  * Storage key for DFDC cards in localStorage.
  */
 // const STORAGE_KEY = 'dataflow-atlas-cards';
-const STORAGE_KEY = 'dfa_default';
+export const STORAGE_KEY = 'dfa_default';
 
 /**
- * Load all DFDC cards from localStorage.
+ * Load DFDC cards from localStorage.
  */
 export function loadCards(): DFDCCard[] {
   try {
