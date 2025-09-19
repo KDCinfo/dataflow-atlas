@@ -217,15 +217,15 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
         <select id="${idPrefix}layer" name="layer" required>
           ${generateLayerOptions(c?.layer)}
         </select>
-      </div>
 
-      <!-- Connected To (for throughpoints) -->
-      <div class="form-group" id="${idPrefix}connected-to-group" style="display: none;">
-        <label for="${idPrefix}linkedTo">Connected To:</label>
-        <select id="${idPrefix}linkedTo" name="linkedTo">
-          ${generateConnectionOptions(c?.id, c?.linkedTo)}
-        </select>
-        <small class="form-help">Optional: Link this throughpoint to another card</small>
+        <!-- Connected To (for throughpoints) -->
+        <div class="form-group" id="${idPrefix}connected-to-group" style="display: none;">
+          <label for="${idPrefix}linkedTo">Connected To:</label>
+          <select id="${idPrefix}linkedTo" name="linkedTo">
+            ${generateConnectionOptions(c?.id, c?.linkedTo)}
+          </select>
+          <small class="form-help">Optional: Link this throughpoint to another card</small>
+        </div>
       </div>
 
       <div class="form-group">

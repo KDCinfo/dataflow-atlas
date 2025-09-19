@@ -2,7 +2,7 @@ import type { DFACard, AtlasFilter, ContentCategory, DataScope } from '../types/
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfa.js';
 import { loadCards, saveCards } from '../utils/storage.js';
 import { addLocation, getSettings } from '../utils/settings.js';
-import { showNotification, updateLocationOptions } from './ui.js';
+import { showNotification, updateLocationOptions, updateConnectionOptions } from './ui.js';
 
 /**
  * Card management operations for DFA cards.
@@ -142,6 +142,9 @@ export function addDFACard(card: DFACard): boolean {
     updateLocationOptions();
   }
 
+  // Update connection options for all forms since we have a new card available.
+  updateConnectionOptions();
+
   showNotification('DFA card added successfully!', 'success');
   return true;
 }
@@ -176,6 +179,9 @@ export function updateDFACard(originalField: string, updatedCard: DFACard): bool
     updateLocationOptions();
   }
 
+  // Update connection options for all forms since card details may have changed.
+  updateConnectionOptions();
+
   showNotification('DFA card updated successfully!', 'success');
   return true;
 }
@@ -197,6 +203,10 @@ export function deleteDFACard(field: string): boolean {
   }
 
   saveCards(filteredCards);
+
+  // Update connection options since a card was removed.
+  updateConnectionOptions();
+
   showNotification('DFA card deleted successfully!', 'success');
   return true;
 }
@@ -238,6 +248,10 @@ export function clearAllCards(): boolean {
   }
 
   saveCards([]);
+
+  // Update connection options since all cards were cleared.
+  updateConnectionOptions();
+
   showNotification('All data cleared successfully!', 'success');
   return true;
 }
