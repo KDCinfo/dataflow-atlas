@@ -199,13 +199,13 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       <!-- What (Content Type) -->
       <div class="form-group">
         <label class="required" for="${idPrefix}field">${isEdit ? 'Field/Key Name:' : 'Field/Key Name:'} *</label>
-        <input type="text" id="${idPrefix}field" name="field" ${isEdit ? `value="${escapeHtml(c.field || '')}"` : ''} required
+        <input class="required-input" type="text" id="${idPrefix}field" name="field" ${isEdit ? `value="${escapeHtml(c.field || '')}"` : ''} required
                placeholder="e.g., nightmode, userToken, email">
       </div>
 
       <div class="form-group">
         <label class="required" for="${idPrefix}type">Data Type: *</label>
-        <select id="${idPrefix}type" name="type" required>
+        <select class="required-input" id="${idPrefix}type" name="type" required>
           <option value="">Select Type</option>
           ${DATA_TYPES.map(type => `<option value="${type}" ${c.type === type ? 'selected' : ''}>${type}</option>`).join('')}
         </select>
@@ -214,7 +214,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       <!-- Where (Layer) -->
       <div class="form-group">
         <label class="required" for="${idPrefix}layer">Data Layer: *</label>
-        <select id="${idPrefix}layer" name="layer" required>
+        <select class="required-input" id="${idPrefix}layer" name="layer" required>
           ${generateLayerOptions(c?.layer)}
         </select>
 
@@ -229,9 +229,9 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       </div>
 
       <div class="form-group">
-        <label class="required" for="${idPrefix}location">Layer Object Name: *</label>
-        <input type="text" id="${idPrefix}location" name="location" ${isEdit ? `value="${escapeHtml(c.location || '')}"` : ''} list="${idPrefix}location-options"
-               placeholder="e.g., appStateStore.nightmode, users.email" required>
+        <label class="required" for="${idPrefix}location">Layer Name: *</label>
+        <input class="required-input" type="text" id="${idPrefix}location" name="location" ${isEdit ? `value="${escapeHtml(c.location || '')}"` : ''} list="${idPrefix}location-options"
+               placeholder="e.g., appStateStore, userStore, authStore" required>
         <datalist id="${idPrefix}location-options">
           ${getUniqueLocations().map(location => `<option value="${escapeHtml(location)}"></option>`).join('')}
         </datalist>
@@ -240,13 +240,13 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       <div class="form-group">
         <label for="${idPrefix}getter_name">Getter Function Name:</label>
         <input type="text" id="${idPrefix}getter_name" name="getter_name" ${isEdit ? `value="${escapeHtml(c.getter_name || '')}"` : ''}
-               placeholder="e.g., getUsername, userStore.getProfile">
+               placeholder="e.g., getUsername, getProfile">
       </div>
 
       <div class="form-group">
         <label for="${idPrefix}setter_name">Setter Function Name:</label>
         <input type="text" id="${idPrefix}setter_name" name="setter_name" ${isEdit ? `value="${escapeHtml(c.setter_name || '')}"` : ''}
-               placeholder="e.g., setUsername, userStore.setProfile">
+               placeholder="e.g., setUsername, setProfile">
       </div>
 
       <div class="code-sections-container">

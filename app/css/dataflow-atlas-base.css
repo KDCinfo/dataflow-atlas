@@ -12,6 +12,7 @@
     --color-border: #e2e8f0;
     --color-text: #f0e68c; /* khaki */
     --color-alternate: #bdb76b; /* darkkhaki */
+    --color-bg-light: #f0e6bc;
     --color-text-muted: #74849b;
     --radius-all1: 8px;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -184,6 +185,16 @@ header img.logo-img:hover {
     font-size: 1rem;
     padding: var(--spacing-sm) var(--spacing-md);
     transition: border-color 0.2s ease;
+}
+
+.form-group input.required-input,
+.form-group select.required-input,
+.form-group textarea.required-input {
+    background-color: var(--color-bg-light);
+    box-shadow: inset 0 0 0px 22px var(--color-bg-light);
+    color: black;
+    font-weight: bold;
+    -webkit-text-fill-color: black;
 }
 
 .form-group input:focus,
