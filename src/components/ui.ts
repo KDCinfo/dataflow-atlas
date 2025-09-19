@@ -71,6 +71,124 @@ export function updateLocationOptions(): void {
 }
 
 /**
+ * Create a unified form for both create and edit modes.
+ */
+export function createDFAForm(mode: 'create' | 'edit', card?: DFDCCard): string {
+  const isEdit = mode === 'edit';
+  const idPrefix = isEdit ? 'edit-' : '';
+  const c = card || {} as Partial<DFDCCard>; // Use card data or empty object
+
+  return `
+    <div class="form-grid">
+      <!-- What (Content Type) -->
+      <div class="form-group">
+        <label for="${idPrefix}field">${isEdit ? 'Field/Key Name:' : 'Field/Key Name:'}</label>
+        <input type="text" id="${idPrefix}field" name="field" ${isEdit ? `value="${escapeHtml(c.field || '')}"` : ''} required
+               placeholder="e.g., nightmode, userToken, email">
+      </div>
+
+      <div class="form-group">
+        <label for="${idPrefix}type">Data Type:</label>
+        <select id="${idPrefix}type" name="type">
+          <option value="">Select Type</option>
+          ${DATA_TYPES.map(type => `<option value="${type}" ${c.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+        </select>
+      </div>
+
+      <!-- Where (Layer) -->
+      <div class="form-group">
+        <label for="${idPrefix}layer">Data Layer:</label>
+        <select id="${idPrefix}layer" name="layer" required>
+          <option value="">Select Layer</option>
+          <option value="store" ${c.layer === 'store' ? 'selected' : ''}>Pinia Store</option>
+          <option value="localStorage" ${c.layer === 'localStorage' ? 'selected' : ''}>Local Storage</option>
+          <option value="sessionStorage" ${c.layer === 'sessionStorage' ? 'selected' : ''}>Session Storage</option>
+          <option value="api" ${c.layer === 'api' ? 'selected' : ''}>Backend API</option>
+          <option value="database" ${c.layer === 'database' ? 'selected' : ''}>Database</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="${idPrefix}location">Layer Object Name:</label>
+        <input type="text" id="${idPrefix}location" name="location" ${isEdit ? `value="${escapeHtml(c.location || '')}"` : ''} list="${idPrefix}location-options"
+               placeholder="e.g., appStateStore.nightmode, users.email">
+        <datalist id="${idPrefix}location-options">
+          ${getUniqueLocations().map(location => `<option value="${escapeHtml(location)}"></option>`).join('')}
+        </datalist>
+      </div>
+
+      <div class="form-group">
+        <label for="${idPrefix}getter_name">Getter Function Name:</label>
+        <input type="text" id="${idPrefix}getter_name" name="getter_name" ${isEdit ? `value="${escapeHtml(c.getter_name || '')}"` : ''}
+               placeholder="e.g., getUsername, userStore.getProfile">
+      </div>
+
+      <div class="form-group">
+        <label for="${idPrefix}setter_name">Setter Function Name:</label>
+        <input type="text" id="${idPrefix}setter_name" name="setter_name" ${isEdit ? `value="${escapeHtml(c.setter_name || '')}"` : ''}
+               placeholder="e.g., setUsername, userStore.setProfile">
+      </div>
+
+      <div class="code-sections-container">
+        <div class="form-group full-width code-section ${c.getter_name ? '' : 'hidden'}" id="${idPrefix}getter-code-section">
+          <label for="${idPrefix}getter_code">Getter Code (optional):</label>
+          <textarea id="${idPrefix}getter_code" name="getter_code" rows="3"
+                    placeholder="Implementation code for the getter...">${isEdit ? escapeHtml(c.getter_code || '') : ''}</textarea>
+        </div>
+
+        <div class="form-group full-width code-section ${c.setter_name ? '' : 'hidden'}" id="${idPrefix}setter-code-section">
+          <label for="${idPrefix}setter_code">Setter Code (optional):</label>
+          <textarea id="${idPrefix}setter_code" name="setter_code" rows="3"
+                    placeholder="Implementation code for the setter...">${isEdit ? escapeHtml(c.setter_code || '') : ''}</textarea>
+        </div>
+      </div>
+
+      <!-- Who (Scope) -->
+      <div class="form-group">
+        <label for="${idPrefix}scope">Scope:</label>
+        <select id="${idPrefix}scope" name="scope" required>
+          <option value="">Select Scope</option>
+          <option value="app" ${c.scope === 'app' ? 'selected' : ''}>App-level (device/browser)</option>
+          <option value="user" ${c.scope === 'user' ? 'selected' : ''}>User-level (account)</option>
+          <option value="session" ${c.scope === 'session' ? 'selected' : ''}>Session-level (temporary)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="${idPrefix}category">Category:</label>
+        <select id="${idPrefix}category" name="category">
+          <option value="">Select Category</option>
+          <option value="user-preference" ${c.category === 'user-preference' ? 'selected' : ''}>User Preference</option>
+          <option value="account-setting" ${c.category === 'account-setting' ? 'selected' : ''}>Account Setting</option>
+          <option value="runtime-state" ${c.category === 'runtime-state' ? 'selected' : ''}>Runtime State</option>
+          <option value="feature-data" ${c.category === 'feature-data' ? 'selected' : ''}>Feature Data</option>
+          <option value="app-preference" ${c.category === 'app-preference' ? 'selected' : ''}>App Preference</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="${idPrefix}persists_in">Also Persists In:</label>
+        <textarea id="${idPrefix}persists_in" name="persists_in" rows="2"
+                  placeholder="One per line: backend.api.users, localStorage.userData">${isEdit ? (c.persists_in || []).join('\n') : ''}</textarea>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="${idPrefix}notes">Notes & Description:</label>
+        <textarea id="${idPrefix}notes" name="notes" rows="4"
+                  placeholder="Purpose, usage notes, conflicts, deprecation status, etc.">${isEdit ? escapeHtml(c.notes || '') : ''}</textarea>
+      </div>
+    </div>
+
+    ${isEdit ? `
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Update DFA Card</button>
+      <button type="button" class="btn-secondary modal-close">Cancel</button>
+    </div>
+    ` : ''}
+  `;
+}
+
+/**
  * Initialize getter/setter code section visibility management.
  */
 export function initializeCodeSectionToggle(): void {
@@ -349,107 +467,6 @@ export function renderEmptyState(): string {
         Start building your Data Flow Atlas by adding your first DFDC card.
         Use the "Add DFDC Card" tab to get started.
       </div>
-    </div>
-  `;
-}
-
-/**
- * Create edit form HTML for a DFDC card.
- */
-export function createEditForm(card: DFDCCard): string {
-  return `
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="edit-field">Field/Key Name:</label>
-        <input type="text" id="edit-field" name="field" value="${escapeHtml(card.field)}" required>
-      </div>
-
-      <div class="form-group">
-        <label for="edit-type">Data Type:</label>
-        <select id="edit-type" name="type">
-          <option value="">Select Type</option>
-          ${DATA_TYPES.map(type => `<option value="${type}" ${card.type === type ? 'selected' : ''}>${type}</option>`).join('')}
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="edit-layer">Primary Layer:</label>
-        <select id="edit-layer" name="layer" required>
-          <option value="">Select Layer</option>
-          <option value="store" ${card.layer === 'store' ? 'selected' : ''}>Pinia Store</option>
-          <option value="localStorage" ${card.layer === 'localStorage' ? 'selected' : ''}>Local Storage</option>
-          <option value="sessionStorage" ${card.layer === 'sessionStorage' ? 'selected' : ''}>Session Storage</option>
-          <option value="api" ${card.layer === 'api' ? 'selected' : ''}>Backend API</option>
-          <option value="database" ${card.layer === 'database' ? 'selected' : ''}>Database</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="edit-location">Specific Location:</label>
-        <input type="text" id="edit-location" name="location" value="${escapeHtml(card.location || '')}" list="edit-location-options">
-        <datalist id="edit-location-options">
-          ${getUniqueLocations().map(location => `<option value="${escapeHtml(location)}"></option>`).join('')}
-        </datalist>
-      </div>
-
-      <div class="form-group">
-        <label for="edit-scope">Scope:</label>
-        <select id="edit-scope" name="scope" required>
-          <option value="">Select Scope</option>
-          <option value="app" ${card.scope === 'app' ? 'selected' : ''}>App-level (device/browser)</option>
-          <option value="user" ${card.scope === 'user' ? 'selected' : ''}>User-level (account)</option>
-          <option value="session" ${card.scope === 'session' ? 'selected' : ''}>Session-level (temporary)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="edit-category">Category:</label>
-        <select id="edit-category" name="category">
-          <option value="">Select Category</option>
-          <option value="user-preference" ${card.category === 'user-preference' ? 'selected' : ''}>User Preference</option>
-          <option value="account-setting" ${card.category === 'account-setting' ? 'selected' : ''}>Account Setting</option>
-          <option value="runtime-state" ${card.category === 'runtime-state' ? 'selected' : ''}>Runtime State</option>
-          <option value="feature-data" ${card.category === 'feature-data' ? 'selected' : ''}>Feature Data</option>
-          <option value="app-preference" ${card.category === 'app-preference' ? 'selected' : ''}>App Preference</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="edit-getter_name">Getter Function:</label>
-        <input type="text" id="edit-getter_name" name="getter_name" value="${escapeHtml(card.getter_name || '')}" placeholder="e.g., getUsername, userStore.getProfile">
-      </div>
-
-      <div class="form-group">
-        <label for="edit-setter_name">Setter Function:</label>
-        <input type="text" id="edit-setter_name" name="setter_name" value="${escapeHtml(card.setter_name || '')}" placeholder="e.g., setUsername, userStore.setProfile">
-      </div>
-
-      <div class="code-sections-container">
-        <div class="form-group full-width code-section ${card.getter_name ? '' : 'hidden'}" id="edit-getter-code-section">
-          <label for="edit-getter_code">Getter Code (optional):</label>
-          <textarea id="edit-getter_code" name="getter_code" rows="3" placeholder="Implementation code for the getter...">${escapeHtml(card.getter_code || '')}</textarea>
-        </div>
-
-        <div class="form-group full-width code-section ${card.setter_name ? '' : 'hidden'}" id="edit-setter-code-section">
-          <label for="edit-setter_code">Setter Code (optional):</label>
-          <textarea id="edit-setter_code" name="setter_code" rows="3" placeholder="Implementation code for the setter...">${escapeHtml(card.setter_code || '')}</textarea>
-        </div>
-      </div>
-
-      <div class="form-group full-width">
-        <label for="edit-persists_in">Also Persists In:</label>
-        <textarea id="edit-persists_in" name="persists_in" rows="2" placeholder="One per line: backend.api.users, localStorage.userData">${(card.persists_in || []).join('\n')}</textarea>
-      </div>
-
-      <div class="form-group full-width">
-        <label for="edit-notes">Notes & Description:</label>
-        <textarea id="edit-notes" name="notes" rows="4" placeholder="Purpose, usage notes, conflicts, deprecation status, etc.">${escapeHtml(card.notes || '')}</textarea>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" class="btn-primary modal-save">Update DFDC Card</button>
-      <button type="button" class="btn-secondary modal-close">Cancel</button>
     </div>
   `;
 }

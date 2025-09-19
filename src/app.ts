@@ -4,7 +4,7 @@ import {
   showNotification,
   renderDFDCCard,
   renderEmptyState,
-  createEditForm,
+  createDFAForm,
   clearFormValidation,
   updateDataStats,
   downloadJson,
@@ -41,6 +41,7 @@ export class DFDAtlas {
    * Initialize UI components.
    */
   private initializeUI(): void {
+    this.populateCreateForm();
     initializeDataTypeDropdown();
     initializeCodeSectionToggle();
     initializeSettingsPanel();
@@ -213,13 +214,23 @@ export class DFDAtlas {
   }
 
   /**
+   * Populate the create form with dynamic content.
+   */
+  private populateCreateForm(): void {
+    const createForm = document.getElementById('dfdc-form');
+    if (!createForm) return;
+
+    createForm.innerHTML = createDFAForm('create');
+  }
+
+  /**
    * Populate the edit form with card data.
    */
   private populateEditForm(card: DFDCCard): void {
     const editForm = document.getElementById('edit-form');
     if (!editForm) return;
 
-    editForm.innerHTML = createEditForm(card);
+    editForm.innerHTML = createDFAForm('edit', card);
 
     // Initialize code section toggle for the edit form.
     initializeEditCodeSectionToggle();
