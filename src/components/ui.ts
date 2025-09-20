@@ -696,7 +696,7 @@ export function initializeFormVisibilityCheckboxes(): void {
  */
 function renderVisibilityCheckboxes(mode: 'create' | 'edit'): void {
   const prefix = mode === 'edit' ? 'edit-' : '';
-  const containerId = mode === 'create' ? 'add-section' : 'edit-section';
+  const containerId = mode === 'create' ? 'add-section' : 'edit-modal';
   const container = document.querySelector(`#${containerId} .visibility-checkboxes`);
 
   if (!container) return;
@@ -738,27 +738,31 @@ function addVisibilityCheckboxListeners(prefix: string): void {
   const showCategoryCheckbox = document.getElementById(`${prefix}show-category`) as HTMLInputElement;
   const showPersistsInCheckbox = document.getElementById(`${prefix}show-persists-in`) as HTMLInputElement;
 
-  const updateVisibility = () => {
-    // Update settings based on any checkbox (they should all be in sync)
-    const visibility = {
-      showScope: document.querySelector('input[id$="show-scope"]:checked') !== null,
-      showCategory: document.querySelector('input[id$="show-category"]:checked') !== null,
-      showPersistsIn: document.querySelector('input[id$="show-persists-in"]:checked') !== null,
+  const createUpdateHandler = (field: 'showScope' | 'showCategory' | 'showPersistsIn') => {
+    return (event: Event) => {
+      const checkbox = event.target as HTMLInputElement;
+      const currentVisibility = getFormVisibility();
+      
+      // Update the specific field based on the checkbox that was clicked
+      const visibility = {
+        ...currentVisibility,
+        [field]: checkbox.checked
+      };
+
+      updateFormVisibility(visibility);
+      updateFormSectionVisibility();
+
+      // Sync all checkboxes across both forms
+      syncVisibilityCheckboxes(visibility);
+
+      // Update checkbox labels
+      updateVisibilityCheckboxLabels(visibility);
     };
-
-    updateFormVisibility(visibility);
-    updateFormSectionVisibility();
-
-    // Sync all checkboxes across both forms
-    syncVisibilityCheckboxes(visibility);
-
-    // Update checkbox labels
-    updateVisibilityCheckboxLabels(visibility);
   };
 
-  if (showScopeCheckbox) showScopeCheckbox.addEventListener('change', updateVisibility);
-  if (showCategoryCheckbox) showCategoryCheckbox.addEventListener('change', updateVisibility);
-  if (showPersistsInCheckbox) showPersistsInCheckbox.addEventListener('change', updateVisibility);
+  if (showScopeCheckbox) showScopeCheckbox.addEventListener('change', createUpdateHandler('showScope'));
+  if (showCategoryCheckbox) showCategoryCheckbox.addEventListener('change', createUpdateHandler('showCategory'));
+  if (showPersistsInCheckbox) showPersistsInCheckbox.addEventListener('change', createUpdateHandler('showPersistsIn'));
 }
 
 /**
