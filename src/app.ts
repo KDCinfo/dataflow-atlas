@@ -14,6 +14,8 @@ import {
   initializeEditCodeSectionToggle,
   initializeConnectionFieldToggle,
   initializeLocationDropdown,
+  initializeFormVisibilityCheckboxes,
+  updateFormSectionVisibility,
 } from './components/ui.js';
 import {
   createDFACardFromForm,
@@ -48,6 +50,7 @@ export class DFDAtlas {
     initializeDataTypeDropdown();
     initializeCodeSectionToggle();
     initializeConnectionFieldToggle('create');
+    initializeFormVisibilityCheckboxes();
     initializeSettingsPanel();
     initializeLocationDropdown();
     this.initializePreviousActiveTab();
@@ -120,7 +123,11 @@ export class DFDAtlas {
     if (editModal) {
       editModal.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
-        if (target.id === 'edit-modal' || target.classList.contains('modal-close')) {
+        if (
+          target.id === 'edit-modal' ||
+          target.classList.contains('modal-close') ||
+          target.classList.contains('modal-cancel')
+        ) {
           this.closeModal();
         }
       });
@@ -233,6 +240,11 @@ export class DFDAtlas {
     if (!createForm) return;
 
     createForm.innerHTML = createDFAForm('create');
+
+    // Apply initial visibility settings immediately after form creation
+    setTimeout(() => {
+      updateFormSectionVisibility();
+    }, 0);
   }
 
   /**
@@ -249,6 +261,14 @@ export class DFDAtlas {
 
     // Initialize connection field visibility for throughpoints.
     initializeConnectionFieldToggle('edit');
+
+    // Reinitialize visibility checkboxes for the edit form.
+    initializeFormVisibilityCheckboxes();
+
+    // Apply visibility settings immediately after edit form creation
+    setTimeout(() => {
+      updateFormSectionVisibility();
+    }, 0);
   }
 
   /**

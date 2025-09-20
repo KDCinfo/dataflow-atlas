@@ -16,15 +16,31 @@ export interface DataLayer {
   type: DataLayerType;
 }
 
+export interface FormVisibilitySettings {
+  showScope: boolean;
+  showCategory: boolean;
+  showPersistsIn: boolean;
+}
+
 export interface SettingsConfig {
   locations: string[];
   dataLayers: DataLayer[];
   categories: string[];
   dataTypes: string[];
+  formVisibility: FormVisibilitySettings;
 }
 
 const SETTINGS_KEY = 'dfa__settings';
 const TEMP_SETTINGS_KEY = 'dfa__temp_settings';
+
+/**
+ * Default form visibility settings - all optional fields hidden by default.
+ */
+const DEFAULT_FORM_VISIBILITY: FormVisibilitySettings = {
+  showScope: false,
+  showCategory: false,
+  showPersistsIn: false,
+};
 
 /**
  * Generate a unique ID for data layers based on name.
@@ -67,6 +83,7 @@ export function getSettings(): SettingsConfig {
         dataLayers,
         categories: parsed.categories || [],
         dataTypes: parsed.dataTypes || [],
+        formVisibility: parsed.formVisibility || { ...DEFAULT_FORM_VISIBILITY },
       };
     }
   } catch (error) {
@@ -79,6 +96,7 @@ export function getSettings(): SettingsConfig {
     dataLayers: [...DEFAULT_DATA_LAYERS],
     categories: [],
     dataTypes: [],
+    formVisibility: { ...DEFAULT_FORM_VISIBILITY },
   };
 }
 
@@ -228,4 +246,26 @@ export function dataLayerExists(id: string, excludeId?: string): boolean {
   return settings.dataLayers.some(layer =>
     layer.id === id && layer.id !== excludeId
   );
+}
+
+/**
+ * Update form visibility settings.
+ */
+export function updateFormVisibility(visibility: Partial<FormVisibilitySettings>): void {
+  const settings = getSettings();
+  const updatedSettings: SettingsConfig = {
+    ...settings,
+    formVisibility: {
+      ...settings.formVisibility,
+      ...visibility,
+    },
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedSettings));
+}
+
+/**
+ * Get current form visibility settings.
+ */
+export function getFormVisibility(): FormVisibilitySettings {
+  return getSettings().formVisibility;
 }

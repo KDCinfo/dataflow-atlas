@@ -1,6 +1,6 @@
 import type { DFACard } from '../types/dfa.js';
 import { DATA_TYPES } from '../types/dfa.js';
-import { getUniqueLocations, getDataLayersByType } from '../utils/settings.js';
+import { getUniqueLocations, getDataLayersByType, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
 
 /**
@@ -302,7 +302,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
     <div class="form-actions">
       ${isEdit ? `
         <button type="submit" class="btn-primary">Update DFA Card</button>
-        <button type="button" class="btn-secondary modal-close">Cancel</button>
+        <button type="button" class="btn-secondary modal-cancel">Cancel</button>
       ` : `
         <button type="submit" class="btn-primary">Save DFA Card</button>
         <button type="button" id="reset-form" class="btn-secondary">Reset Form</button>
@@ -679,6 +679,170 @@ export function updateDataStats(cardCount: number): void {
 }
 
 /**
+ * Initialize form visibility checkboxes for both create and edit forms.
+ */
+export function initializeFormVisibilityCheckboxes(): void {
+  renderVisibilityCheckboxes('create');
+  renderVisibilityCheckboxes('edit');
+
+  // Set initial visibility state immediately
+  updateFormSectionVisibility();
+
+  // Also update labels to match current state
+  const visibility = getFormVisibility();
+  updateVisibilityCheckboxLabels(visibility);
+}/**
+ * Render visibility checkboxes in a DRY fashion.
+ */
+function renderVisibilityCheckboxes(mode: 'create' | 'edit'): void {
+  const prefix = mode === 'edit' ? 'edit-' : '';
+  const containerId = mode === 'create' ? 'add-section' : 'edit-section';
+  const container = document.querySelector(`#${containerId} .visibility-checkboxes`);
+
+  if (!container) return;
+
+  const visibility = getFormVisibility();
+
+  container.innerHTML = `
+    <div class="visibility-controls">
+      <h3>Optional Fields</h3>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="${prefix}show-scope" ${visibility.showScope ? 'checked' : ''}>
+          <span class="checkmark"></span>
+          <span class="label-text">${visibility.showScope ? 'Hide' : 'Show'} Scope</span>
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="${prefix}show-category" ${visibility.showCategory ? 'checked' : ''}>
+          <span class="checkmark"></span>
+          <span class="label-text">${visibility.showCategory ? 'Hide' : 'Show'} Category</span>
+        </label>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="${prefix}show-persists-in" ${visibility.showPersistsIn ? 'checked' : ''}>
+          <span class="checkmark"></span>
+          <span class="label-text">${visibility.showPersistsIn ? 'Hide' : 'Show'} Also Persists In</span>
+        </label>
+      </div>
+    </div>
+  `;  // Add event listeners
+  addVisibilityCheckboxListeners(prefix);
+}
+
+/**
+ * Add event listeners to visibility checkboxes.
+ */
+function addVisibilityCheckboxListeners(prefix: string): void {
+  const showScopeCheckbox = document.getElementById(`${prefix}show-scope`) as HTMLInputElement;
+  const showCategoryCheckbox = document.getElementById(`${prefix}show-category`) as HTMLInputElement;
+  const showPersistsInCheckbox = document.getElementById(`${prefix}show-persists-in`) as HTMLInputElement;
+
+  const updateVisibility = () => {
+    // Update settings based on any checkbox (they should all be in sync)
+    const visibility = {
+      showScope: document.querySelector('input[id$="show-scope"]:checked') !== null,
+      showCategory: document.querySelector('input[id$="show-category"]:checked') !== null,
+      showPersistsIn: document.querySelector('input[id$="show-persists-in"]:checked') !== null,
+    };
+
+    updateFormVisibility(visibility);
+    updateFormSectionVisibility();
+
+    // Sync all checkboxes across both forms
+    syncVisibilityCheckboxes(visibility);
+
+    // Update checkbox labels
+    updateVisibilityCheckboxLabels(visibility);
+  };
+
+  if (showScopeCheckbox) showScopeCheckbox.addEventListener('change', updateVisibility);
+  if (showCategoryCheckbox) showCategoryCheckbox.addEventListener('change', updateVisibility);
+  if (showPersistsInCheckbox) showPersistsInCheckbox.addEventListener('change', updateVisibility);
+}
+
+/**
+ * Sync checkbox states across both forms.
+ */
+function syncVisibilityCheckboxes(visibility: any): void {
+  // Update all show-scope checkboxes
+  document.querySelectorAll('input[id$="show-scope"]').forEach((checkbox) => {
+    (checkbox as HTMLInputElement).checked = visibility.showScope;
+  });
+
+  // Update all show-category checkboxes
+  document.querySelectorAll('input[id$="show-category"]').forEach((checkbox) => {
+    (checkbox as HTMLInputElement).checked = visibility.showCategory;
+  });
+
+  // Update all show-persists-in checkboxes
+  document.querySelectorAll('input[id$="show-persists-in"]').forEach((checkbox) => {
+    (checkbox as HTMLInputElement).checked = visibility.showPersistsIn;
+  });
+}
+
+/**
+ * Update checkbox labels to show/hide based on current state.
+ */
+function updateVisibilityCheckboxLabels(visibility: any): void {
+  // Update scope labels
+  document.querySelectorAll('input[id$="show-scope"]').forEach((checkbox) => {
+    const labelText = checkbox.parentElement?.querySelector('.label-text');
+    if (labelText) {
+      labelText.textContent = visibility.showScope ? 'Hide Scope' : 'Show Scope';
+    }
+  });
+
+  // Update category labels
+  document.querySelectorAll('input[id$="show-category"]').forEach((checkbox) => {
+    const labelText = checkbox.parentElement?.querySelector('.label-text');
+    if (labelText) {
+      labelText.textContent = visibility.showCategory ? 'Hide Category' : 'Show Category';
+    }
+  });
+
+  // Update persists-in labels
+  document.querySelectorAll('input[id$="show-persists-in"]').forEach((checkbox) => {
+    const labelText = checkbox.parentElement?.querySelector('.label-text');
+    if (labelText) {
+      labelText.textContent = visibility.showPersistsIn ? 'Hide Also Persists In' : 'Show Also Persists In';
+    }
+  });
+}
+
+/**
+ * Update form section visibility based on current settings.
+ */
+export function updateFormSectionVisibility(): void {
+  const visibility = getFormVisibility();
+
+  // Update both create and edit forms
+  ['', 'edit-'].forEach(prefix => {
+    // Scope sections - look for exact ID match
+    const scopeId = prefix === '' ? 'scope' : 'edit-scope';
+    const scopeElement = document.getElementById(scopeId);
+    const scopeGroup = scopeElement?.closest('.form-group') as HTMLElement;
+    if (scopeGroup) {
+      scopeGroup.style.display = visibility.showScope ? 'inherit' : 'none';
+    }
+
+    // Category sections - look for exact ID match
+    const categoryId = prefix === '' ? 'category' : 'edit-category';
+    const categoryElement = document.getElementById(categoryId);
+    const categoryGroup = categoryElement?.closest('.form-group') as HTMLElement;
+    if (categoryGroup) {
+      categoryGroup.style.display = visibility.showCategory ? 'inherit' : 'none';
+    }
+
+    // Also Persists In sections - look for exact ID match
+    const persistsInId = prefix === '' ? 'persists_in' : 'edit-persists_in';
+    const persistsInElement = document.getElementById(persistsInId);
+    const persistsInGroup = persistsInElement?.closest('.form-group') as HTMLElement;
+    if (persistsInGroup) {
+      persistsInGroup.style.display = visibility.showPersistsIn ? 'inherit' : 'none';
+    }
+  });
+}/**
  * Download data as JSON file.
  */
 export function downloadJson(data: any, filename: string): void {

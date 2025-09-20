@@ -459,7 +459,11 @@ export function initializeSettingsPanel(): void {
   if (modal) {
     modal.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.id === 'settings-modal' || target.classList.contains('modal-close')) {
+      if (
+        target.id === 'settings-modal' ||
+        target.classList.contains('modal-close') ||
+        target.classList.contains('modal-cancel')
+      ) {
         closeSettingsModal();
       }
     });

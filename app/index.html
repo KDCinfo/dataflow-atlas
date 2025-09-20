@@ -40,6 +40,8 @@
     <!-- Add DFA Card Section -->
     <section id="add-section" class="section active">
       <h2 class="subheading">Create New DFA Card</h2>
+      <div class="visibility-checkboxes">
+      </div>
       <form id="dfa-form" class="dfa-form">
         <!-- Form content populated dynamically via createDFAForm('create') -->
       </form>
@@ -128,8 +130,12 @@
   <!-- Modal for editing DFA cards -->
   <div id="edit-modal" class="modal">
     <div class="modal-content">
-      <h3 class="modal-h3">Edit DFA Card</h3>
-      <button class="modal-close">X</button>
+      <div class="modal-top">
+        <h3 class="modal-h3">Edit DFA Card</h3>
+        <button class="modal-close">X</button>
+      </div>
+      <div class="visibility-checkboxes">
+      </div>
       <form id="edit-form" class="dfa-form">
         <!-- Form fields will be populated dynamically -->
       </form>
@@ -139,14 +145,16 @@
   <!-- Settings Modal -->
   <div id="settings-modal" class="modal">
     <div class="modal-content">
-      <h3 class="modal-h3">Settings</h3>
-      <button class="modal-close">X</button>
+      <div class="modal-top">
+        <h3 class="modal-h3">Settings</h3>
+        <button class="modal-close">X</button>
+      </div>
       <div id="settings-content" class="settings-content">
         <!-- Settings tabs and panels will be populated dynamically -->
       </div>
       <div class="form-actions">
         <button id="settings-save" class="btn-primary modal-save">Save Settings</button>
-        <button id="settings-cancel" class="btn-secondary modal-close">Cancel</button>
+        <button id="settings-cancel" class="btn-secondary modal-cancel">Cancel</button>
       </div>
     </div>
   </div>
