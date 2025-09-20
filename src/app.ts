@@ -6,6 +6,7 @@ import {
   renderEmptyState,
   createDFAForm,
   clearFormValidation,
+  resetCreateForm,
   updateDataStats,
   downloadJson,
   initializeDataTypeDropdown,
@@ -88,8 +89,7 @@ export class DFDAtlas {
     const resetFormBtn = document.getElementById('reset-form') as HTMLButtonElement;
     if (resetFormBtn) {
       resetFormBtn.addEventListener('click', () => {
-        dfaForm?.reset();
-        clearFormValidation();
+        resetCreateForm();
       });
     }
 
@@ -197,8 +197,7 @@ export class DFDAtlas {
       const dfaCard = createDFACardFromForm(formData);
 
       if (addDFACard(dfaCard)) {
-        form.reset();
-        clearFormValidation();
+        resetCreateForm();
         this.renderAtlas();
         this.updateStats();
       }

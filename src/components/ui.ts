@@ -641,6 +641,33 @@ export function clearFormValidation(): void {
 }
 
 /**
+ * Reset the create form to its initial state.
+ * This includes clearing all fields and hiding the connection group.
+ */
+export function resetCreateForm(): void {
+  const form = document.getElementById('dfa-form') as HTMLFormElement;
+  if (!form) return;
+
+  // Reset all form fields
+  form.reset();
+
+  // Clear validation styles
+  clearFormValidation();
+
+  // Hide the connection group and clear linkedTo value
+  const connectionGroup = getElement<HTMLElement>('connected-to-group');
+  const linkedToSelect = getElement<HTMLSelectElement>('linkedTo');
+
+  if (connectionGroup) {
+    connectionGroup.classList.remove('show');
+  }
+
+  if (linkedToSelect) {
+    linkedToSelect.value = '';
+  }
+}
+
+/**
  * Update data statistics display.
  */
 export function updateDataStats(cardCount: number): void {
