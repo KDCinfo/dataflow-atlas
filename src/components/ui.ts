@@ -705,7 +705,6 @@ function renderVisibilityCheckboxes(mode: 'create' | 'edit'): void {
 
   container.innerHTML = `
     <div class="visibility-controls">
-      <h3>Optional Fields</h3>
       <div class="checkbox-group">
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-scope" ${visibility.showScope ? 'checked' : ''}>
@@ -742,7 +741,7 @@ function addVisibilityCheckboxListeners(prefix: string): void {
     return (event: Event) => {
       const checkbox = event.target as HTMLInputElement;
       const currentVisibility = getFormVisibility();
-      
+
       // Update the specific field based on the checkbox that was clicked
       const visibility = {
         ...currentVisibility,
