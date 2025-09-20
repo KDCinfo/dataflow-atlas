@@ -241,22 +241,18 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
         <label for="${idPrefix}getter_name">Getter Function Name:</label>
         <input type="text" id="${idPrefix}getter_name" name="getter_name" ${isEdit ? `value="${escapeHtml(c.getter_name || '')}"` : ''}
                placeholder="e.g., getUsername, getProfile">
+        <div class="form-group form-group-sub code-section ${c.getter_name ? 'show' : ''}" id="${idPrefix}getter-code-section">
+          <label for="${idPrefix}getter_code">Getter Code (optional):</label>
+          <textarea id="${idPrefix}getter_code" name="getter_code" rows="3"
+                    placeholder="Implementation code for the getter...">${isEdit ? escapeHtml(c.getter_code || '') : ''}</textarea>
+        </div>
       </div>
 
       <div class="form-group">
         <label for="${idPrefix}setter_name">Setter Function Name:</label>
         <input type="text" id="${idPrefix}setter_name" name="setter_name" ${isEdit ? `value="${escapeHtml(c.setter_name || '')}"` : ''}
                placeholder="e.g., setUsername, setProfile">
-      </div>
-
-      <div class="code-sections-container">
-        <div class="form-group full-width code-section ${c.getter_name ? '' : 'hidden'}" id="${idPrefix}getter-code-section">
-          <label for="${idPrefix}getter_code">Getter Code (optional):</label>
-          <textarea id="${idPrefix}getter_code" name="getter_code" rows="3"
-                    placeholder="Implementation code for the getter...">${isEdit ? escapeHtml(c.getter_code || '') : ''}</textarea>
-        </div>
-
-        <div class="form-group full-width code-section ${c.setter_name ? '' : 'hidden'}" id="${idPrefix}setter-code-section">
+        <div class="form-group form-group-sub code-section ${c.setter_name ? 'show' : ''}" id="${idPrefix}setter-code-section">
           <label for="${idPrefix}setter_code">Setter Code (optional):</label>
           <textarea id="${idPrefix}setter_code" name="setter_code" rows="3"
                     placeholder="Implementation code for the setter...">${isEdit ? escapeHtml(c.setter_code || '') : ''}</textarea>
@@ -330,9 +326,9 @@ export function initializeCodeSectionToggle(): void {
 
   const toggleSection = (section: HTMLElement, show: boolean): void => {
     if (show) {
-      section.classList.remove('hidden');
+      section.classList.add('show');
     } else {
-      section.classList.add('hidden');
+      section.classList.remove('show');
     }
   };
 
@@ -418,9 +414,9 @@ export function initializeEditCodeSectionToggle(): void {
 
   const toggleSection = (section: HTMLElement, show: boolean): void => {
     if (show) {
-      section.classList.remove('hidden');
+      section.classList.add('show');
     } else {
-      section.classList.add('hidden');
+      section.classList.remove('show');
     }
   };
 
@@ -709,19 +705,19 @@ function renderVisibilityCheckboxes(mode: 'create' | 'edit'): void {
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-scope" ${visibility.showScope ? 'checked' : ''}>
           <span class="checkmark"></span>
-          <span class="label-text">${visibility.showScope ? 'Hide' : 'Show'} Scope</span>
+          <span class="label-text">${visibility.showScope ? 'Hide' : 'Show'} 'Scope'</span>
         </label>
 
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-category" ${visibility.showCategory ? 'checked' : ''}>
           <span class="checkmark"></span>
-          <span class="label-text">${visibility.showCategory ? 'Hide' : 'Show'} Category</span>
+          <span class="label-text">${visibility.showCategory ? 'Hide' : 'Show'} 'Category'</span>
         </label>
 
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-persists-in" ${visibility.showPersistsIn ? 'checked' : ''}>
           <span class="checkmark"></span>
-          <span class="label-text">${visibility.showPersistsIn ? 'Hide' : 'Show'} Also Persists In</span>
+          <span class="label-text">${visibility.showPersistsIn ? 'Hide' : 'Show'} 'Also Persists In'</span>
         </label>
       </div>
     </div>
