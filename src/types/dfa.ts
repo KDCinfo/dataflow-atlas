@@ -95,6 +95,7 @@ export interface AtlasFilter {
   scope?: DataScope;
   category?: ContentCategory;
   searchTerm?: string;
+  orphans?: 'all' | 'endpoints' | 'throughpoints';
 }
 
 /**

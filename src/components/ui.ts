@@ -570,6 +570,16 @@ export function renderDFACard(card: DFACard): string {
        <div class="dfa-card-value">${escapeHtml(card.setter_name)}</div>`
     : '';
 
+  // Get linked card name for display
+  const linkedToSection = card.linkedTo
+    ? (() => {
+        const linkedCard = loadCards().find(c => c.id === card.linkedTo);
+        const linkedName = linkedCard ? linkedCard.field : `Card ID: ${card.linkedTo}`;
+        return `<div class="dfa-card-label">Linked to:</div>
+         <div class="dfa-card-value">${escapeHtml(linkedName)}</div>`;
+      })()
+    : '';
+
   const notesSection = card.notes
     ? `<div class="dfa-card-notes">${escapeHtml(card.notes)}</div>`
     : '';
@@ -596,6 +606,7 @@ export function renderDFACard(card: DFACard): string {
 
         ${getterSection}
         ${setterSection}
+        ${linkedToSection}
         ${persistsInList}
       </div>
 

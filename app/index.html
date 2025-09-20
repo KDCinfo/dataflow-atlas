@@ -83,6 +83,15 @@
             <option value="feature">Core/Feature Data</option>
           </select>
         </div>
+        <div class="filter-group">
+          <label for="filter-orphans">Orphans:</label>
+          <select id="filter-orphans">
+            <option value="">All Cards</option>
+            <option value="endpoints">Endpoints (Not linked from anywhere)</option>
+            <option value="throughpoints">Throughpoints (Not linked to anywhere)</option>
+            <!-- <option value="all">All Orphaned Cards</option> -->
+          </select>
+        </div>
         <button id="clear-filters" class="btn-secondary">Clear Filters</button>
       </div>
       <div id="atlas-grid" class="atlas-grid">

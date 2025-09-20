@@ -1,7 +1,7 @@
 import type { DFACard, AtlasFilter, ContentCategory, DataScope } from '../types/dfa.js';
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfa.js';
 import { loadCards, saveCards } from '../utils/storage.js';
-import { addLocation, getSettings } from '../utils/settings.js';
+import { addLocation, getSettings, getDataLayersByType } from '../utils/settings.js';
 import { showNotification, updateLocationOptions, updateConnectionOptions } from './ui.js';
 
 /**
@@ -217,10 +217,55 @@ export function deleteDFACard(field: string): boolean {
 export function getFilteredCards(filters: AtlasFilter): DFACard[] {
   const allCards = loadCards();
 
+  // Debug logging
+  console.log('Filtering with:', filters);
+  console.log('Total cards:', allCards.length);
+
   return allCards.filter(card => {
     if (filters.layer && card.layer !== filters.layer) return false;
     if (filters.scope && card.scope !== filters.scope) return false;
     if (filters.category && card.category !== filters.category) return false;
+
+    // Handle orphans filter
+    if (filters.orphans) {
+      // Get layer types from settings
+      const { endpoints, throughpoints } = getDataLayersByType();
+
+      const cardId = card.id;
+      const hasOutgoingConnection = !!card.linkedTo;
+      const hasIncomingConnection = allCards.some(otherCard =>
+        otherCard.id !== cardId && otherCard.linkedTo === cardId
+      );
+
+      // Check if card's layer is an endpoint or throughpoint type
+      const isEndpointLayer = endpoints.some((layer: any) => layer.name === card.layer);
+      const isThroughpointLayer = throughpoints.some((layer: any) => layer.name === card.layer);
+
+      console.log(`Card ${card.field}:`, {
+        cardId,
+        layer: card.layer,
+        isEndpointLayer,
+        isThroughpointLayer,
+        hasOutgoingConnection,
+        hasIncomingConnection,
+        linkedTo: card.linkedTo,
+        filterType: filters.orphans
+      });
+
+      switch (filters.orphans) {
+        case 'endpoints':
+          // Show endpoint layer cards that have no incoming connections
+          const showEndpoint = isEndpointLayer && !hasIncomingConnection;
+          console.log(`Endpoints filter: showing ${card.field}? ${showEndpoint}`);
+          return showEndpoint;
+        case 'throughpoints':
+          // Show throughpoint layer cards that have no outgoing connections
+          const showThroughpoint = isThroughpointLayer && !hasOutgoingConnection;
+          console.log(`Throughpoints filter: showing ${card.field}? ${showThroughpoint}`);
+          return showThroughpoint;
+      }
+    }
+
     if (filters.searchTerm) {
       const searchTerm = filters.searchTerm.toLowerCase();
       const searchableText = [
@@ -236,9 +281,7 @@ export function getFilteredCards(filters: AtlasFilter): DFACard[] {
     }
     return true;
   });
-}
-
-/**
+}/**
  * Clear all DFA cards after confirmation.
  */
 export function clearAllCards(): boolean {

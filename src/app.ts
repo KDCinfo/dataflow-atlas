@@ -100,11 +100,13 @@ export class DFDAtlas {
     const filterLayer = document.getElementById('filter-layer') as HTMLSelectElement;
     const filterScope = document.getElementById('filter-scope') as HTMLSelectElement;
     const filterCategory = document.getElementById('filter-category') as HTMLSelectElement;
+    const filterOrphans = document.getElementById('filter-orphans') as HTMLSelectElement;
     const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
 
     if (filterLayer) filterLayer.addEventListener('change', () => this.applyFilters());
     if (filterScope) filterScope.addEventListener('change', () => this.applyFilters());
     if (filterCategory) filterCategory.addEventListener('change', () => this.applyFilters());
+    if (filterOrphans) filterOrphans.addEventListener('change', () => this.applyFilters());
     if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
 
     // Import/Export.
@@ -358,6 +360,7 @@ export class DFDAtlas {
     const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement | null;
     const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement | null;
     const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement | null;
+    const orphansFilter = document.getElementById('filter-orphans') as HTMLSelectElement | null;
 
     const filters: AtlasFilter = {};
 
@@ -369,6 +372,9 @@ export class DFDAtlas {
     }
     if (categoryFilter?.value) {
       filters.category = categoryFilter.value as any; // Validated by form options.
+    }
+    if (orphansFilter?.value) {
+      filters.orphans = orphansFilter.value as 'all' | 'endpoints' | 'throughpoints';
     }
 
     return filters;
@@ -388,10 +394,12 @@ export class DFDAtlas {
     const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement;
     const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
     const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
+    const orphansFilter = document.getElementById('filter-orphans') as HTMLSelectElement;
 
     if (layerFilter) layerFilter.value = '';
     if (scopeFilter) scopeFilter.value = '';
     if (categoryFilter) categoryFilter.value = '';
+    if (orphansFilter) orphansFilter.value = '';
 
     this.renderAtlas();
   }
