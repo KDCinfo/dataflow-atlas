@@ -219,7 +219,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
         </select>
 
         <!-- Connected To (for throughpoints) -->
-        <div class="form-group" id="${idPrefix}connected-to-group" style="display: none;">
+        <div class="form-group form-group-sub" id="${idPrefix}connected-to-group">
           <label for="${idPrefix}linkedTo">Connected To:</label>
           <select id="${idPrefix}linkedTo" name="linkedTo">
             ${generateConnectionOptions(c?.id, c?.linkedTo)}
@@ -383,9 +383,9 @@ export function initializeConnectionFieldToggle(mode: 'create' | 'edit' = 'creat
     const isThroughpoint = throughpointNames.includes(selectedLayer);
 
     if (isThroughpoint) {
-      connectionGroup.style.display = '';
+      connectionGroup.classList.add('show');
     } else {
-      connectionGroup.style.display = 'none';
+      connectionGroup.classList.remove('show');
       // Clear the linkedTo value if switching away from throughpoint
       const linkedToSelect = getElement<HTMLSelectElement>(`${prefix}linkedTo`);
       if (linkedToSelect) linkedToSelect.value = '';

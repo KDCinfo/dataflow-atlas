@@ -12,7 +12,7 @@
     --color-border: #e2e8f0;
     --color-text: #f0e68c; /* khaki */
     --color-alternate: #bdb76b; /* darkkhaki */
-    --color-bg-light: #f0e6bc;
+    --color-bg-light: #f0eacf;
     --color-text-muted: #74849b;
     --radius-all1: 8px;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -209,6 +209,21 @@ header img.logo-img:hover {
     resize: vertical;
 }
 
+.form-group-sub {
+    border: none;
+    border-radius: 0 0 10px 10px;
+    margin: 0 10px;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 10px;
+    transition: border 0.3s ease, max-height 0.3s ease, padding 0.5s ease;
+}
+.form-group-sub.show {
+    border: 1px solid var(--color-bg-light);
+    max-height: 200px;
+    padding: 5px 10px;
+}
+
 .form-actions {
     display: flex;
     gap: var(--spacing-md);
@@ -400,25 +415,27 @@ header img.logo-img:hover {
 }
 
 .dfa-card-tag {
-    background-color: var(--color-primary);
+    background-color: darkslategray;
     border-radius: var(--radius-all1);
+    /* color: var(--color-background); */
     color: white;
     display: inline-block;
     font-size: 0.75rem;
     font-weight: 500;
     padding: var(--spacing-xs) var(--spacing-sm);
 }
-
+/* .dfa-card-tag.scope-none {} */
 .dfa-card-tag.scope-app {
-    background-color: var(--color-success);
+    background-color: green;
+    color: white;
 }
-
 .dfa-card-tag.scope-user {
-    background-color: var(--color-primary);
+    background-color: darkturquoise;
+    color: black;
 }
-
 .dfa-card-tag.scope-session {
     background-color: var(--color-warning);
+    color: var(--color-primary-dark);
 }
 
 .dfa-card-notes {
