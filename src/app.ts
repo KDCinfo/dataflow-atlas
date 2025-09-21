@@ -104,12 +104,14 @@ export class DFDAtlas {
     const filterScope = document.getElementById('filter-scope') as HTMLSelectElement;
     const filterCategory = document.getElementById('filter-category') as HTMLSelectElement;
     const filterOrphans = document.getElementById('filter-orphans') as HTMLSelectElement;
+    const filterSearch = document.getElementById('filter-search') as HTMLInputElement;
     const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
 
     if (filterLayer) filterLayer.addEventListener('change', () => this.applyFilters());
     if (filterScope) filterScope.addEventListener('change', () => this.applyFilters());
     if (filterCategory) filterCategory.addEventListener('change', () => this.applyFilters());
     if (filterOrphans) filterOrphans.addEventListener('change', () => this.applyFilters());
+    if (filterSearch) filterSearch.addEventListener('input', () => this.applyFilters());
     if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
 
     // Relationships filter
@@ -373,6 +375,7 @@ export class DFDAtlas {
     const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement | null;
     const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement | null;
     const orphansFilter = document.getElementById('filter-orphans') as HTMLSelectElement | null;
+    const searchFilter = document.getElementById('filter-search') as HTMLInputElement | null;
 
     const filters: AtlasFilter = {};
 
@@ -387,6 +390,9 @@ export class DFDAtlas {
     }
     if (orphansFilter?.value) {
       filters.orphans = orphansFilter.value as 'all' | 'endpoints' | 'throughpoints';
+    }
+    if (searchFilter?.value.trim()) {
+      filters.searchTerm = searchFilter.value.trim();
     }
     if (this.relationshipsFilterCardId) {
       filters.relationships = this.relationshipsFilterCardId;
@@ -410,11 +416,13 @@ export class DFDAtlas {
     const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
     const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
     const orphansFilter = document.getElementById('filter-orphans') as HTMLSelectElement;
+    const searchFilter = document.getElementById('filter-search') as HTMLInputElement;
 
     if (layerFilter) layerFilter.value = '';
     if (scopeFilter) scopeFilter.value = '';
     if (categoryFilter) categoryFilter.value = '';
     if (orphansFilter) orphansFilter.value = '';
+    if (searchFilter) searchFilter.value = '';
 
     // Clear relationships filter
     this.relationshipsFilterCardId = null;
@@ -432,11 +440,13 @@ export class DFDAtlas {
     const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
     const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
     const orphansFilter = document.getElementById('filter-orphans') as HTMLSelectElement;
+    const searchFilter = document.getElementById('filter-search') as HTMLInputElement;
 
     if (layerFilter) layerFilter.value = '';
     if (scopeFilter) scopeFilter.value = '';
     if (categoryFilter) categoryFilter.value = '';
     if (orphansFilter) orphansFilter.value = '';
+    if (searchFilter) searchFilter.value = '';
 
     // Store the relationships filter state
     this.relationshipsFilterCardId = cardId;

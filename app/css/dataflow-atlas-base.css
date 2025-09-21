@@ -406,6 +406,13 @@ header img.logo-img:hover {
     padding: var(--spacing-xs) var(--spacing-sm);
 }
 
+/* .filter-group input#filter-search { */
+.filter-group input {
+    border-radius: 5px;
+    min-width: 170px;
+    padding: var(--spacing-xs);
+}
+
 .atlas-grid {
     display: grid;
     gap: var(--spacing-lg);
