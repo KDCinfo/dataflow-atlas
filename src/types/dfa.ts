@@ -96,6 +96,7 @@ export interface AtlasFilter {
   category?: ContentCategory;
   searchTerm?: string;
   orphans?: 'all' | 'endpoints' | 'throughpoints';
+  relationships?: string; // Card ID to show relationships for
 }
 
 /**

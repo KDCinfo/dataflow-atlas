@@ -34,6 +34,7 @@ export class DFDAtlas {
   private currentEditField: string | null = null;
   private currentEditCard: DFACard | null = null;
   private previousActiveTab: string = 'nav-add'; // Default to add tab
+  private relationshipsFilterCardId: string | null = null; // Track active relationships filter
 
   constructor() {
     this.initializeEventListeners();
@@ -108,6 +109,10 @@ export class DFDAtlas {
     if (filterCategory) filterCategory.addEventListener('change', () => this.applyFilters());
     if (filterOrphans) filterOrphans.addEventListener('change', () => this.applyFilters());
     if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+
+    // Relationships filter
+    const clearRelationshipsBtn = document.getElementById('clear-relationships') as HTMLButtonElement;
+    if (clearRelationshipsBtn) clearRelationshipsBtn.addEventListener('click', () => this.clearFilters());
 
     // Import/Export.
     const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
@@ -325,6 +330,9 @@ export class DFDAtlas {
     const filters = this.getCurrentFilters();
     const filteredCards = getFilteredCards(filters);
 
+    // Update relationships status display
+    this.updateRelationshipsStatus();
+
     if (filteredCards.length === 0) {
       atlasGrid.innerHTML = renderEmptyState();
       return;
@@ -341,7 +349,9 @@ export class DFDAtlas {
         const action = target.dataset.action;
         const cardField = target.dataset.cardId;
 
-        if (action === 'edit' && cardField) {
+        if (action === 'relationships' && cardField) {
+          this.setRelationshipsFilter(cardField);
+        } else if (action === 'edit' && cardField) {
           this.editDFACard(cardField);
         } else if (action === 'delete' && cardField) {
           if (deleteDFACard(cardField)) {
@@ -376,6 +386,9 @@ export class DFDAtlas {
     if (orphansFilter?.value) {
       filters.orphans = orphansFilter.value as 'all' | 'endpoints' | 'throughpoints';
     }
+    if (this.relationshipsFilterCardId) {
+      filters.relationships = this.relationshipsFilterCardId;
+    }
 
     return filters;
   }
@@ -401,7 +414,57 @@ export class DFDAtlas {
     if (categoryFilter) categoryFilter.value = '';
     if (orphansFilter) orphansFilter.value = '';
 
+    // Clear relationships filter
+    this.relationshipsFilterCardId = null;
+    this.updateRelationshipsStatus();
+
     this.renderAtlas();
+  }
+
+  /**
+   * Set relationships filter to show connected network for a specific card.
+   */
+  private setRelationshipsFilter(cardId: string): void {
+    // Clear other filters first
+    const layerFilter = document.getElementById('filter-layer') as HTMLSelectElement;
+    const scopeFilter = document.getElementById('filter-scope') as HTMLSelectElement;
+    const categoryFilter = document.getElementById('filter-category') as HTMLSelectElement;
+    const orphansFilter = document.getElementById('filter-orphans') as HTMLSelectElement;
+
+    if (layerFilter) layerFilter.value = '';
+    if (scopeFilter) scopeFilter.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+    if (orphansFilter) orphansFilter.value = '';
+
+    // Store the relationships filter state
+    this.relationshipsFilterCardId = cardId;
+
+    // Show the relationships status
+    this.updateRelationshipsStatus();
+
+    this.renderAtlas();
+  }
+
+  /**
+   * Update the relationships status display.
+   */
+  private updateRelationshipsStatus(): void {
+    const statusElement = document.getElementById('relationships-status');
+    const cardNameElement = document.getElementById('relationships-card-name');
+
+    if (!statusElement || !cardNameElement) return;
+
+    if (this.relationshipsFilterCardId) {
+      // Find the card name to display
+      const cards = loadCards();
+      const card = cards.find(c => c.id === this.relationshipsFilterCardId);
+      const cardName = card ? card.field : 'Unknown Card';
+
+      cardNameElement.textContent = cardName;
+      statusElement.classList.remove('hidden');
+    } else {
+      statusElement.classList.add('hidden');
+    }
   }
 
   /**

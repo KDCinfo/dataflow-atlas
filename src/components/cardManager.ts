@@ -212,14 +212,49 @@ export function deleteDFACard(field: string): boolean {
 }
 
 /**
+ * Get all cards connected to a given card (including the card itself).
+ * Uses breadth-first search to find all connected cards in both directions.
+ */
+function getConnectedCardIds(rootCardId: string, allCards: DFACard[]): Set<string> {
+  const visited = new Set<string>();
+  const queue: string[] = [rootCardId];
+
+  while (queue.length > 0) {
+    const currentId = queue.shift()!;
+
+    if (visited.has(currentId)) continue;
+    visited.add(currentId);
+
+    const currentCard = allCards.find(card => card.id === currentId);
+    if (!currentCard) continue;
+
+    // Add cards this card links to (outgoing)
+    if (currentCard.linkedTo && !visited.has(currentCard.linkedTo)) {
+      queue.push(currentCard.linkedTo);
+    }
+
+    // Add cards that link to this card (incoming)
+    allCards.forEach(card => {
+      if (card.linkedTo === currentId && !visited.has(card.id)) {
+        queue.push(card.id);
+      }
+    });
+  }
+
+  return visited;
+}
+
+/**
  * Get filtered cards based on filter criteria.
  */
 export function getFilteredCards(filters: AtlasFilter): DFACard[] {
   const allCards = loadCards();
 
-  // Debug logging
-  console.log('Filtering with:', filters);
-  console.log('Total cards:', allCards.length);
+  // Handle relationships filter first (overrides other filters)
+  if (filters.relationships) {
+    const connectedIds = getConnectedCardIds(filters.relationships, allCards);
+    return allCards.filter(card => connectedIds.has(card.id));
+  }
 
   return allCards.filter(card => {
     if (filters.layer && card.layer !== filters.layer) return false;
