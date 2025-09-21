@@ -425,8 +425,8 @@ header img.logo-img:hover {
 }
 
 .atlas-grid.size-mini {
-    gap: var(--spacing-md);
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
 }
 
 /* Relationships Status */
@@ -586,15 +586,19 @@ header img.logo-img:hover {
 }
 
 .dfa-card.size-mini {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
 }
 
 .dfa-card.size-mini .dfa-card-title {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .dfa-card.size-mini .dfa-card-header {
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: calc(var(--spacing-xs) * 0.5);
 }
 
 .dfa-card.size-mini .dfa-card-actions {
@@ -602,22 +606,59 @@ header img.logo-img:hover {
 }
 
 .dfa-card.size-mini .dfa-card-meta {
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-xs);
+    gap: calc(var(--spacing-xs) * 0.5);
+    margin-bottom: calc(var(--spacing-xs) * 0.5);
 }
 
 .dfa-card.size-mini .dfa-card-label,
 .dfa-card.size-mini .dfa-card-value {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    line-height: 1.2;
 }
 
 .dfa-card.size-mini .dfa-card-tag {
-    font-size: 0.6875rem;
-    padding: calc(var(--spacing-xs) * 0.5) var(--spacing-xs);
+    font-size: 0.625rem;
+    padding: calc(var(--spacing-xs) * 0.25) calc(var(--spacing-xs) * 0.5);
 }
 
 .dfa-card.size-mini .dfa-card-notes {
     display: none;
+}
+
+/* Mini card expand button */
+.card-expand-btn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    height: 20px;
+    line-height: 1;
+    min-width: 20px;
+    padding: 0;
+    transition: all 0.2s ease;
+    width: 20px;
+}
+
+.card-expand-btn:hover {
+    background-color: var(--color-background);
+    color: var(--color-primary);
+}
+
+.card-expand-btn.expanded {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+}
+
+/* Mini card details section */
+.dfa-card-details {
+    margin-top: var(--spacing-xs);
+    transition: all 0.3s ease;
+}
+
+.dfa-card-details.expanded {
+    display: block !important;
 }
 
 /* Import/Export Styles */

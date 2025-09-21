@@ -627,8 +627,35 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
   // Define fields to show based on card size
   const showAllFields = size === 'standard';
   const showCompactFields = size === 'compact';
+  const showMiniFields = size === 'mini';
 
-  // Core fields (always shown)
+  // For mini cards, create ultra-compact view with expandable details
+  if (showMiniFields) {
+    return `
+      <div class="dfa-card size-mini">
+        <div class="dfa-card-header">
+          <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
+          <button class="card-expand-btn" data-action="expand" data-card-id="${card.id}" title="Show Details">⊕</button>
+        </div>
+
+        <div class="dfa-card-details" data-card-details="${card.id}" style="display: none;">
+          <div class="dfa-card-meta">
+            <div class="dfa-card-label">Layer:</div>
+            <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
+            <div class="dfa-card-label">Location:</div>
+            <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.5rem;">
+          <span class="dfa-card-tag scope-${card.scope || 'none'}">${formatScope(card.scope)}</span>
+          ${card.category ? `<span class="dfa-card-tag">${formatCategory(card.category)}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // Core fields (always shown for standard and compact)
   const coreFields = `
     <div class="dfa-card-label">Layer:</div>
     <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
@@ -648,7 +675,9 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
   const extendedFields = showAllFields ? `
     ${getterSection}
     ${setterSection}
-    ${persistsInList}` : '';  return `
+    ${persistsInList}` : '';
+
+  return `
     <div class="dfa-card${size !== 'standard' ? ` size-${size}` : ''}">
       <div class="dfa-card-header">
         <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>

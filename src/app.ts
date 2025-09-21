@@ -377,6 +377,44 @@ export class DFDAtlas {
         }
       });
     });
+
+    // Add event listeners to mini card expand buttons.
+    atlasGrid.querySelectorAll('.card-expand-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const cardId = target.dataset.cardId;
+
+        if (cardId) {
+          this.toggleMiniCardDetails(cardId);
+        }
+      });
+    });
+  }
+
+  /**
+   * Toggle mini card details visibility.
+   */
+  private toggleMiniCardDetails(cardId: string): void {
+    const detailsElement = document.querySelector(`[data-card-details="${cardId}"]`) as HTMLElement;
+    const expandButton = document.querySelector(`[data-card-id="${cardId}"][data-action="expand"]`) as HTMLElement;
+
+    if (detailsElement && expandButton) {
+      const isExpanded = detailsElement.style.display !== 'none';
+
+      if (isExpanded) {
+        // Collapse
+        detailsElement.style.display = 'none';
+        expandButton.textContent = '⊕';
+        expandButton.title = 'Show Details';
+        expandButton.classList.remove('expanded');
+      } else {
+        // Expand
+        detailsElement.style.display = 'block';
+        expandButton.textContent = '⊖';
+        expandButton.title = 'Hide Details';
+        expandButton.classList.add('expanded');
+      }
+    }
   }
 
   /**
