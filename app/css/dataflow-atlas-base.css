@@ -413,20 +413,84 @@ header img.logo-img:hover {
     padding: var(--spacing-xs);
 }
 
-.atlas-grid {
-    display: grid;
-    gap: var(--spacing-lg);
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+.atlas-container {
+    position: relative;
+    width: 100%;
 }
 
-/* Grid variations for different card sizes */
-.atlas-grid.size-compact {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+.atlas-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+    position: relative;
+}
+
+.atlas-grid .dfa-card {
+    flex: 0 1 auto;
+    min-width: 350px;
+    max-width: fit-content;
+}
+
+/* Flex variations for different card sizes */
+.atlas-grid.size-compact .dfa-card {
+    min-width: 300px;
 }
 
 .atlas-grid.size-mini {
     gap: var(--spacing-sm);
-    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+}
+
+.atlas-grid.size-mini .dfa-card {
+    min-width: 125px;
+    max-width: fit-content;
+    transition: min-width 0.3s ease, max-width 0.3s ease;
+}
+
+.atlas-grid.size-mini .dfa-card.expanded {
+    min-width: 200px;
+}
+
+/* Connection lines overlay */
+.atlas-connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.atlas-grid .dfa-card {
+    position: relative;
+    z-index: 2;
+}
+
+/* Connection line styles */
+.connection-line {
+    stroke: var(--color-primary);
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+    fill: none;
+    opacity: 0.7;
+    /* animation: connection-pulse 2s infinite; */
+    animation: connection-pulse 3s 20;
+}
+
+.connection-line.highlighted {
+    stroke-width: 3;
+    opacity: 1;
+    animation: connection-glow 1.5s infinite alternate;
+}
+
+@keyframes connection-pulse {
+    0%, 100% { stroke-dashoffset: 0; }
+    50% { stroke-dashoffset: 10; }
+}
+
+@keyframes connection-glow {
+    0% { filter: drop-shadow(0 0 3px var(--color-primary)); }
+    100% { filter: drop-shadow(0 0 8px var(--color-primary)); }
 }
 
 /* Relationships Status */
@@ -499,7 +563,13 @@ header img.logo-img:hover {
     padding: var(--spacing-xs);
     transition: all 0.2s ease;
 }
-
+button.card-action-btn.mini {
+    background-color: blue;
+    border-radius: 50%;
+    height: 20px;
+    line-height: 1.0;
+    vertical-align: middle;
+}
 .card-action-btn:hover {
     background-color: var(--color-background);
     color: var(--color-text);

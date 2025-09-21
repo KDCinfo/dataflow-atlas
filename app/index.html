@@ -110,8 +110,13 @@
         <span class="status-text">Showing network connected to: <strong id="relationships-card-name"></strong></span>
         <button id="clear-relationships" class="btn-secondary">Clear Network Filter</button>
       </div>
-      <div id="atlas-grid" class="atlas-grid">
-        <!-- DFA cards will be dynamically populated here -->
+      <div class="atlas-container">
+        <div id="atlas-grid" class="atlas-grid">
+          <!-- DFA cards will be dynamically populated here -->
+        </div>
+        <svg id="atlas-connections" class="atlas-connections">
+          <!-- Connection lines will be drawn here when relationships filter is active -->
+        </svg>
       </div>
     </section>
 

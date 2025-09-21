@@ -154,6 +154,13 @@ export class DFDAtlas {
         this.handleEditSubmit();
       });
     }
+
+    // Window resize handler to redraw connection lines
+    window.addEventListener('resize', () => {
+      if (this.relationshipsFilterCardId) {
+        setTimeout(() => this.drawConnectionLines(), 100);
+      }
+    });
   }
 
   /**
@@ -351,6 +358,7 @@ export class DFDAtlas {
 
     if (filteredCards.length === 0) {
       atlasGrid.innerHTML = renderEmptyState();
+      this.clearConnectionLines();
       return;
     }
 
@@ -358,7 +366,12 @@ export class DFDAtlas {
       .map((card: DFACard) => renderDFACard(card, currentSize))
       .join('');
 
-    // Add event listeners to card actions.
+    // Draw connection lines if relationships filter is active
+    if (this.relationshipsFilterCardId) {
+      setTimeout(() => this.drawConnectionLines(), 100); // Small delay to let DOM settle
+    } else {
+      this.clearConnectionLines();
+    }
     atlasGrid.querySelectorAll('.card-action-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
@@ -397,8 +410,9 @@ export class DFDAtlas {
   private toggleMiniCardDetails(cardId: string): void {
     const detailsElement = document.querySelector(`[data-card-details="${cardId}"]`) as HTMLElement;
     const expandButton = document.querySelector(`[data-card-id="${cardId}"][data-action="expand"]`) as HTMLElement;
+    const cardElement = expandButton?.closest('.dfa-card') as HTMLElement;
 
-    if (detailsElement && expandButton) {
+    if (detailsElement && expandButton && cardElement) {
       const isExpanded = detailsElement.style.display !== 'none';
 
       if (isExpanded) {
@@ -407,13 +421,135 @@ export class DFDAtlas {
         expandButton.textContent = '⊕';
         expandButton.title = 'Show Details';
         expandButton.classList.remove('expanded');
+        cardElement.classList.remove('expanded');
       } else {
         // Expand
         detailsElement.style.display = 'block';
         expandButton.textContent = '⊖';
         expandButton.title = 'Hide Details';
         expandButton.classList.add('expanded');
+        cardElement.classList.add('expanded');
       }
+    }
+  }
+
+  /**
+   * Draw connection lines between related cards when relationships filter is active.
+   */
+  private drawConnectionLines(): void {
+    if (!this.relationshipsFilterCardId) return;
+
+    const atlasGrid = document.getElementById('atlas-grid');
+    const connectionsSvg = document.getElementById('atlas-connections') as unknown as SVGSVGElement;
+
+    if (!atlasGrid || !connectionsSvg) return;
+
+    // Clear existing lines
+    this.clearConnectionLines();
+
+    // Update SVG size to match container
+    const containerRect = atlasGrid.getBoundingClientRect();
+    connectionsSvg.setAttribute('width', containerRect.width.toString());
+    connectionsSvg.setAttribute('height', containerRect.height.toString());
+
+    // Find all cards currently displayed and all cards data
+    const cardElements = atlasGrid.querySelectorAll('.dfa-card');
+    const allCards = loadCards();
+
+    // Find the source card
+    const sourceCard = allCards.find(c => c.id === this.relationshipsFilterCardId);
+    if (!sourceCard) return;
+
+    // Find source card element
+    const sourceCardElement = Array.from(cardElements).find(el =>
+      el.querySelector(`[data-card-id="${sourceCard.id}"]`)
+    ) as HTMLElement;
+
+    if (!sourceCardElement) return;
+
+    // Create a simple breadth-first search to find connected cards
+    const connectedIds = this.getConnectedCardIds(this.relationshipsFilterCardId, allCards);
+
+    // Draw lines to each connected card
+    connectedIds.forEach((connectedId: string) => {
+      const targetCardElement = Array.from(cardElements).find(el =>
+        el.querySelector(`[data-card-id="${connectedId}"]`)
+      ) as HTMLElement;
+
+      if (targetCardElement) {
+        this.drawLineBetweenCards(connectionsSvg, sourceCardElement, targetCardElement, atlasGrid);
+      }
+    });
+  }
+
+  /**
+   * Find all cards connected to the specified card (breadth-first search).
+   */
+  private getConnectedCardIds(rootCardId: string, allCards: DFACard[]): Set<string> {
+    const visited = new Set<string>();
+    const queue: string[] = [rootCardId];
+
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      if (visited.has(currentId)) continue;
+
+      visited.add(currentId);
+      const currentCard = allCards.find(c => c.id === currentId);
+      if (!currentCard) continue;
+
+      // Add linked card if it exists and hasn't been visited
+      if (currentCard.linkedTo && !visited.has(currentCard.linkedTo)) {
+        queue.push(currentCard.linkedTo);
+      }
+
+      // Add cards that link to this card
+      allCards.forEach(card => {
+        if (card.linkedTo === currentId && !visited.has(card.id)) {
+          queue.push(card.id);
+        }
+      });
+    }
+
+    return visited;
+  }
+
+  /**
+   * Draw a single line between two card elements.
+   */
+  private drawLineBetweenCards(svg: SVGElement, sourceEl: HTMLElement, targetEl: HTMLElement, container: HTMLElement): void {
+    const containerRect = container.getBoundingClientRect();
+    const sourceRect = sourceEl.getBoundingClientRect();
+    const targetRect = targetEl.getBoundingClientRect();
+
+    // Calculate relative positions within the container
+    const sourceX = sourceRect.left - containerRect.left + sourceRect.width / 2;
+    const sourceY = sourceRect.top - containerRect.top + sourceRect.height / 2;
+    const targetX = targetRect.left - containerRect.left + targetRect.width / 2;
+    const targetY = targetRect.top - containerRect.top + targetRect.height / 2;
+
+    // Create SVG path element
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+    // Create a curved path for better visual appeal
+    const midX = (sourceX + targetX) / 2;
+    const midY = (sourceY + targetY) / 2;
+    const offsetY = Math.abs(targetX - sourceX) * 0.2; // Curve based on horizontal distance
+
+    const pathData = `M ${sourceX},${sourceY} Q ${midX},${midY - offsetY} ${targetX},${targetY}`;
+
+    path.setAttribute('d', pathData);
+    path.setAttribute('class', 'connection-line');
+
+    svg.appendChild(path);
+  }
+
+  /**
+   * Clear all connection lines.
+   */
+  private clearConnectionLines(): void {
+    const connectionsSvg = document.getElementById('atlas-connections');
+    if (connectionsSvg) {
+      connectionsSvg.innerHTML = '';
     }
   }
 
