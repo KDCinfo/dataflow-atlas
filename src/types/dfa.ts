@@ -88,6 +88,11 @@ export type ContentCategory =
 export type ImportMode = 'replace' | 'merge';
 
 /**
+ * Card size options for display.
+ */
+export type CardSize = 'standard' | 'compact' | 'mini';
+
+/**
  * Filter configuration for atlas view.
  */
 export interface AtlasFilter {

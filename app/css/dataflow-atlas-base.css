@@ -419,6 +419,16 @@ header img.logo-img:hover {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 }
 
+/* Grid variations for different card sizes */
+.atlas-grid.size-compact {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.atlas-grid.size-mini {
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
 /* Relationships Status */
 .relationships-status {
     align-items: center;
@@ -545,6 +555,69 @@ header img.logo-img:hover {
     font-style: italic;
     margin-top: var(--spacing-md);
     padding: var(--spacing-sm);
+}
+
+/* Card Size Variations */
+.dfa-card.size-compact {
+    padding: var(--spacing-md);
+}
+
+.dfa-card.size-compact .dfa-card-title {
+    font-size: 1.1rem;
+}
+
+.dfa-card.size-compact .dfa-card-header {
+    margin-bottom: var(--spacing-sm);
+}
+
+.dfa-card.size-compact .dfa-card-meta {
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.dfa-card.size-compact .dfa-card-label,
+.dfa-card.size-compact .dfa-card-value {
+    font-size: 0.8125rem;
+}
+
+.dfa-card.size-compact .dfa-card-notes {
+    font-size: 0.8125rem;
+    margin-top: var(--spacing-sm);
+}
+
+.dfa-card.size-mini {
+    padding: var(--spacing-sm);
+}
+
+.dfa-card.size-mini .dfa-card-title {
+    font-size: 1rem;
+}
+
+.dfa-card.size-mini .dfa-card-header {
+    margin-bottom: var(--spacing-xs);
+}
+
+.dfa-card.size-mini .dfa-card-actions {
+    display: none;
+}
+
+.dfa-card.size-mini .dfa-card-meta {
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+}
+
+.dfa-card.size-mini .dfa-card-label,
+.dfa-card.size-mini .dfa-card-value {
+    font-size: 0.75rem;
+}
+
+.dfa-card.size-mini .dfa-card-tag {
+    font-size: 0.6875rem;
+    padding: calc(var(--spacing-xs) * 0.5) var(--spacing-xs);
+}
+
+.dfa-card.size-mini .dfa-card-notes {
+    display: none;
 }
 
 /* Import/Export Styles */

@@ -1,4 +1,4 @@
-import type { DFACard } from '../types/dfa.js';
+import type { DFACard, CardSize } from '../types/dfa.js';
 import { DATA_TYPES } from '../types/dfa.js';
 import { getUniqueLocations, getDataLayersByType, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
@@ -594,7 +594,7 @@ export function formatCategory(category: string): string {
 /**
  * Render a single DFA card as HTML.
  */
-export function renderDFACard(card: DFACard): string {
+export function renderDFACard(card: DFACard, size: CardSize = 'standard'): string {
   const persistsInList = card.persists_in && card.persists_in.length > 0
     ? `<div class="dfa-card-label">Also persists in:</div>
        <div class="dfa-card-value">${card.persists_in.join(', ')}</div>`
@@ -620,12 +620,36 @@ export function renderDFACard(card: DFACard): string {
       })()
     : '';
 
-  const notesSection = card.notes
+  const notesSection = (card.notes && size !== 'mini')
     ? `<div class="dfa-card-notes">${escapeHtml(card.notes)}</div>`
     : '';
 
-  return `
-    <div class="dfa-card">
+  // Define fields to show based on card size
+  const showAllFields = size === 'standard';
+  const showCompactFields = size === 'compact';
+
+  // Core fields (always shown)
+  const coreFields = `
+    <div class="dfa-card-label">Layer:</div>
+    <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
+    <div class="dfa-card-label">Location:</div>
+    <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>`;
+
+  // Standard fields (shown in standard and compact)
+  const standardFields = (showAllFields || showCompactFields) ? `
+    <div class="dfa-card-label">Type:</div>
+    <div class="dfa-card-value">${escapeHtml(card.type || 'Not specified')}</div>` : '';
+
+  // Essential linkage info for compact (only linked connections, most important)
+  const compactFields = showCompactFields ? `
+    ${linkedToSection}` : '';
+
+  // Extended fields (only in standard size)
+  const extendedFields = showAllFields ? `
+    ${getterSection}
+    ${setterSection}
+    ${persistsInList}` : '';  return `
+    <div class="dfa-card${size !== 'standard' ? ` size-${size}` : ''}">
       <div class="dfa-card-header">
         <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
         <div class="dfa-card-actions">
@@ -636,19 +660,10 @@ export function renderDFACard(card: DFACard): string {
       </div>
 
       <div class="dfa-card-meta">
-        <div class="dfa-card-label">Layer:</div>
-        <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
-
-        <div class="dfa-card-label">Location:</div>
-        <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
-
-        <div class="dfa-card-label">Type:</div>
-        <div class="dfa-card-value">${escapeHtml(card.type || 'Not specified')}</div>
-
-        ${getterSection}
-        ${setterSection}
-        ${linkedToSection}
-        ${persistsInList}
+        ${coreFields}
+        ${standardFields}
+        ${compactFields}
+        ${extendedFields}
       </div>
 
       <div style="margin-top: 1rem;">

@@ -1,4 +1,4 @@
-import type { DFACard, AtlasFilter } from './types/dfa.js';
+import type { DFACard, AtlasFilter, CardSize } from './types/dfa.js';
 import { loadCards, importCards } from './utils/storage.js';
 import {
   showNotification,
@@ -105,6 +105,7 @@ export class DFDAtlas {
     const filterCategory = document.getElementById('filter-category') as HTMLSelectElement;
     const filterOrphans = document.getElementById('filter-orphans') as HTMLSelectElement;
     const filterSearch = document.getElementById('filter-search') as HTMLInputElement;
+    const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
     const clearFiltersBtn = document.getElementById('clear-filters') as HTMLButtonElement;
 
     if (filterLayer) filterLayer.addEventListener('change', () => this.applyFilters());
@@ -112,6 +113,7 @@ export class DFDAtlas {
     if (filterCategory) filterCategory.addEventListener('change', () => this.applyFilters());
     if (filterOrphans) filterOrphans.addEventListener('change', () => this.applyFilters());
     if (filterSearch) filterSearch.addEventListener('input', () => this.applyFilters());
+    if (viewSizeSelect) viewSizeSelect.addEventListener('change', () => this.renderAtlas());
     if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
 
     // Relationships filter
@@ -337,13 +339,23 @@ export class DFDAtlas {
     // Update relationships status display
     this.updateRelationshipsStatus();
 
+    // Get current view size
+    const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
+    const currentSize = (viewSizeSelect?.value as CardSize) || 'standard';
+
+    // Update grid classes for responsive layout
+    atlasGrid.className = 'atlas-grid';
+    if (currentSize !== 'standard') {
+      atlasGrid.classList.add(`size-${currentSize}`);
+    }
+
     if (filteredCards.length === 0) {
       atlasGrid.innerHTML = renderEmptyState();
       return;
     }
 
     atlasGrid.innerHTML = filteredCards
-      .map((card: DFACard) => renderDFACard(card))
+      .map((card: DFACard) => renderDFACard(card, currentSize))
       .join('');
 
     // Add event listeners to card actions.
