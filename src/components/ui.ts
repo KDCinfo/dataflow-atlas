@@ -102,6 +102,46 @@ export function updateLayerOptions(): void {
 }
 
 /**
+ * Update the layer filter dropdown in the atlas view.
+ */
+export function updateLayerFilterOptions(): void {
+  const filterLayer = document.getElementById('filter-layer') as HTMLSelectElement;
+  if (!filterLayer) return;
+
+  const currentValue = filterLayer.value;
+  filterLayer.innerHTML = generateLayerFilterOptions(currentValue);
+}
+
+/**
+ * Generate layer filter options HTML (for atlas view filtering).
+ */
+function generateLayerFilterOptions(selectedLayer?: string): string {
+  const { endpoints, throughpoints } = getDataLayersByType();
+
+  let html = '<option value="">All Layers</option>';
+
+  if (endpoints.length > 0) {
+    html += '<optgroup label="Endpoints">';
+    endpoints.forEach(layer => {
+      const selected = selectedLayer === layer.name ? 'selected' : '';
+      html += `<option value="${layer.name}" ${selected}>${layer.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  if (throughpoints.length > 0) {
+    html += '<optgroup label="Throughpoints">';
+    throughpoints.forEach(layer => {
+      const selected = selectedLayer === layer.name ? 'selected' : '';
+      html += `<option value="${layer.name}" ${selected}>${layer.name}</option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  return html;
+}
+
+/**
  * Generate connection options for throughpoint linking.
  */
 function generateConnectionOptions(currentCardId?: string, selectedConnection?: string): string {

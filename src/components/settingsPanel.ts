@@ -10,7 +10,7 @@ import {
   DataLayerType,
   type DataLayer,
 } from '../utils/settings.js';
-import { getElement, updateLocationOptions, updateLayerOptions, updateConnectionOptions } from './ui.js';
+import { getElement, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions } from './ui.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -305,6 +305,7 @@ function setupSettingsEventListeners(): void {
 
       // Update dropdowns in real-time
       updateLayerOptions();
+      updateLayerFilterOptions();
       updateConnectionOptions();
 
       // Clear inputs
@@ -425,6 +426,7 @@ function handleEditDataLayer(layerId: string): void {
 
   // Update dropdowns in real-time
   updateLayerOptions();
+  updateLayerFilterOptions();
   updateConnectionOptions();
 
   // Refresh the settings panel
@@ -445,6 +447,7 @@ function handleDeleteDataLayer(layerId: string): void {
 
     // Update dropdowns in real-time
     updateLayerOptions();
+    updateLayerFilterOptions();
     updateConnectionOptions();
 
     // Refresh the settings panel

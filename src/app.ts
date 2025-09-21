@@ -16,6 +16,7 @@ import {
   initializeLocationDropdown,
   initializeFormVisibilityCheckboxes,
   updateFormSectionVisibility,
+  updateLayerFilterOptions,
 } from './components/ui.js';
 import {
   createDFACardFromForm,
@@ -54,6 +55,7 @@ export class DFDAtlas {
     initializeFormVisibilityCheckboxes();
     initializeSettingsPanel();
     initializeLocationDropdown();
+    updateLayerFilterOptions(); // Initialize layer filter options
     this.initializePreviousActiveTab();
   }
 
