@@ -28,6 +28,7 @@ import { initializeSettingsPanel } from './components/settingsPanel.js';
 export class DFDAtlas {
   private currentEditCard: DFACard | null = null;
   private relationshipsFilterCardId: string | null = null; // Track active relationships filter
+  private isTreeViewActive: boolean = false; // Track tree view state
   private treeView: TreeView = new TreeView(); // Tree view system
 
   constructor() {
@@ -109,7 +110,10 @@ export class DFDAtlas {
 
     // Relationships filter
     const clearRelationshipsBtn = document.getElementById('clear-relationships') as HTMLButtonElement;
-    if (clearRelationshipsBtn) clearRelationshipsBtn.addEventListener('click', () => this.clearFilters());
+    if (clearRelationshipsBtn) clearRelationshipsBtn.addEventListener('click', () => this.clearRelationshipsFilter());
+
+    const treeViewToggleBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
+    if (treeViewToggleBtn) treeViewToggleBtn.addEventListener('click', () => this.toggleTreeView());
 
     // Import/Export.
     const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
@@ -362,6 +366,63 @@ export class DFDAtlas {
   }
 
   /**
+   * Clear only the relationships filter while keeping other filters active.
+   */
+  private clearRelationshipsFilter(): void {
+    this.relationshipsFilterCardId = null;
+    this.isTreeViewActive = false;
+    this.updateRelationshipsStatus();
+    this.updateTreeViewButton();
+
+    // Clear tree view
+    this.treeView.clearTree();
+
+    // Ensure we return to mini view since link icons are only available on mini cards
+    const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
+    if (viewSizeSelect) {
+      viewSizeSelect.value = 'mini';
+    }
+
+    this.renderAtlas();
+  }
+
+  /**
+   * Toggle between tree view and grid view.
+   */
+  private toggleTreeView(): void {
+    if (this.isTreeViewActive && this.relationshipsFilterCardId) {
+      // Switch back to grid view
+      this.isTreeViewActive = false;
+      this.treeView.clearTree();
+      this.renderAtlas();
+      this.updateTreeViewButton();
+    } else if (this.relationshipsFilterCardId) {
+      // Switch to tree view
+      this.isTreeViewActive = true;
+      setTimeout(() => {
+        this.treeView.renderTree(this.relationshipsFilterCardId!);
+      }, 150);
+      this.updateTreeViewButton();
+    }
+  }
+
+  /**
+   * Update tree view button text based on current state.
+   */
+  private updateTreeViewButton(): void {
+    const treeViewBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
+    if (treeViewBtn) {
+      if (this.relationshipsFilterCardId) {
+        treeViewBtn.textContent = this.isTreeViewActive ? 'Grid View' : 'Tree View';
+        treeViewBtn.disabled = false;
+      } else {
+        treeViewBtn.textContent = 'Tree View';
+        treeViewBtn.disabled = true; // Disable when no relationship is active
+      }
+    }
+  }
+
+  /**
    * Set relationships filter to show connected network for a specific card.
    */
   private setRelationshipsFilter(cardId: string): void {
@@ -389,9 +450,12 @@ export class DFDAtlas {
 
     // Then switch to tree view after the cards are rendered
     // Use setTimeout to ensure DOM layout is complete
+    this.isTreeViewActive = true;
     setTimeout(() => {
       this.treeView.renderTree(cardId);
     }, 150); // Anything under 100 shows the connectors in an umbrella layout.
+
+    this.updateTreeViewButton();
   }
 
   /**
@@ -409,10 +473,10 @@ export class DFDAtlas {
       const card = cards.find(c => c.id === this.relationshipsFilterCardId);
       const cardName = card ? card.field : 'Unknown Card';
 
-      statusElement.style.display = 'block';
+      statusElement.classList.remove('hidden');
       cardNameElement.textContent = cardName;
     } else {
-      statusElement.style.display = 'none';
+      statusElement.classList.add('hidden');
     }
   }
 
