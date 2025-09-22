@@ -786,7 +786,9 @@ export function initializeFormVisibilityCheckboxes(): void {
   // Also update labels to match current state
   const visibility = getFormVisibility();
   updateVisibilityCheckboxLabels(visibility);
-}/**
+}
+
+/**
  * Render visibility checkboxes in a DRY fashion.
  */
 function renderVisibilityCheckboxes(mode: 'create' | 'edit'): void {
@@ -940,7 +942,9 @@ export function updateFormSectionVisibility(): void {
       persistsInGroup.style.display = visibility.showPersistsIn ? 'inherit' : 'none';
     }
   });
-}/**
+}
+
+/**
  * Download data as JSON file.
  */
 export function downloadJson(data: any, filename: string): void {
