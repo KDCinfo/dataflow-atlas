@@ -450,6 +450,26 @@ header img.logo-img:hover {
     min-width: 200px;
 }
 
+/* Grid layout for relationship views */
+.atlas-grid.grid-layout {
+    display: grid !important;
+    gap: var(--spacing-lg);
+    align-items: start;
+    justify-items: start;
+    position: relative;
+}
+
+.atlas-grid.grid-layout .dfa-card {
+    width: 100%;
+    min-width: unset;
+    max-width: unset;
+}
+
+.atlas-grid.grid-layout.size-mini .dfa-card {
+    min-width: 125px;
+    max-width: fit-content;
+}
+
 /* Connection lines overlay */
 .atlas-connections {
     position: absolute;

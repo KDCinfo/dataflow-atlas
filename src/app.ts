@@ -381,6 +381,14 @@ export class DFDAtlas {
       // Switch back to grid view
       this.isTreeViewActive = false;
       this.treeView.clearTree();
+
+      // Clear any tree-specific styling that might affect card heights
+      const atlasGrid = document.getElementById('atlas-grid');
+      if (atlasGrid) {
+        atlasGrid.style.removeProperty('height');
+        atlasGrid.style.removeProperty('overflow');
+      }
+
       this.renderAtlas();
       this.updateTreeViewButton();
     } else if (this.relationshipsFilterCardId) {
@@ -391,6 +399,147 @@ export class DFDAtlas {
       }, 150);
       this.updateTreeViewButton();
     }
+  }
+
+  /**
+   * Calculate grid positions for relationship cards in a hierarchical layout.
+   */
+  private calculateGridPositions(rootCardId: string, cards: DFACard[]): Map<string, {row: number, col: number}> {
+    const positions = new Map<string, {row: number, col: number}>();
+    const visited = new Set<string>();
+
+    // Start with root card at position (0, 0)
+    positions.set(rootCardId, {row: 0, col: 0});
+    visited.add(rootCardId);
+
+    // Queue for level-by-level processing: [cardId, level, parentCol]
+    const queue: Array<{cardId: string, level: number, parentCol: number}> = [{cardId: rootCardId, level: 0, parentCol: 0}];
+
+    // Track columns used at each level to avoid collisions
+    const levelColumnUsage = new Map<number, Set<number>>();
+    levelColumnUsage.set(0, new Set([0]));
+
+    while (queue.length > 0) {
+      const {cardId, level, parentCol} = queue.shift()!;
+      const nextLevel = level + 1;
+
+      // Find all cards connected to this card
+      const connectedCards = cards.filter(card =>
+        card.linkedTo === cardId &&
+        !visited.has(card.id)
+      );
+
+      // Also find cards that this card links TO (bidirectional)
+      const currentCard = cards.find(c => c.id === cardId);
+      const reverseConnectedCards = currentCard && currentCard.linkedTo ?
+        cards.filter(card =>
+          card.id === currentCard.linkedTo &&
+          !visited.has(card.id)
+        ) : [];
+
+      const allConnectedCards = [...connectedCards, ...reverseConnectedCards];
+
+      if (allConnectedCards.length === 0) continue;
+
+      // Initialize level column tracking if needed
+      if (!levelColumnUsage.has(nextLevel)) {
+        levelColumnUsage.set(nextLevel, new Set());
+      }
+
+      const usedColumns = levelColumnUsage.get(nextLevel)!;
+
+      // For level 1 (direct children of root), place them vertically under the root
+      if (nextLevel === 1) {
+        allConnectedCards.forEach((card, index) => {
+          const row = index + 1; // Start from row 1 (root is at row 0)
+          const col = 0; // All first-level children in column 0
+
+          positions.set(card.id, {row, col});
+          visited.add(card.id);
+          usedColumns.add(col);
+
+          queue.push({cardId: card.id, level: nextLevel, parentCol: col});
+        });
+      } else {
+        // For deeper levels, place horizontally to the right
+        let startCol = parentCol + 1;
+
+        // Find the first available column position
+        while (usedColumns.has(startCol)) {
+          startCol++;
+        }
+
+        allConnectedCards.forEach((card) => {
+          // Find the parent card's row position
+          const parentPosition = positions.get(cardId);
+          const row = parentPosition ? parentPosition.row : 0;
+          const col = startCol;
+
+          positions.set(card.id, {row, col});
+          visited.add(card.id);
+          usedColumns.add(col);
+
+          queue.push({cardId: card.id, level: nextLevel, parentCol: col});
+        });
+      }
+    }
+
+    return positions;
+  }
+
+  /**
+   * Render cards in a CSS Grid layout based on calculated positions.
+   */
+  private renderGridLayout(cards: DFACard[], rootCardId: string, currentSize: CardSize): void {
+    const atlasGrid = document.getElementById('atlas-grid');
+    if (!atlasGrid) return;
+
+    const positions = this.calculateGridPositions(rootCardId, cards);
+
+    // Find the maximum row and column to set grid dimensions
+    let maxRow = 0;
+    let maxCol = 0;
+    positions.forEach(({row, col}) => {
+      maxRow = Math.max(maxRow, row);
+      maxCol = Math.max(maxCol, col);
+    });
+
+    // Create CSS Grid
+    atlasGrid.className = 'atlas-grid grid-layout';
+    if (currentSize !== 'standard') {
+      atlasGrid.classList.add(`size-${currentSize}`);
+    }
+
+    // Set CSS Grid properties
+    atlasGrid.style.display = 'grid';
+    atlasGrid.style.gridTemplateRows = `repeat(${maxRow + 1}, minmax(auto, 1fr))`;
+    atlasGrid.style.gridTemplateColumns = `repeat(${maxCol + 1}, minmax(200px, 1fr))`;
+    atlasGrid.style.gap = 'var(--spacing-lg)';
+    atlasGrid.style.alignItems = 'start';
+
+    // Create grid content with positioned cards and empty cells
+    let gridContent = '';
+
+    for (let row = 0; row <= maxRow; row++) {
+      for (let col = 0; col <= maxCol; col++) {
+        // Find card at this position
+        const cardAtPosition = cards.find(card => {
+          const pos = positions.get(card.id);
+          return pos && pos.row === row && pos.col === col;
+        });
+
+        if (cardAtPosition) {
+          // Render the actual card with grid position
+          const cardHtml = renderDFACard(cardAtPosition, currentSize);
+          gridContent += `<div style="grid-row: ${row + 1}; grid-column: ${col + 1};">${cardHtml}</div>`;
+        } else {
+          // Empty cell (invisible placeholder)
+          gridContent += `<div style="grid-row: ${row + 1}; grid-column: ${col + 1}; min-height: 1px;"></div>`;
+        }
+      }
+    }
+
+    atlasGrid.innerHTML = gridContent;
   }
 
   /**
@@ -568,21 +717,33 @@ export class DFDAtlas {
     const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
     const currentSize = (viewSizeSelect?.value as CardSize) || 'standard';
 
-    // Update grid classes for responsive layout
-    atlasGrid.className = 'atlas-grid';
-    if (currentSize !== 'standard') {
-      atlasGrid.classList.add(`size-${currentSize}`);
-    }
-
     if (filteredCards.length === 0) {
       atlasGrid.innerHTML = renderEmptyState();
       this.clearConnectionLines();
       return;
     }
 
-    atlasGrid.innerHTML = filteredCards
-      .map((card: DFACard) => renderDFACard(card, currentSize))
-      .join('');
+    // Use grid layout for relationships view when not in tree mode
+    if (this.relationshipsFilterCardId && !this.isTreeViewActive) {
+      this.renderGridLayout(filteredCards, this.relationshipsFilterCardId, currentSize);
+    } else {
+      // Standard flex layout for normal view
+      atlasGrid.className = 'atlas-grid';
+      if (currentSize !== 'standard') {
+        atlasGrid.classList.add(`size-${currentSize}`);
+      }
+
+      // Clear any grid-specific styling
+      atlasGrid.style.removeProperty('display');
+      atlasGrid.style.removeProperty('grid-template-rows');
+      atlasGrid.style.removeProperty('grid-template-columns');
+      atlasGrid.style.removeProperty('gap');
+      atlasGrid.style.removeProperty('align-items');
+
+      atlasGrid.innerHTML = filteredCards
+        .map((card: DFACard) => renderDFACard(card, currentSize))
+        .join('');
+    }
 
     // Clear any existing connection lines when not in relationships view
     if (!this.relationshipsFilterCardId) {
