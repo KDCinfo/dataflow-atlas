@@ -128,13 +128,6 @@ export class DFDAtlas {
 
     // Modal.
     const editModal = document.getElementById('edit-modal') as HTMLElement;
-    const closeEditModalBtn = document.getElementById('close-edit-modal') as HTMLButtonElement;
-
-    if (closeEditModalBtn) {
-      closeEditModalBtn.addEventListener('click', () => {
-        this.hideModal();
-      });
-    }
 
     // Close modal on backdrop click.
     if (editModal) {
@@ -144,6 +137,16 @@ export class DFDAtlas {
         }
       });
     }
+
+    // Handle modal close buttons using event delegation
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+
+      // Handle X button (modal-close class) and Cancel button (modal-cancel class)
+      if (target.classList.contains('modal-close') || target.classList.contains('modal-cancel')) {
+        this.hideModal();
+      }
+    });
 
     // Navigation.
     const navLinks = document.querySelectorAll('.nav-btn');
