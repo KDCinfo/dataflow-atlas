@@ -685,8 +685,8 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
       <div class="dfa-card-header">
         <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
         <div class="dfa-card-actions">
-          <button class="card-action-btn" data-action="edit" data-card-id="${card.field}" title="Edit">✏️</button>
-          <button class="card-action-btn" data-action="delete" data-card-id="${card.field}" title="Delete">🗑️</button>
+          <button class="card-action-btn" data-action="edit" data-card-id="${card.id}" title="Edit">✏️</button>
+          <button class="card-action-btn" data-action="delete" data-card-id="${card.id}" title="Delete">🗑️</button>
         </div>
       </div>
 
