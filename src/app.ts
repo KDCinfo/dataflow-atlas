@@ -239,24 +239,11 @@ export class DFDAtlas {
   private editCard(card: DFACard): void {
     this.currentEditCard = card;
 
-    // Populate edit form
-    const editForm = document.getElementById('edit-card-form') as HTMLFormElement;
+    // Populate edit form with form HTML and card data
+    const editForm = document.getElementById('edit-form') as HTMLFormElement;
     if (editForm) {
-      // Find form elements and set their values
-      const elements = editForm.elements;
-      for (let i = 0; i < elements.length; i++) {
-        const element = elements[i] as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-        const fieldName = element.name;
-
-        if (fieldName && fieldName in card) {
-          const value = card[fieldName as keyof DFACard];
-          if (fieldName === 'persists_in' && Array.isArray(value)) {
-            element.value = value.join(', ');
-          } else if (value !== undefined && value !== null) {
-            element.value = String(value);
-          }
-        }
-      }
+      // First populate the form structure with the card data
+      editForm.innerHTML = createDFAForm('edit', card);
     }
 
     this.showModal();
