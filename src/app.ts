@@ -1,4 +1,4 @@
-import type { DFACard, AtlasFilter, CardSize } from './types/dfa.js';
+import type { DFACard, AtlasFilter, CardSize, TreeNode, TreeLayout } from './types/dfa.js';
 import { loadCards, importCards } from './utils/storage.js';
 import {
   showNotification,
@@ -36,6 +36,7 @@ export class DFDAtlas {
   private currentEditCard: DFACard | null = null;
   private previousActiveTab: string = 'nav-add'; // Default to add tab
   private relationshipsFilterCardId: string | null = null; // Track active relationships filter
+  private isTreeView: boolean = false; // Track current view mode
 
   constructor() {
     this.initializeEventListeners();
@@ -119,6 +120,9 @@ export class DFDAtlas {
     // Relationships filter
     const clearRelationshipsBtn = document.getElementById('clear-relationships') as HTMLButtonElement;
     if (clearRelationshipsBtn) clearRelationshipsBtn.addEventListener('click', () => this.clearFilters());
+
+    const toggleTreeViewBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
+    if (toggleTreeViewBtn) toggleTreeViewBtn.addEventListener('click', () => this.toggleTreeView());
 
     // Import/Export.
     const exportBtn = document.getElementById('export-btn') as HTMLButtonElement;
@@ -614,6 +618,12 @@ export class DFDAtlas {
     this.relationshipsFilterCardId = null;
     this.updateRelationshipsStatus();
 
+    // Reset to grid view when clearing relationships filter
+    this.switchToGridView();
+    this.isTreeView = false;
+    const toggleBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
+    if (toggleBtn) toggleBtn.textContent = 'Tree View';
+
     this.renderAtlas();
   }
 
@@ -640,7 +650,17 @@ export class DFDAtlas {
     // Show the relationships status
     this.updateRelationshipsStatus();
 
+    // First render the atlas with the filtered cards
     this.renderAtlas();
+
+    // Then switch to tree view after the cards are rendered
+    // Use setTimeout to ensure DOM layout is complete
+    setTimeout(() => {
+      this.switchToTreeView();
+      this.isTreeView = true;
+      const toggleBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
+      if (toggleBtn) toggleBtn.textContent = 'Grid View';
+    }, 150); // Anything under 100 shows the connectors in an unbrella layout.
   }
 
   /**
@@ -752,6 +772,266 @@ export class DFDAtlas {
   private updateStats(): void {
     const cards = loadCards();
     updateDataStats(cards.length);
+  }
+
+  /**
+   * Toggle between tree view and grid view.
+   */
+  private toggleTreeView(): void {
+    if (!this.relationshipsFilterCardId) return;
+
+    const toggleBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
+
+    if (this.isTreeView) {
+      // Switch to grid view
+      this.switchToGridView();
+      this.isTreeView = false;
+      if (toggleBtn) toggleBtn.textContent = 'Tree View';
+    } else {
+      // Switch to tree view
+      this.switchToTreeView();
+      this.isTreeView = true;
+      if (toggleBtn) toggleBtn.textContent = 'Grid View';
+    }
+  }
+
+  /**
+   * Create a tree layout from the relationships of a root card.
+   */
+  private buildTreeLayout(rootCardId: string): TreeLayout | null {
+    const allCards = loadCards();
+    const rootCard = allCards.find(c => c.id === rootCardId);
+
+    if (!rootCard) return null;
+
+    const visited = new Set<string>();
+
+    const buildNode = (card: DFACard, parent?: TreeNode, depth = 0): TreeNode => {
+      visited.add(card.id);
+
+      const node: TreeNode = {
+        id: card.id,
+        card,
+        children: [],
+        parent,
+        x: 0, // Will be calculated later
+        y: 0, // Will be calculated later
+        depth,
+      };
+
+      // Build tree by finding cards that link TO this card (reverse direction)
+      // These become children of the current node
+      allCards.forEach(otherCard => {
+        if (otherCard.linkedTo === card.id && !visited.has(otherCard.id) && otherCard.id !== card.id) {
+          const childNode = buildNode(otherCard, node, depth + 1);
+          node.children.push(childNode);
+        }
+      });      return node;
+    };
+
+    const root = buildNode(rootCard);
+    const nodes = this.collectAllNodes(root);
+    const layout = this.calculateTreePositions(root, nodes);
+
+    return layout;
+  }
+
+  /**
+   * Collect all nodes in the tree (breadth-first).
+   */
+  private collectAllNodes(root: TreeNode): TreeNode[] {
+    const nodes: TreeNode[] = [];
+    const queue: TreeNode[] = [root];
+
+    while (queue.length > 0) {
+      const node = queue.shift()!;
+      nodes.push(node);
+      queue.push(...node.children);
+    }
+
+    return nodes;
+  }
+
+  /**
+   * Calculate positions for tree layout - Vertical branching style.
+   */
+  private calculateTreePositions(root: TreeNode, nodes: TreeNode[]): TreeLayout {
+    const cardWidth = 200; // Mini card width
+    const horizontalSpacing = 80;
+    const verticalSpacing = 120;
+
+    // First pass: Calculate subtree widths for each node
+    const calculateSubtreeWidth = (node: TreeNode): number => {
+      if (node.children.length === 0) {
+        return cardWidth;
+      }
+
+      const childWidths = node.children.map(child => calculateSubtreeWidth(child));
+      const totalChildWidth = childWidths.reduce((sum, width) => sum + width, 0);
+      const childSpacing = Math.max(0, (node.children.length - 1) * horizontalSpacing);
+
+      return Math.max(cardWidth, totalChildWidth + childSpacing);
+    };
+
+    // Second pass: Position nodes
+    const positionNode = (node: TreeNode, centerX: number, y: number): void => {
+      node.x = centerX;
+      node.y = y;
+
+      if (node.children.length === 0) return;
+
+      // Calculate positions for children
+      const subtreeWidths = node.children.map(child => calculateSubtreeWidth(child));
+      const totalWidth = subtreeWidths.reduce((sum, width) => sum + width, 0);
+      const totalSpacing = (node.children.length - 1) * horizontalSpacing;
+      const totalRequiredWidth = totalWidth + totalSpacing;
+
+      // Start position for first child
+      let currentX = centerX - (totalRequiredWidth / 2);
+
+      node.children.forEach((child, index) => {
+        const subtreeWidth = subtreeWidths[index];
+        const childCenterX = currentX + (subtreeWidth / 2);
+
+        positionNode(child, childCenterX, y + verticalSpacing);
+
+        // Move to next position
+        currentX += subtreeWidth + horizontalSpacing;
+      });
+    };
+
+    // Calculate total tree width and position root at center
+    const totalTreeWidth = calculateSubtreeWidth(root);
+    const rootX = totalTreeWidth / 2;
+
+    positionNode(root, rootX, 50); // Start with some top padding
+
+    // Find bounds for centering
+    const allX = nodes.map(n => n.x);
+    const allY = nodes.map(n => n.y);
+    const minX = Math.min(...allX);
+    const maxX = Math.max(...allX);
+    const minY = Math.min(...allY);
+    const maxY = Math.max(...allY);
+
+    // Center the tree horizontally and add padding
+    const offsetX = -minX + 100; // 100px left padding
+    nodes.forEach(node => {
+      node.x += offsetX;
+    });
+
+    return {
+      root,
+      nodes,
+      width: maxX - minX + 200, // Add left + right padding
+      height: maxY - minY + 200, // Add top + bottom padding
+    };
+  }  /**
+   * Render cards in tree layout.
+   */
+  private renderTreeLayout(layout: TreeLayout): void {
+    const atlasGrid = document.getElementById('atlas-grid');
+    if (!atlasGrid) return;
+
+    // Switch to tree layout mode
+    atlasGrid.style.display = 'relative';
+    atlasGrid.style.position = 'relative';
+    atlasGrid.style.width = `${layout.width}px`;
+    atlasGrid.style.height = `${layout.height}px`;
+
+    // Clear existing content
+    atlasGrid.innerHTML = '';
+
+    // Render nodes with absolute positioning
+    layout.nodes.forEach(node => {
+      const cardHtml = renderDFACard(node.card, 'mini');
+      const cardWrapper = document.createElement('div');
+      cardWrapper.innerHTML = cardHtml;
+      const cardElement = cardWrapper.firstElementChild as HTMLElement;
+
+      if (cardElement) {
+        cardElement.style.position = 'absolute';
+        cardElement.style.left = `${node.x - 100}px`; // Offset by half card width
+        cardElement.style.top = `${node.y + 50}px`; // Add top padding
+        cardElement.style.zIndex = '2';
+        atlasGrid.appendChild(cardElement);
+      }
+    });
+
+    // Draw tree connections
+    this.drawTreeConnections(layout);
+  }
+
+  /**
+   * Draw SVG connections for tree layout with curved branches.
+   */
+  private drawTreeConnections(layout: TreeLayout): void {
+    const connectionsSvg = document.getElementById('atlas-connections') as unknown as SVGSVGElement;
+    if (!connectionsSvg) return;
+
+    // Update SVG size
+    connectionsSvg.setAttribute('width', layout.width.toString());
+    connectionsSvg.setAttribute('height', layout.height.toString());
+    connectionsSvg.style.position = 'absolute';
+    connectionsSvg.style.top = '0';
+    connectionsSvg.style.left = '0';
+    connectionsSvg.style.zIndex = '1';
+
+    // Clear existing connections
+    connectionsSvg.innerHTML = '';
+
+    // Draw connections between parent and children with curves
+    layout.nodes.forEach(node => {
+      node.children.forEach(child => {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+        // Calculate connection points
+        const parentX = node.x;
+        const parentY = node.y + 60 + 50; // Bottom of parent card
+        const childX = child.x;
+        const childY = child.y + 50; // Top of child card
+
+        // Create curved path - quadratic curve for tree-like branching
+        const midY = parentY + ((childY - parentY) * 0.5);
+        const pathData = `M ${parentX},${parentY} Q ${parentX},${midY} ${childX},${childY}`;
+
+        path.setAttribute('d', pathData);
+        path.setAttribute('stroke', '#00ffff');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('opacity', '0.8');
+        path.classList.add('tree-connection');
+
+        connectionsSvg.appendChild(path);
+      });
+    });
+  }  /**
+   * Switch to tree view mode.
+   */
+  private switchToTreeView(): void {
+    if (!this.relationshipsFilterCardId) return;
+
+    const layout = this.buildTreeLayout(this.relationshipsFilterCardId);
+    if (!layout) return;
+
+    this.renderTreeLayout(layout);
+  }
+
+  /**
+   * Switch back to grid view mode.
+   */
+  private switchToGridView(): void {
+    const atlasGrid = document.getElementById('atlas-grid');
+    if (!atlasGrid) return;
+
+    // Reset grid styles
+    atlasGrid.style.display = '';
+    atlasGrid.style.position = '';
+    atlasGrid.style.width = '';
+    atlasGrid.style.height = '';
+
+    // Re-render cards in normal grid
+    this.renderAtlas();
   }
 }
 

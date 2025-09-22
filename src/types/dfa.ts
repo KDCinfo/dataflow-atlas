@@ -122,3 +122,23 @@ export function isDataScope(value: string): value is DataScope {
 export function isContentCategory(value: string): value is ContentCategory {
   return ['user-preference', 'account-setting', 'runtime-state', 'feature-data', 'app-preference'].includes(value);
 }
+
+/**
+ * Tree layout types for visualizing card relationships.
+ */
+export interface TreeNode {
+  id: string;
+  card: DFACard;
+  children: TreeNode[];
+  parent?: TreeNode | undefined;
+  x: number;
+  y: number;
+  depth: number;
+}
+
+export interface TreeLayout {
+  root: TreeNode;
+  nodes: TreeNode[];
+  width: number;
+  height: number;
+}

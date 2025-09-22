@@ -493,6 +493,19 @@ header img.logo-img:hover {
     100% { filter: drop-shadow(0 0 8px var(--color-primary)); }
 }
 
+/* Tree Connection Styles */
+.tree-connection {
+    stroke: var(--color-primary);
+    stroke-width: 2;
+    fill: none;
+    opacity: 0.8;
+}
+
+.tree-connection:hover {
+    opacity: 1;
+    stroke-width: 3;
+}
+
 /* Relationships Status */
 .relationships-status {
     align-items: center;
@@ -518,6 +531,11 @@ header img.logo-img:hover {
 
 .relationships-status.hidden {
     display: none;
+}
+
+.relationships-controls {
+    display: flex;
+    gap: var(--spacing-md);
 }
 
 .dfa-card {
