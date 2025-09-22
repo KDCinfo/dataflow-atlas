@@ -545,7 +545,12 @@ export class DFDAtlas {
   private exportData(): void {
     try {
       const cards = loadCards();
-      downloadJson(cards, 'dataflow-atlas-export.json');
+      const exportData = {
+        version: '1.0',
+        exported: new Date().toISOString(),
+        cards: cards
+      };
+      downloadJson(exportData, `dfd-atlas-${new Date().toISOString().split('T')[0]}.json`);
       showNotification('Data exported successfully', 'success');
     } catch (error) {
       console.error('Export error:', error);
@@ -576,16 +581,26 @@ export class DFDAtlas {
     reader.onload = (e) => {
       try {
         const jsonData = e.target?.result as string;
-        const cards = JSON.parse(jsonData);
+        const parsedData = JSON.parse(jsonData);
 
-        if (Array.isArray(cards)) {
-          importCards(jsonData, 'replace');
-          showNotification('Data imported successfully', 'success');
-          this.renderAtlas();
-          this.updateStats();
+        let cards: DFACard[];
+
+        // Handle both export formats: structured object with metadata or plain array
+        if (Array.isArray(parsedData)) {
+          // Legacy format: plain array of cards
+          cards = parsedData;
+        } else if (parsedData.cards && Array.isArray(parsedData.cards)) {
+          // New format: structured object with cards array
+          cards = parsedData.cards;
         } else {
-          throw new Error('Invalid data format');
+          throw new Error('Invalid data format - expected array of cards or object with cards property');
         }
+
+        // Import the cards
+        importCards(JSON.stringify(cards), 'replace');
+        showNotification('Data imported successfully', 'success');
+        this.renderAtlas();
+        this.updateStats();
       } catch (error) {
         console.error('Import error:', error);
         showNotification('Import failed - invalid JSON format', 'error');
