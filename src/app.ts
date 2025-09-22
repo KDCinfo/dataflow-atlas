@@ -244,6 +244,10 @@ export class DFDAtlas {
     if (editForm) {
       // First populate the form structure with the card data
       editForm.innerHTML = createDFAForm('edit', card);
+
+      // Initialize form interactions for edit mode
+      initializeConnectionFieldToggle('edit');
+      initializeEditCodeSectionToggle();
     }
 
     this.showModal();
