@@ -635,7 +635,6 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
       <div class="dfa-card size-mini">
         <div class="dfa-card-header">
           <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
-          <button class="card-expand-btn" data-action="expand" data-card-id="${card.id}" title="Show Details">⊕</button>
           <div class="dfa-card-mini-actions">
             <button class="card-action-btn mini" data-action="relationships" data-card-id="${card.id}" title="Show Connected Network">🔗</button>
             <button class="card-expand-btn" data-action="expand" data-card-id="${card.id}" title="Show Details">⊕</button>

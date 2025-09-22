@@ -437,7 +437,7 @@ header img.logo-img:hover {
 }
 
 .atlas-grid.size-mini {
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xl);
 }
 
 .atlas-grid.size-mini .dfa-card {
