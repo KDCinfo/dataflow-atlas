@@ -377,6 +377,18 @@ export class DFDAtlas {
     // Clear tree view
     this.treeView.clearTree();
 
+    // Clear any tree-specific styling that might affect card heights
+    const atlasGrid = document.getElementById('atlas-grid');
+    if (atlasGrid) {
+      atlasGrid.style.removeProperty('height');
+      atlasGrid.style.removeProperty('min-height');
+      atlasGrid.style.removeProperty('minHeight');
+      atlasGrid.style.removeProperty('overflow');
+      atlasGrid.style.removeProperty('width');
+      atlasGrid.style.removeProperty('position');
+      atlasGrid.style.removeProperty('display');
+    }
+
     this.renderAtlas();
   }
 
@@ -391,6 +403,18 @@ export class DFDAtlas {
 
     // Clear tree view
     this.treeView.clearTree();
+
+    // Clear any tree-specific styling that might affect card heights
+    const atlasGrid = document.getElementById('atlas-grid');
+    if (atlasGrid) {
+      atlasGrid.style.removeProperty('height');
+      atlasGrid.style.removeProperty('min-height');
+      atlasGrid.style.removeProperty('minHeight');
+      atlasGrid.style.removeProperty('overflow');
+      atlasGrid.style.removeProperty('width');
+      atlasGrid.style.removeProperty('position');
+      atlasGrid.style.removeProperty('display');
+    }
 
     // Ensure we return to mini view since link icons are only available on mini cards
     const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
@@ -414,7 +438,12 @@ export class DFDAtlas {
       const atlasGrid = document.getElementById('atlas-grid');
       if (atlasGrid) {
         atlasGrid.style.removeProperty('height');
+        atlasGrid.style.removeProperty('min-height');
+        atlasGrid.style.removeProperty('minHeight');
         atlasGrid.style.removeProperty('overflow');
+        atlasGrid.style.removeProperty('width');
+        atlasGrid.style.removeProperty('position');
+        atlasGrid.style.removeProperty('display');
       }
 
       this.renderAtlas();
