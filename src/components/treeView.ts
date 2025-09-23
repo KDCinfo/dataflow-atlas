@@ -229,9 +229,9 @@ export class TreeView {
         // Connection points - carefully calculated to align with card edges
         const cardHeight = 70; // Reduced mini card height estimate to fix 10px offset
         const parentX = node.x; // Center X of parent card
-        const parentY = node.y + 20 + cardHeight; // Bottom of parent card (y + cardTopPadding + cardHeight)
+        const parentY = node.y + cardHeight; // Bottom of parent card (y + cardHeight, no extra padding)
         const childX = child.x; // Center X of child card
-        const childY = child.y + 20; // Top of child card (y + cardTopPadding)
+        const childY = child.y; // Top of child card (y, no extra padding)
 
         // Create curved path - quadratic bezier
         const midY = (parentY + childY) / 2;
