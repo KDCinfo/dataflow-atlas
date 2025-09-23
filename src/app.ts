@@ -603,7 +603,26 @@ export class DFDAtlas {
 
         gridContent += `<div style="grid-row: ${pos.row + 1}; grid-column: ${gridCol}; position: relative;">${cardHtml}${arrowHtml}</div>`;
       }
-    });    atlasGrid.innerHTML = gridContent;
+    });
+
+    atlasGrid.innerHTML = gridContent;
+
+    // Update SVG size to match the actual grid width
+    const connectionsSvg = document.getElementById('atlas-connections') as unknown as SVGSVGElement;
+    if (connectionsSvg) {
+      // Calculate the actual grid width needed
+      const cardWidth = 200; // Approximate card width
+      const gridGap = 24; // CSS variable --spacing-lg converted to pixels
+      const actualGridWidth = (sortedCols.length * cardWidth) + ((sortedCols.length - 1) * gridGap) + 40; // 40px for margins
+
+      connectionsSvg.style.width = `${actualGridWidth}px`;
+      connectionsSvg.style.height = '100%';
+      connectionsSvg.style.minWidth = `${actualGridWidth}px`;
+      connectionsSvg.setAttribute('width', actualGridWidth.toString());
+      connectionsSvg.setAttribute('height', '2000'); // Large height for connections
+      // Remove any viewBox to keep 1:1 pixel coordinate system
+      connectionsSvg.removeAttribute('viewBox');
+    }
   }
 
   /**
