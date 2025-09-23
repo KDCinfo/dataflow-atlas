@@ -502,14 +502,17 @@ export class DFDAtlas {
       let currentCol = startCol;
       const nextRow = row + 1;
 
-      // Place all children horizontally in the next row
-      for (const child of node.children) {
-        const subtreeWidth = calculateSubtreeWidth(child);
+    // Place all children horizontally in the next row
+    for (const child of node.children) {
+      const subtreeWidth = calculateSubtreeWidth(child);
 
-        // Position child at the start of its allocated column space
-        const childCol = currentCol + Math.floor(subtreeWidth / 2);
-        currentCol = positionNodes(child, nextRow, childCol);
-      }
+      // For single-node subtrees, don't allocate extra space
+      const childCol = subtreeWidth === 1 ? currentCol : currentCol + Math.floor(subtreeWidth / 2);
+      const nextCol = positionNodes(child, nextRow, childCol);
+
+      // Move to next position, ensuring minimal spacing for single nodes
+      currentCol = subtreeWidth === 1 ? currentCol + 1 : nextCol;
+    }
 
       return currentCol;
     };
@@ -571,11 +574,31 @@ export class DFDAtlas {
         const gridCol = colMapping.get(pos.col) || 1;
         const cardHtml = renderDFACard(card, currentSize);
 
-        // Add simple downward arrow for any card that has children
         let arrowHtml = '';
+
+        // Add simple downward arrow for any card that has children
         const hasChildren = cards.some(c => c.linkedTo === card.id);
         if (hasChildren) {
-          arrowHtml = '<div class="flow-arrow" style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #00bcd4; font-weight: bold;">↓</div>';
+          arrowHtml += '<div class="flow-arrow outgoing" style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #00bcd4; font-weight: bold;">↓</div>';
+        }
+
+        // Add incoming connection arrow for non-root cards
+        if (card.id !== rootCardId && card.linkedTo) {
+          const parent = cards.find(c => c.id === card.linkedTo);
+          const parentPos = parent ? positions.get(parent.id) : null;
+
+          if (parentPos) {
+            const isDirectlyBelow = parentPos.col === pos.col;
+            const isToTheRight = parentPos.col < pos.col;
+
+            // Only show incoming arrows for diagonal connections (not direct vertical)
+            if (!isDirectlyBelow && isToTheRight) {
+              // Parent to the left - use corner arrow (right-then-down)
+              arrowHtml += '<div class="flow-arrow incoming" style="position: absolute; top: -20px; left: -5%; font-size: 14px; color: #00bcd4;">&#8600;</div>';
+              // Other potential arrows: &#8628; &#8625; (the 2nd would require a transform: rotate(-90) / counter-clockwise)
+              // https://www.w3schools.com/charsets/ref_utf_arrows.asp
+            }
+          }
         }
 
         gridContent += `<div style="grid-row: ${pos.row + 1}; grid-column: ${gridCol}; position: relative;">${cardHtml}${arrowHtml}</div>`;

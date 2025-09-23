@@ -452,9 +452,10 @@ header img.logo-img:hover {
 
 /* Grid layout for relationship views */
 .atlas-grid.grid-layout {
+    align-items: start;
     display: grid !important;
     gap: var(--spacing-lg);
-    align-items: start;
+    grid-template-columns: min-content !important;
     justify-items: start;
     position: relative;
 }
