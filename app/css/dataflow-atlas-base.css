@@ -388,6 +388,7 @@ header img.logo-img:hover {
 }
 
 .filter-group {
+    align-self: flex-end;
     display: flex;
     flex-direction: column;
     min-width: 150px;
