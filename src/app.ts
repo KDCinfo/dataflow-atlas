@@ -278,6 +278,7 @@ export class DFDAtlas {
       // Initialize form interactions for edit mode
       initializeConnectionFieldToggle('edit');
       initializeEditCodeSectionToggle();
+      initializeFormVisibilityCheckboxes(); // Set up visibility checkboxes for edit form
     }
 
     this.showModal();
