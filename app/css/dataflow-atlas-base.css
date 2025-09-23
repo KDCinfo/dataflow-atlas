@@ -576,7 +576,7 @@ header img.logo-img:hover {
 }
 
 .dfa-card-header {
-    align-items: flex-start;
+    align-items: flex-end;
     display: flex;
     justify-content: space-between;
     margin-bottom: var(--spacing-md);
@@ -714,6 +714,7 @@ button.card-action-btn.mini {
 
 .dfa-card.size-mini .dfa-card-mini-actions {
     white-space: nowrap;
+    line-height: 0;
 }
 
 .dfa-card.size-mini .dfa-card-actions {

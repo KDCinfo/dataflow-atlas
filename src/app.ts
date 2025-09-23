@@ -164,7 +164,7 @@ export class DFDAtlas {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
 
-      if (target.classList.contains('card-action-btn')) {
+      if (target.classList.contains('card-action-btn') || target.classList.contains('card-expand-btn')) {
         e.preventDefault();
         const action = target.getAttribute('data-action');
         const cardId = target.getAttribute('data-card-id');
@@ -231,8 +231,29 @@ export class DFDAtlas {
       case 'relationships':
         this.setRelationshipsFilter(cardId);
         break;
+      case 'expand':
+        this.toggleCardDetails(cardId);
+        break;
       default:
         console.warn('Unknown card action:', action);
+    }
+  }
+
+  /**
+   * Toggle the expanded details of a mini card.
+   */
+  private toggleCardDetails(cardId: string): void {
+    const detailsElement = document.querySelector(`[data-card-details="${cardId}"]`) as HTMLElement;
+    if (detailsElement) {
+      const isHidden = detailsElement.style.display === 'none';
+      detailsElement.style.display = isHidden ? 'block' : 'none';
+
+      // Update the expand button symbol
+      const expandBtn = document.querySelector(`[data-action="expand"][data-card-id="${cardId}"]`) as HTMLElement;
+      if (expandBtn) {
+        expandBtn.textContent = isHidden ? '⊖' : '⊕';
+        expandBtn.title = isHidden ? 'Hide Details' : 'Show Details';
+      }
     }
   }
 

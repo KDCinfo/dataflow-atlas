@@ -651,7 +651,6 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
         </div>
 
         <div style="margin-top: 0.5rem;">
-          <span class="dfa-card-tag scope-${card.scope || 'none'}">${formatScope(card.scope)}</span>
           ${card.category ? `<span class="dfa-card-tag">${formatCategory(card.category)}</span>` : ''}
         </div>
       </div>
