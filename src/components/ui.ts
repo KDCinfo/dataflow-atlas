@@ -629,7 +629,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
   const showCompactFields = size === 'compact';
   const showMiniFields = size === 'mini';
 
-  // For mini cards, create ultra-compact view with expandable details
+  // For mini cards, create ultra-compact view with key details visible
   if (showMiniFields) {
     return `
       <div class="dfa-card size-mini">
@@ -637,17 +637,14 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
           <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
           <div class="dfa-card-mini-actions">
             <button class="card-action-btn mini" data-action="relationships" data-card-id="${card.id}" title="Show Connected Network">🔗</button>
-            <button class="card-expand-btn" data-action="expand" data-card-id="${card.id}" title="Show Details">⊕</button>
           </div>
         </div>
 
-        <div class="dfa-card-details" data-card-details="${card.id}" style="display: none;">
-          <div class="dfa-card-meta">
-            <div class="dfa-card-label">Layer:</div>
-            <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
-            <div class="dfa-card-label">Location:</div>
-            <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
-          </div>
+        <div class="dfa-card-meta">
+          <div class="dfa-card-label">Layer:</div>
+          <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
+          <div class="dfa-card-label">Location:</div>
+          <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
         </div>
 
         <div style="margin-top: 0.5rem;">
