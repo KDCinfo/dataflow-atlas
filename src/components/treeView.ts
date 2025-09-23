@@ -93,7 +93,7 @@ export class TreeView {
    * Calculate positions for tree layout - Vertical branching style.
    */
   private calculateTreePositions(root: TreeNode, nodes: TreeNode[]): TreeLayout {
-    const cardWidth = 200; // Mini card width
+    const cardWidth = 150; // Mini card width - matches CSS .size-mini width
     const horizontalSpacing = 80;
     const verticalSpacing = 120;
 
@@ -140,8 +140,8 @@ export class TreeView {
 
     // Calculate tree dimensions
     const rootSubtreeWidth = calculateSubtreeWidth(root);
-    const startX = rootSubtreeWidth / 2 + 100; // Add left padding
-    const startY = 100; // Add top padding
+    const startX = Math.max(rootSubtreeWidth / 2, cardWidth) + 10; // Reduced padding for leftmost at 10px
+    const startY = 0; // Start at top with no padding
 
     // Position all nodes
     positionNode(root, startX, startY);
@@ -157,8 +157,8 @@ export class TreeView {
     return {
       root,
       nodes,
-      width: maxX - minX + 400, // Add left + right padding
-      height: maxY - minY + 200, // Add top + bottom padding
+      width: Math.max(maxX - minX + cardWidth, 600), // Reduced padding and minimum width
+      height: maxY - minY + 120, // Account for card height + padding
     };
   }
 
@@ -169,11 +169,14 @@ export class TreeView {
     const atlasGrid = document.getElementById('atlas-grid');
     if (!atlasGrid) return;
 
+    const cardWidth = 150; // Mini card width - matches CSS .size-mini width
+
     // Switch to tree layout mode
     atlasGrid.style.display = 'relative';
     atlasGrid.style.position = 'relative';
-    atlasGrid.style.width = `${layout.width}px`;
-    atlasGrid.style.height = `${layout.height}px`;
+    atlasGrid.style.width = '100%'; // Use full container width instead of fixed width
+    atlasGrid.style.minHeight = `${layout.height}px`; // Set minimum height instead of fixed
+    atlasGrid.style.overflow = 'visible'; // Allow content to be visible
 
     // Clear existing content
     atlasGrid.innerHTML = '';
@@ -187,9 +190,10 @@ export class TreeView {
 
       if (cardElement) {
         cardElement.style.position = 'absolute';
-        cardElement.style.left = `${node.x - 100}px`; // Offset by half card width
-        cardElement.style.top = `${node.y + 50}px`; // Add top padding
+        cardElement.style.left = `${node.x - cardWidth/2}px`; // Center card properly using actual card width
+        cardElement.style.top = `${node.y}px`; // Root at top:0, others maintain relative spacing
         cardElement.style.zIndex = '2';
+        cardElement.title = node.card.field; // Add tooltip showing full field name
         atlasGrid.appendChild(cardElement);
       }
     });
@@ -206,11 +210,12 @@ export class TreeView {
     if (!connectionsSvg) return;
 
     // Update SVG size
-    connectionsSvg.setAttribute('width', layout.width.toString());
+    connectionsSvg.setAttribute('width', '100%'); // Use full container width
     connectionsSvg.setAttribute('height', layout.height.toString());
     connectionsSvg.style.position = 'absolute';
     connectionsSvg.style.top = '0';
     connectionsSvg.style.left = '0';
+    connectionsSvg.style.width = '100%';
     connectionsSvg.style.zIndex = '1';
 
     // Clear existing connections
@@ -221,11 +226,12 @@ export class TreeView {
       node.children.forEach(child => {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-        // Connection points (center of cards)
-        const parentX = node.x;
-        const parentY = node.y + 100; // Bottom of parent card
-        const childX = child.x;
-        const childY = child.y + 50; // Top of child card
+        // Connection points - carefully calculated to align with card edges
+        const cardHeight = 70; // Reduced mini card height estimate to fix 10px offset
+        const parentX = node.x; // Center X of parent card
+        const parentY = node.y + 20 + cardHeight; // Bottom of parent card (y + cardTopPadding + cardHeight)
+        const childX = child.x; // Center X of child card
+        const childY = child.y + 20; // Top of child card (y + cardTopPadding)
 
         // Create curved path - quadratic bezier
         const midY = (parentY + childY) / 2;

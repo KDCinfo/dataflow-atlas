@@ -466,8 +466,10 @@ header img.logo-img:hover {
 }
 
 .atlas-grid.grid-layout.size-mini .dfa-card {
-    min-width: 125px;
-    max-width: fit-content;
+    /* min-width: 125px; */
+    /* max-width: 150px; */
+    /* width: fit-content; */
+    width: 150px;
 }
 
 /* Connection lines overlay */
@@ -703,10 +705,15 @@ button.card-action-btn.mini {
     line-height: 1.2;
     text-overflow: ellipsis;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .dfa-card.size-mini .dfa-card-header {
     margin-bottom: calc(var(--spacing-xs) * 0.5);
+}
+
+.dfa-card.size-mini .dfa-card-mini-actions {
+    white-space: nowrap;
 }
 
 .dfa-card.size-mini .dfa-card-actions {
