@@ -459,7 +459,8 @@ export class DFDAtlas {
   }
 
   /**
-   * Calculate grid positions for relationship cards in a hierarchical layout.
+   * Calculate grid positions for relationship cards in a transposed hierarchical layout.
+   * Root at top, children spread horizontally below, with deep vertical flows.
    */
   private calculateGridPositions(rootCardId: string, cards: DFACard[]): Map<string, {row: number, col: number}> {
     const positions = new Map<string, {row: number, col: number}>();
@@ -483,47 +484,40 @@ export class DFDAtlas {
     const tree = buildTree(rootCardId);
     if (!tree) return positions;
 
-    // Calculate the height needed for each subtree (total rows it will occupy)
-    const calculateSubtreeHeight = (node: any): number => {
+    // Calculate the width needed for each subtree (total columns it will occupy)
+    const calculateSubtreeWidth = (node: any): number => {
       if (!node.children || node.children.length === 0) return 1;
 
       return node.children.reduce((total: number, child: any) => {
-        return total + calculateSubtreeHeight(child);
+        return total + calculateSubtreeWidth(child);
       }, 0);
     };
 
-    // Position nodes using the tree structure
-    const positionNodes = (node: any, col: number, startRow: number): number => {
-      positions.set(node.id, { row: startRow, col: col });
+    // Position nodes in transposed layout: root at top, children spread horizontally
+    const positionNodes = (node: any, row: number, startCol: number): number => {
+      positions.set(node.id, { row: row, col: startCol });
 
-      if (!node.children || node.children.length === 0) return startRow + 1;
+      if (!node.children || node.children.length === 0) return startCol + 1;
 
-      let currentRow = startRow;
+      let currentCol = startCol;
+      const nextRow = row + 1;
 
-      if (node.id === rootCardId) {
-        // Root node: place children vertically in column 0, starting from row 1
-        currentRow = 1;
-        for (const child of node.children) {
-          currentRow = positionNodes(child, 0, currentRow);
-        }
-      } else {
-        // All other nodes: place children horizontally to the right
-        const nextCol = col + 1;
+      // Place all children horizontally in the next row
+      for (const child of node.children) {
+        const subtreeWidth = calculateSubtreeWidth(child);
 
-        // First child goes at same row as parent
-        if (node.children.length > 0) {
-          currentRow = positionNodes(node.children[0], nextCol, startRow);
-        }
-
-        // Additional children go in subsequent rows in the same column
-        for (let i = 1; i < node.children.length; i++) {
-          currentRow = positionNodes(node.children[i], nextCol, currentRow);
-        }
+        // Position child at the start of its allocated column space
+        const childCol = currentCol + Math.floor(subtreeWidth / 2);
+        currentCol = positionNodes(child, nextRow, childCol);
       }
 
-      return currentRow;
-    };    // Start positioning from root
-    positionNodes(tree, 0, 0);
+      return currentCol;
+    };
+
+    // Start positioning from root at (0, 0), centered based on total tree width
+    const totalWidth = calculateSubtreeWidth(tree);
+    const rootCol = Math.floor(totalWidth / 2);
+    positionNodes(tree, 0, rootCol);
 
     return positions;
   }  /**
@@ -535,13 +529,19 @@ export class DFDAtlas {
 
     const positions = this.calculateGridPositions(rootCardId, cards);
 
-    // Find the maximum row and column to set grid dimensions
+    // Find the maximum row and column to set grid dimensions, and get used columns
     let maxRow = 0;
     let maxCol = 0;
+    const usedCols = new Set<number>();
     positions.forEach(({row, col}) => {
       maxRow = Math.max(maxRow, row);
       maxCol = Math.max(maxCol, col);
+      usedCols.add(col);
     });
+
+    // Create column template only for used columns
+    const sortedCols = Array.from(usedCols).sort((a, b) => a - b);
+    const colTemplate = sortedCols.map(() => 'minmax(200px, max-content)').join(' ');
 
     // Create CSS Grid
     atlasGrid.className = 'atlas-grid grid-layout';
@@ -551,34 +551,36 @@ export class DFDAtlas {
 
     // Set CSS Grid properties
     atlasGrid.style.display = 'grid';
-    atlasGrid.style.gridTemplateRows = `repeat(${maxRow + 1}, minmax(auto, 1fr))`;
-    atlasGrid.style.gridTemplateColumns = `repeat(${maxCol + 1}, minmax(200px, 1fr))`;
+    atlasGrid.style.gridTemplateRows = `repeat(${maxRow + 1}, minmax(auto, max-content))`;
+    atlasGrid.style.gridTemplateColumns = colTemplate;
     atlasGrid.style.gap = 'var(--spacing-lg)';
     atlasGrid.style.alignItems = 'start';
 
-    // Create grid content with positioned cards and empty cells
+    // Create grid content with positioned cards only (no empty cells)
     let gridContent = '';
 
-    for (let row = 0; row <= maxRow; row++) {
-      for (let col = 0; col <= maxCol; col++) {
-        // Find card at this position
-        const cardAtPosition = cards.find(card => {
-          const pos = positions.get(card.id);
-          return pos && pos.row === row && pos.col === col;
-        });
+    // Create a column mapping for grid positioning
+    const colMapping = new Map<number, number>();
+    sortedCols.forEach((originalCol, index) => {
+      colMapping.set(originalCol, index + 1); // CSS Grid is 1-indexed
+    });
 
-        if (cardAtPosition) {
-          // Render the actual card with grid position
-          const cardHtml = renderDFACard(cardAtPosition, currentSize);
-          gridContent += `<div style="grid-row: ${row + 1}; grid-column: ${col + 1};">${cardHtml}</div>`;
-        } else {
-          // Empty cell (invisible placeholder)
-          gridContent += `<div style="grid-row: ${row + 1}; grid-column: ${col + 1}; min-height: 1px;"></div>`;
+    cards.forEach(card => {
+      const pos = positions.get(card.id);
+      if (pos) {
+        const gridCol = colMapping.get(pos.col) || 1;
+        const cardHtml = renderDFACard(card, currentSize);
+
+        // Add simple downward arrow for any card that has children
+        let arrowHtml = '';
+        const hasChildren = cards.some(c => c.linkedTo === card.id);
+        if (hasChildren) {
+          arrowHtml = '<div class="flow-arrow" style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #00bcd4; font-weight: bold;">↓</div>';
         }
-      }
-    }
 
-    atlasGrid.innerHTML = gridContent;
+        gridContent += `<div style="grid-row: ${pos.row + 1}; grid-column: ${gridCol}; position: relative;">${cardHtml}${arrowHtml}</div>`;
+      }
+    });    atlasGrid.innerHTML = gridContent;
   }
 
   /**
