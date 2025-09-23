@@ -154,6 +154,12 @@ export class DFDAtlas {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         const targetTab = (e.target as HTMLElement).getAttribute('id');
+
+        // Skip settings button - it has its own handler in settingsPanel.ts
+        if (targetTab === 'nav-settings') {
+          return;
+        }
+
         if (targetTab) {
           this.switchTab(targetTab);
         }
@@ -329,6 +335,14 @@ export class DFDAtlas {
   }
 
   /**
+   * Restore the previously active tab (called when settings modal closes).
+   * Since settings is now a pure modal, this just refreshes the current view.
+   */
+  public restorePreviousActiveTab(): void {
+    // Simply refresh the current view since settings didn't change the active tab
+    this.renderAtlas();
+    this.updateStats();
+  }  /**
    * Apply current filter values to render filtered cards.
    */
   private applyFilters(): void {
