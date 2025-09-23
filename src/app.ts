@@ -419,82 +419,80 @@ export class DFDAtlas {
     positions.set(rootCardId, {row: 0, col: 0});
     visited.add(rootCardId);
 
-    // Queue for level-by-level processing: [cardId, level, parentCol]
-    const queue: Array<{cardId: string, level: number, parentCol: number}> = [{cardId: rootCardId, level: 0, parentCol: 0}];
+    // Track the next available row for each column
+    const nextRowByColumn = new Map<number, number>();
+    nextRowByColumn.set(0, 1); // Column 0 starts placing cards from row 1 (under root)
 
-    // Track columns used at each level to avoid collisions
-    const levelColumnUsage = new Map<number, Set<number>>();
-    levelColumnUsage.set(0, new Set([0]));
+    // Process level by level using BFS
+    const queue: Array<{cardId: string, level: number}> = [{cardId: rootCardId, level: 0}];
 
     while (queue.length > 0) {
-      const {cardId, level, parentCol} = queue.shift()!;
-      const nextLevel = level + 1;
+      const {cardId, level} = queue.shift()!;
 
-      // Find all cards connected to this card
+      // Find all cards that link TO this card
       const connectedCards = cards.filter(card =>
         card.linkedTo === cardId &&
         !visited.has(card.id)
       );
 
-      // Also find cards that this card links TO (bidirectional)
-      const currentCard = cards.find(c => c.id === cardId);
-      const reverseConnectedCards = currentCard && currentCard.linkedTo ?
-        cards.filter(card =>
-          card.id === currentCard.linkedTo &&
-          !visited.has(card.id)
-        ) : [];
+      if (connectedCards.length === 0) continue;
 
-      const allConnectedCards = [...connectedCards, ...reverseConnectedCards];
+      // Get the current card's position
+      const currentPosition = positions.get(cardId);
+      if (!currentPosition) continue;
 
-      if (allConnectedCards.length === 0) continue;
+      if (level === 0) {
+        // Level 1: Direct connections to root go vertically under root (column 0)
+        connectedCards.forEach((card) => {
+          const nextRow = nextRowByColumn.get(0) || 1;
+          const position = {row: nextRow, col: 0};
 
-      // Initialize level column tracking if needed
-      if (!levelColumnUsage.has(nextLevel)) {
-        levelColumnUsage.set(nextLevel, new Set());
-      }
-
-      const usedColumns = levelColumnUsage.get(nextLevel)!;
-
-      // For level 1 (direct children of root), place them vertically under the root
-      if (nextLevel === 1) {
-        allConnectedCards.forEach((card, index) => {
-          const row = index + 1; // Start from row 1 (root is at row 0)
-          const col = 0; // All first-level children in column 0
-
-          positions.set(card.id, {row, col});
+          positions.set(card.id, position);
           visited.add(card.id);
-          usedColumns.add(col);
+          nextRowByColumn.set(0, nextRow + 1);
 
-          queue.push({cardId: card.id, level: nextLevel, parentCol: col});
+          queue.push({cardId: card.id, level: level + 1});
         });
       } else {
-        // For deeper levels, place horizontally to the right
-        let startCol = parentCol + 1;
+        // Level 2+: Connections go horizontally to the right
+        const parentCol = currentPosition.col;
+        const parentRow = currentPosition.row;
+        const nextCol = parentCol + 1;
 
-        // Find the first available column position
-        while (usedColumns.has(startCol)) {
-          startCol++;
+        // Initialize column tracking if needed
+        if (!nextRowByColumn.has(nextCol)) {
+          nextRowByColumn.set(nextCol, 0);
         }
 
-        allConnectedCards.forEach((card) => {
-          // Find the parent card's row position
-          const parentPosition = positions.get(cardId);
-          const row = parentPosition ? parentPosition.row : 0;
-          const col = startCol;
+        connectedCards.forEach((card, index) => {
+          let targetRow: number;
 
-          positions.set(card.id, {row, col});
+          if (index === 0) {
+            // First connected card goes at the same row as parent
+            targetRow = parentRow;
+          } else {
+            // Additional cards go in subsequent rows in this column
+            const nextAvailableRow = Math.max(
+              nextRowByColumn.get(nextCol) || 0,
+              parentRow + index
+            );
+            targetRow = nextAvailableRow;
+          }
+
+          const position = {row: targetRow, col: nextCol};
+          positions.set(card.id, position);
           visited.add(card.id);
-          usedColumns.add(col);
 
-          queue.push({cardId: card.id, level: nextLevel, parentCol: col});
+          // Update next available row for this column
+          nextRowByColumn.set(nextCol, Math.max(nextRowByColumn.get(nextCol) || 0, targetRow + 1));
+
+          queue.push({cardId: card.id, level: level + 1});
         });
       }
     }
 
     return positions;
-  }
-
-  /**
+  }  /**
    * Render cards in a CSS Grid layout based on calculated positions.
    */
   private renderGridLayout(cards: DFACard[], rootCardId: string, currentSize: CardSize): void {
