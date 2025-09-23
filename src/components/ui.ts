@@ -662,12 +662,13 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
     <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>`;
 
   // Standard fields (shown in standard and compact)
-  const standardFields = (showAllFields || showCompactFields) ? `
+  // const standardFields = (showAllFields || showCompactFields) ? `
+  const standardFields = (showAllFields) ? `
     <div class="dfa-card-label">Type:</div>
     <div class="dfa-card-value">${escapeHtml(card.type || 'Not specified')}</div>` : '';
 
   // Essential linkage info for compact (only linked connections, most important)
-  const compactFields = showCompactFields ? `
+  const compactFields = showAllFields || showCompactFields ? `
     ${linkedToSection}` : '';
 
   // Extended fields (only in standard size)
