@@ -413,83 +413,67 @@ export class DFDAtlas {
    */
   private calculateGridPositions(rootCardId: string, cards: DFACard[]): Map<string, {row: number, col: number}> {
     const positions = new Map<string, {row: number, col: number}>();
-    const visited = new Set<string>();
 
-    // Start with root card at position (0, 0)
-    positions.set(rootCardId, {row: 0, col: 0});
-    visited.add(rootCardId);
+    // First, build the complete tree structure
+    const buildTree = (nodeId: string, visited = new Set<string>()): any => {
+      if (visited.has(nodeId)) return null;
+      visited.add(nodeId);
 
-    // Track the next available row for each column
-    const nextRowByColumn = new Map<number, number>();
-    nextRowByColumn.set(0, 1); // Column 0 starts placing cards from row 1 (under root)
+      const children = cards
+        .filter(card => card.linkedTo === nodeId && !visited.has(card.id))
+        .map(card => buildTree(card.id, visited))
+        .filter(Boolean);
 
-    // Process level by level using BFS
-    const queue: Array<{cardId: string, level: number}> = [{cardId: rootCardId, level: 0}];
+      return {
+        id: nodeId,
+        children: children
+      };
+    };
 
-    while (queue.length > 0) {
-      const {cardId, level} = queue.shift()!;
+    const tree = buildTree(rootCardId);
+    if (!tree) return positions;
 
-      // Find all cards that link TO this card
-      const connectedCards = cards.filter(card =>
-        card.linkedTo === cardId &&
-        !visited.has(card.id)
-      );
+    // Calculate the height needed for each subtree (total rows it will occupy)
+    const calculateSubtreeHeight = (node: any): number => {
+      if (!node.children || node.children.length === 0) return 1;
 
-      if (connectedCards.length === 0) continue;
+      return node.children.reduce((total: number, child: any) => {
+        return total + calculateSubtreeHeight(child);
+      }, 0);
+    };
 
-      // Get the current card's position
-      const currentPosition = positions.get(cardId);
-      if (!currentPosition) continue;
+    // Position nodes using the tree structure
+    const positionNodes = (node: any, col: number, startRow: number): number => {
+      positions.set(node.id, { row: startRow, col: col });
 
-      if (level === 0) {
-        // Level 1: Direct connections to root go vertically under root (column 0)
-        connectedCards.forEach((card) => {
-          const nextRow = nextRowByColumn.get(0) || 1;
-          const position = {row: nextRow, col: 0};
+      if (!node.children || node.children.length === 0) return startRow + 1;
 
-          positions.set(card.id, position);
-          visited.add(card.id);
-          nextRowByColumn.set(0, nextRow + 1);
+      let currentRow = startRow;
 
-          queue.push({cardId: card.id, level: level + 1});
-        });
+      if (node.id === rootCardId) {
+        // Root node: place children vertically in column 0, starting from row 1
+        currentRow = 1;
+        for (const child of node.children) {
+          currentRow = positionNodes(child, 0, currentRow);
+        }
       } else {
-        // Level 2+: Connections go horizontally to the right
-        const parentCol = currentPosition.col;
-        const parentRow = currentPosition.row;
-        const nextCol = parentCol + 1;
+        // All other nodes: place children horizontally to the right
+        const nextCol = col + 1;
 
-        // Initialize column tracking if needed
-        if (!nextRowByColumn.has(nextCol)) {
-          nextRowByColumn.set(nextCol, 0);
+        // First child goes at same row as parent
+        if (node.children.length > 0) {
+          currentRow = positionNodes(node.children[0], nextCol, startRow);
         }
 
-        connectedCards.forEach((card, index) => {
-          let targetRow: number;
-
-          if (index === 0) {
-            // First connected card goes at the same row as parent
-            targetRow = parentRow;
-          } else {
-            // Additional cards go in subsequent rows in this column
-            const nextAvailableRow = Math.max(
-              nextRowByColumn.get(nextCol) || 0,
-              parentRow + index
-            );
-            targetRow = nextAvailableRow;
-          }
-
-          const position = {row: targetRow, col: nextCol};
-          positions.set(card.id, position);
-          visited.add(card.id);
-
-          // Update next available row for this column
-          nextRowByColumn.set(nextCol, Math.max(nextRowByColumn.get(nextCol) || 0, targetRow + 1));
-
-          queue.push({cardId: card.id, level: level + 1});
-        });
+        // Additional children go in subsequent rows in the same column
+        for (let i = 1; i < node.children.length; i++) {
+          currentRow = positionNodes(node.children[i], nextCol, currentRow);
+        }
       }
-    }
+
+      return currentRow;
+    };    // Start positioning from root
+    positionNodes(tree, 0, 0);
 
     return positions;
   }  /**
