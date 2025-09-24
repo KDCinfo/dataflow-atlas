@@ -29,6 +29,7 @@ export interface SettingsConfig {
   categories: string[];
   scopeLabels: Record<string, string>; // Custom labels for scope keys
   categoryLabels: Record<string, string>; // Custom labels for category keys
+  locationLabels: Record<string, string>; // Custom labels for location keys
   dataTypes: string[];
   formVisibility: FormVisibilitySettings;
 }
@@ -75,7 +76,37 @@ export function getCategoryLabel(category: string): string {
   return settings.categoryLabels[category] ||
          DEFAULT_CATEGORIES_MAP[category] ||
          category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}/**
+}
+
+// Default location definitions with display labels
+const DEFAULT_LOCATIONS_MAP: Record<string, string> = {
+  'app-state': 'Application State',
+  'user-store': 'User Store',
+  'session-storage': 'Session Storage',
+  'local-storage': 'Local Storage',
+  'api-endpoint': 'API Endpoint',
+  'database': 'Database',
+};
+
+/**
+ * Get default location keys.
+ */
+export function getDefaultLocations(): string[] {
+  return Object.keys(DEFAULT_LOCATIONS_MAP);
+}
+
+/**
+ * Get display label for a location value.
+ */
+export function getLocationLabel(location: string): string {
+  const settings = getSettings();
+  // Check custom labels first, then defaults, then auto-generate
+  return settings.locationLabels[location] ||
+         DEFAULT_LOCATIONS_MAP[location] ||
+         location.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+/**
  * Default form visibility settings - all optional fields hidden by default.
  */
 const DEFAULT_FORM_VISIBILITY: FormVisibilitySettings = {
@@ -121,12 +152,13 @@ export function getSettings(): SettingsConfig {
       const dataLayers = parsed.dataLayers?.length > 0 ? parsed.dataLayers : [...DEFAULT_DATA_LAYERS];
 
       return {
-        locations: parsed.locations || [],
+        locations: (parsed.locations && parsed.locations.length > 0) ? parsed.locations : getDefaultLocations(),
         dataLayers,
         scopes: (parsed.scopes && parsed.scopes.length > 0) ? parsed.scopes : getDefaultScopes(),
         categories: (parsed.categories && parsed.categories.length > 0) ? parsed.categories : getDefaultCategories(),
         scopeLabels: parsed.scopeLabels || {},
         categoryLabels: parsed.categoryLabels || {},
+        locationLabels: parsed.locationLabels || {},
         dataTypes: parsed.dataTypes || [],
         formVisibility: parsed.formVisibility || { ...DEFAULT_FORM_VISIBILITY },
       };
@@ -137,12 +169,13 @@ export function getSettings(): SettingsConfig {
 
   // Return default settings.
   return {
-    locations: [],
+    locations: getDefaultLocations(),
     dataLayers: [...DEFAULT_DATA_LAYERS],
     scopes: getDefaultScopes(),
     categories: getDefaultCategories(),
     scopeLabels: {},
     categoryLabels: {},
+    locationLabels: {},
     dataTypes: [],
     formVisibility: { ...DEFAULT_FORM_VISIBILITY },
   };
@@ -197,11 +230,35 @@ export function addLocation(location: string): void {
 }
 
 /**
+ * Add a new location with custom label to settings.
+ */
+export function addLocationWithLabel(location: string, label: string): void {
+  const trimmedLocation = location.trim();
+  const trimmedLabel = label.trim();
+  if (!trimmedLocation) return;
+
+  const settings = getSettings();
+  if (!settings.locations.includes(trimmedLocation)) {
+    settings.locations.push(trimmedLocation);
+    settings.locations.sort();
+
+    // Add custom label if provided and different from auto-generated
+    if (trimmedLabel && trimmedLabel !== trimmedLocation.charAt(0).toUpperCase() + trimmedLocation.slice(1)) {
+      settings.locationLabels[trimmedLocation] = trimmedLabel;
+    }
+
+    saveSettings(settings);
+  }
+}
+
+/**
  * Remove a location from settings.
  */
 export function removeLocation(location: string): void {
   const settings = getSettings();
   settings.locations = settings.locations.filter(loc => loc !== location);
+  // Also remove custom label if it exists
+  delete settings.locationLabels[location];
   saveSettings(settings);
 }
 
@@ -393,54 +450,24 @@ export function editCategory(oldKey: string, newKey: string, newLabel: string): 
 }
 
 /**
- * Edit an existing location.
+ * Edit an existing location label (key stays the same for efficiency).
  */
-export function editLocation(oldLocation: string, newLocation: string): boolean {
-  const trimmedOld = oldLocation.trim();
-  const trimmedNew = newLocation.trim();
+export function editLocation(locationKey: string, newLabel: string): boolean {
+  const trimmedKey = locationKey.trim();
+  const trimmedLabel = newLabel.trim();
 
-  if (!trimmedOld || !trimmedNew) return false;
+  if (!trimmedKey) return false;
 
   const settings = getSettings();
-  const locations = getUniqueLocations();
 
-  if (!locations.includes(trimmedOld)) return false;
+  if (!settings.locations.includes(trimmedKey)) return false;
 
-  // Check if new location already exists (and is different from old location)
-  if (trimmedNew !== trimmedOld && locations.includes(trimmedNew)) {
-    return false;
-  }
-
-  // Update location in settings.locations if it exists there
-  const settingsIndex = settings.locations.indexOf(trimmedOld);
-  if (settingsIndex !== -1) {
-    settings.locations[settingsIndex] = trimmedNew;
-    settings.locations.sort();
+  // Update the label (key remains unchanged for efficiency)
+  if (trimmedLabel && trimmedLabel !== trimmedKey.charAt(0).toUpperCase() + trimmedKey.slice(1)) {
+    settings.locationLabels[trimmedKey] = trimmedLabel;
   } else {
-    // If not in settings.locations, add the new one
-    if (!settings.locations.includes(trimmedNew)) {
-      settings.locations.push(trimmedNew);
-      settings.locations.sort();
-    }
-  }
-
-  // Update references in existing cards
-  try {
-    const cards = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    let cardsUpdated = false;
-
-    cards.forEach((card: any) => {
-      if (card.location === trimmedOld) {
-        card.location = trimmedNew;
-        cardsUpdated = true;
-      }
-    });
-
-    if (cardsUpdated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
-    }
-  } catch (error) {
-    console.warn('Failed to update card references during location edit:', error);
+    // Remove custom label if it matches the auto-generated one
+    delete settings.locationLabels[trimmedKey];
   }
 
   saveSettings(settings);

@@ -1036,19 +1036,19 @@ button.card-action-btn.mini {
     background-color: var(--color-background);
 }
 
-.scope-details, .category-details {
+.scope-details, .category-details, .location-details {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
 }
 
-.scope-key, .category-key {
+.scope-key, .category-key, .location-key {
     font-family: 'Courier New', monospace;
     font-size: 0.875rem;
     font-weight: 600;
 }
 
-.scope-label, .category-label {
+.scope-label, .category-label, .location-label {
     color: var(--color-text-muted);
     font-size: 0.8rem;
 }

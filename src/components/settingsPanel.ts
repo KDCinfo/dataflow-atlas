@@ -1,8 +1,9 @@
 import {
   getUniqueLocations,
-  addLocation,
+  addLocationWithLabel,
   removeLocation,
   editLocation,
+  getLocationLabel,
   getScopes,
   addScopeWithLabel,
   removeScope,
@@ -297,10 +298,14 @@ export function populateSettingsContent(): void {
 
         <div class="settings-item">
           <label id="location-form-label">Add New Location:</label>
-          <div style="display: flex; gap: var(--spacing-sm);">
-            <input type="text" id="new-location-input" class="settings-input" placeholder="e.g., userStore.profile">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
+            <input type="text" required id="new-location-key-input" class="settings-input" placeholder="Key (e.g., user-store)" style="flex: 1;">
+            <input type="text" required id="new-location-label-input" class="settings-input" placeholder="Display Label (e.g., User Store)" style="flex: 1;">
             <button id="add-location-btn" class="btn-secondary">Add</button>
             <button id="cancel-location-btn" class="btn-secondary" style="display: none;">Cancel</button>
+          </div>
+          <div class="input-help">
+            <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
           </div>
         </div>
 
@@ -310,7 +315,10 @@ export function populateSettingsContent(): void {
             <div class="location-manager">
               ${locations.map(location => `
                 <div class="location-item">
-                  <span class="location-name">${escapeHtml(location)}</span>
+                  <div class="location-details">
+                    <span class="location-key">${escapeHtml(location)}</span>
+                    <span class="location-label">${escapeHtml(getLocationLabel(location))}</span>
+                  </div>
                   <div class="item-actions">
                     <button class="location-edit edit-btn btn-compact" data-location="${escapeHtml(location)}">Edit</button>
                     <button class="location-delete delete-btn btn-compact" data-location="${escapeHtml(location)}">Remove</button>
@@ -368,33 +376,36 @@ export function populateSettingsContent(): void {
  * Setup event listeners for settings interactions.
  */
 function setupSettingsEventListeners(): void {
-  // Add new location.
-  const addBtn = getElement('add-location-btn');
-  const input = getElement<HTMLInputElement>('new-location-input');
+  // Location management.
+  const addLocationBtn = getElement('add-location-btn');
+  const locationKeyInput = getElement<HTMLInputElement>('new-location-key-input');
+  const locationLabelInput = getElement<HTMLInputElement>('new-location-label-input');
 
-  if (addBtn && input) {
+  if (addLocationBtn && locationKeyInput && locationLabelInput) {
     const handleAddOrUpdateLocation = (): void => {
-      const value = input.value.trim();
+      const key = locationKeyInput.value.trim();
+      const label = locationLabelInput.value.trim();
 
-      if (!value) {
-        alert('Please provide a location name.');
+      if (!key) {
+        alert('Please provide a key for the location.');
         return;
       }
 
       let success = false;
       if (currentEditState && currentEditState.type === 'location') {
-        // Edit mode
-        success = editLocation(currentEditState.originalKey, value);
+        // Edit mode - only update the label, keep the original key
+        success = editLocation(currentEditState.originalKey, label);
         if (success) {
           exitEditMode();
         } else {
-          alert('Failed to update location. It may already exist.');
+          alert('Failed to update location.');
           return;
         }
       } else {
         // Add mode
-        addLocation(value);
-        input.value = '';
+        addLocationWithLabel(key, label);
+        locationKeyInput.value = '';
+        locationLabelInput.value = '';
         success = true;
       }
 
@@ -404,8 +415,14 @@ function setupSettingsEventListeners(): void {
       }
     };
 
-    addBtn.addEventListener('click', handleAddOrUpdateLocation);
-    input.addEventListener('keypress', (e) => {
+    addLocationBtn.addEventListener('click', handleAddOrUpdateLocation);
+    locationKeyInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddOrUpdateLocation();
+      }
+    });
+    locationLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         handleAddOrUpdateLocation();
@@ -821,18 +838,21 @@ function enterEditMode(type: 'scope' | 'category' | 'location', key: string, lab
       labelInput.focus(); // Focus on label since key is disabled
     }
   } else if (type === 'location') {
-    const input = getElement<HTMLInputElement>('new-location-input');
+    const keyInput = getElement<HTMLInputElement>('new-location-key-input');
+    const labelInput = getElement<HTMLInputElement>('new-location-label-input');
     const addBtn = getElement('add-location-btn');
     const cancelBtn = getElement('cancel-location-btn');
     const formLabel = getElement('location-form-label');
 
-    if (input && addBtn && cancelBtn && formLabel) {
-      input.value = key;
+    if (keyInput && labelInput && addBtn && cancelBtn && formLabel) {
+      keyInput.value = key;
+      keyInput.disabled = true; // Disable key editing
+      labelInput.value = label || '';
       addBtn.textContent = 'Update';
       addBtn.className = 'btn-primary';
       cancelBtn.style.display = 'inline-block';
       formLabel.textContent = 'Edit Location:';
-      input.focus();
+      labelInput.focus(); // Focus on label since key is disabled
     }
   }
 }
@@ -878,13 +898,16 @@ function exitEditMode(): void {
   }
 
   // Reset location form
-  const locationInput = getElement<HTMLInputElement>('new-location-input');
+  const locationKeyInput = getElement<HTMLInputElement>('new-location-key-input');
+  const locationLabelInput = getElement<HTMLInputElement>('new-location-label-input');
   const locationAddBtn = getElement('add-location-btn');
   const locationCancelBtn = getElement('cancel-location-btn');
   const locationFormLabel = getElement('location-form-label');
 
-  if (locationInput && locationAddBtn && locationCancelBtn && locationFormLabel) {
-    locationInput.value = '';
+  if (locationKeyInput && locationLabelInput && locationAddBtn && locationCancelBtn && locationFormLabel) {
+    locationKeyInput.value = '';
+    locationKeyInput.disabled = false; // Re-enable key input
+    locationLabelInput.value = '';
     locationAddBtn.textContent = 'Add';
     locationAddBtn.className = 'btn-secondary';
     locationCancelBtn.style.display = 'none';
@@ -924,7 +947,8 @@ function attachEditHandlers(): void {
       const target = e.target as HTMLElement;
       const location = target.getAttribute('data-location');
       if (location) {
-        enterEditMode('location', location);
+        const currentLabel = getLocationLabel(location);
+        enterEditMode('location', location, currentLabel);
       }
     });
   });
