@@ -2,13 +2,16 @@ import {
   getUniqueLocations,
   addLocation,
   removeLocation,
+  editLocation,
   getScopes,
   addScopeWithLabel,
   removeScope,
+  editScope,
   getScopeLabel,
   getCategories,
   addCategoryWithLabel,
   removeCategory,
+  editCategory,
   getCategoryLabel,
   getDataLayersByType,
   saveDataLayer,
@@ -139,8 +142,8 @@ function generateDataLayerManagementSection(): string {
                 <div class="layer-item-compact" data-layer-id="${escapeHtml(layer.id)}">
                   <span class="layer-name">${escapeHtml(layer.name)}</span>
                   <div class="layer-actions">
-                    <button class="layer-edit btn-compact" data-layer-id="${escapeHtml(layer.id)}">Edit</button>
-                    <button class="layer-delete btn-compact" data-layer-id="${escapeHtml(layer.id)}">Delete</button>
+                    <button class="layer-edit edit-btn btn-compact" data-layer-id="${escapeHtml(layer.id)}">Edit</button>
+                    <button class="layer-delete delete-btn btn-compact" data-layer-id="${escapeHtml(layer.id)}">Delete</button>
                   </div>
                 </div>
               `).join('') : '<div class="empty-layer-list">No endpoints defined</div>'}
@@ -154,8 +157,8 @@ function generateDataLayerManagementSection(): string {
                 <div class="layer-item-compact" data-layer-id="${escapeHtml(layer.id)}">
                   <span class="layer-name">${escapeHtml(layer.name)}</span>
                   <div class="layer-actions">
-                    <button class="layer-edit btn-compact" data-layer-id="${escapeHtml(layer.id)}">Edit</button>
-                    <button class="layer-delete btn-compact" data-layer-id="${escapeHtml(layer.id)}">Delete</button>
+                    <button class="layer-edit edit-btn btn-compact" data-layer-id="${escapeHtml(layer.id)}">Edit</button>
+                    <button class="layer-delete delete-btn btn-compact" data-layer-id="${escapeHtml(layer.id)}">Delete</button>
                   </div>
                 </div>
               `).join('') : '<div class="empty-layer-list">No throughpoints defined</div>'}
@@ -184,11 +187,12 @@ function generateScopeManagementSection(): string {
         <p class="setting-description">Manage the list of data scopes for your DFA cards. These define the ownership level of data (app-wide, user-specific, session-only).</p>
 
         <div class="settings-item">
-          <label>Add New Scope:</label>
+          <label id="scope-form-label">Add New Scope:</label>
           <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
             <input type="text" required id="new-scope-key-input" class="settings-input" placeholder="Key (e.g., global)" style="flex: 1;">
             <input type="text" required id="new-scope-label-input" class="settings-input" placeholder="Display Label (e.g., Global)" style="flex: 1;">
             <button id="add-scope-btn" class="btn-secondary">Add</button>
+            <button id="cancel-scope-btn" class="btn-secondary" style="display: none;">Cancel</button>
           </div>
           <div class="input-help">
             <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
@@ -205,7 +209,10 @@ function generateScopeManagementSection(): string {
                     <span class="scope-key">${escapeHtml(scope)}</span>
                     <span class="scope-label">${escapeHtml(getScopeLabel(scope))}</span>
                   </div>
-                  <button class="scope-delete" data-scope="${escapeHtml(scope)}">Remove</button>
+                  <div class="item-actions">
+                    <button class="scope-edit edit-btn btn-compact" data-scope="${escapeHtml(scope)}">Edit</button>
+                    <button class="scope-delete delete-btn btn-compact" data-scope="${escapeHtml(scope)}">Remove</button>
+                  </div>
                 </div>
               `).join('')}
             </div>
@@ -233,11 +240,12 @@ function generateCategoryManagementSection(): string {
         <p class="setting-description">Manage the list of content categories for your DFA cards. These help classify the type of data being tracked.</p>
 
         <div class="settings-item">
-          <label>Add New Category:</label>
+          <label id="category-form-label">Add New Category:</label>
           <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
             <input type="text" required id="new-category-key-input" class="settings-input" placeholder="Key (e.g., ui-state)" style="flex: 1;">
             <input type="text" required id="new-category-label-input" class="settings-input" placeholder="Display Label (e.g., UI State)" style="flex: 1;">
             <button id="add-category-btn" class="btn-secondary">Add</button>
+            <button id="cancel-category-btn" class="btn-secondary" style="display: none;">Cancel</button>
           </div>
           <div class="input-help">
             <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
@@ -254,7 +262,10 @@ function generateCategoryManagementSection(): string {
                     <span class="category-key">${escapeHtml(category)}</span>
                     <span class="category-label">${escapeHtml(getCategoryLabel(category))}</span>
                   </div>
-                  <button class="category-delete" data-category="${escapeHtml(category)}">Remove</button>
+                  <div class="item-actions">
+                    <button class="category-edit edit-btn btn-compact" data-category="${escapeHtml(category)}">Edit</button>
+                    <button class="category-delete delete-btn btn-compact" data-category="${escapeHtml(category)}">Remove</button>
+                  </div>
                 </div>
               `).join('')}
             </div>
@@ -285,10 +296,11 @@ export function populateSettingsContent(): void {
         <p class="setting-description">Manage the list of 'layer object names' for your DFA cards. These will appear as dropdown options when creating or editing cards.</p>
 
         <div class="settings-item">
-          <label>Add New Location:</label>
+          <label id="location-form-label">Add New Location:</label>
           <div style="display: flex; gap: var(--spacing-sm);">
             <input type="text" id="new-location-input" class="settings-input" placeholder="e.g., userStore.profile">
             <button id="add-location-btn" class="btn-secondary">Add</button>
+            <button id="cancel-location-btn" class="btn-secondary" style="display: none;">Cancel</button>
           </div>
         </div>
 
@@ -298,8 +310,11 @@ export function populateSettingsContent(): void {
             <div class="location-manager">
               ${locations.map(location => `
                 <div class="location-item">
-                  <span>${escapeHtml(location)}</span>
-                  <button class="location-delete" data-location="${escapeHtml(location)}">Remove</button>
+                  <span class="location-name">${escapeHtml(location)}</span>
+                  <div class="item-actions">
+                    <button class="location-edit edit-btn btn-compact" data-location="${escapeHtml(location)}">Edit</button>
+                    <button class="location-delete delete-btn btn-compact" data-location="${escapeHtml(location)}">Remove</button>
+                  </div>
                 </div>
               `).join('')}
             </div>
@@ -346,6 +361,7 @@ export function populateSettingsContent(): void {
   `;
 
   setupSettingsEventListeners();
+  attachEditHandlers(); // Attach edit handlers after content is populated
 }
 
 /**
@@ -357,21 +373,42 @@ function setupSettingsEventListeners(): void {
   const input = getElement<HTMLInputElement>('new-location-input');
 
   if (addBtn && input) {
-    const handleAdd = (): void => {
+    const handleAddOrUpdateLocation = (): void => {
       const value = input.value.trim();
-      if (value) {
+
+      if (!value) {
+        alert('Please provide a location name.');
+        return;
+      }
+
+      let success = false;
+      if (currentEditState && currentEditState.type === 'location') {
+        // Edit mode
+        success = editLocation(currentEditState.originalKey, value);
+        if (success) {
+          exitEditMode();
+        } else {
+          alert('Failed to update location. It may already exist.');
+          return;
+        }
+      } else {
+        // Add mode
         addLocation(value);
         input.value = '';
+        success = true;
+      }
+
+      if (success) {
         populateSettingsContent(); // Refresh the content.
         updateLocationOptions(); // Update main form options.
       }
     };
 
-    addBtn.addEventListener('click', handleAdd);
+    addBtn.addEventListener('click', handleAddOrUpdateLocation);
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAdd();
+        handleAddOrUpdateLocation();
       }
     });
   }
@@ -395,31 +432,50 @@ function setupSettingsEventListeners(): void {
   const scopeLabelInput = getElement<HTMLInputElement>('new-scope-label-input');
 
   if (addScopeBtn && scopeKeyInput && scopeLabelInput) {
-    const handleAddScope = (): void => {
+    const handleAddOrUpdateScope = (): void => {
       const key = scopeKeyInput.value.trim();
       const label = scopeLabelInput.value.trim();
-      if (key && label) {
+
+      if (!key) {
+        alert('Please provide a key for the scope.');
+        return;
+      }
+
+      let success = false;
+      if (currentEditState && currentEditState.type === 'scope') {
+        // Edit mode - only update the label, keep the original key
+        success = editScope(currentEditState.originalKey, currentEditState.originalKey, label);
+        if (success) {
+          exitEditMode();
+        } else {
+          alert('Failed to update scope.');
+          return;
+        }
+      } else {
+        // Add mode
         addScopeWithLabel(key, label);
         scopeKeyInput.value = '';
         scopeLabelInput.value = '';
+        success = true;
+      }
+
+      if (success) {
         populateSettingsContent(); // Refresh the content.
         updateScopeOptions(); // Update main form scope options.
-      } else {
-        alert('Please fill in both key and label for the new scope.');
       }
     };
 
-    addScopeBtn.addEventListener('click', handleAddScope);
+    addScopeBtn.addEventListener('click', handleAddOrUpdateScope);
     scopeKeyInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddScope();
+        handleAddOrUpdateScope();
       }
     });
     scopeLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddScope();
+        handleAddOrUpdateScope();
       }
     });
   }
@@ -443,31 +499,50 @@ function setupSettingsEventListeners(): void {
   const categoryLabelInput = getElement<HTMLInputElement>('new-category-label-input');
 
   if (addCategoryBtn && categoryKeyInput && categoryLabelInput) {
-    const handleAddCategory = (): void => {
+    const handleAddOrUpdateCategory = (): void => {
       const key = categoryKeyInput.value.trim();
       const label = categoryLabelInput.value.trim();
-      if (key && label) {
+
+      if (!key) {
+        alert('Please provide a key for the category.');
+        return;
+      }
+
+      let success = false;
+      if (currentEditState && currentEditState.type === 'category') {
+        // Edit mode - only update the label, keep the original key
+        success = editCategory(currentEditState.originalKey, currentEditState.originalKey, label);
+        if (success) {
+          exitEditMode();
+        } else {
+          alert('Failed to update category.');
+          return;
+        }
+      } else {
+        // Add mode
         addCategoryWithLabel(key, label);
         categoryKeyInput.value = '';
         categoryLabelInput.value = '';
+        success = true;
+      }
+
+      if (success) {
         populateSettingsContent(); // Refresh the content.
         updateCategoryOptions(); // Update main form category options.
-      } else {
-        alert('Please fill in both key and label for the new category.');
       }
     };
 
-    addCategoryBtn.addEventListener('click', handleAddCategory);
+    addCategoryBtn.addEventListener('click', handleAddOrUpdateCategory);
     categoryKeyInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddCategory();
+        handleAddOrUpdateCategory();
       }
     });
     categoryLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddCategory();
+        handleAddOrUpdateCategory();
       }
     });
   }
@@ -696,6 +771,178 @@ export function initializeSettingsPanel(): void {
       e.stopPropagation();
       openSettingsModal();
     });
+  }
+}
+
+// Track editing state
+let currentEditState: {
+  type: 'scope' | 'category' | 'location';
+  originalKey: string;
+} | null = null;
+
+/**
+ * Enter edit mode for an item by populating the form fields.
+ */
+function enterEditMode(type: 'scope' | 'category' | 'location', key: string, label?: string): void {
+  currentEditState = { type, originalKey: key };
+
+  if (type === 'scope') {
+    const keyInput = getElement<HTMLInputElement>('new-scope-key-input');
+    const labelInput = getElement<HTMLInputElement>('new-scope-label-input');
+    const addBtn = getElement('add-scope-btn');
+    const cancelBtn = getElement('cancel-scope-btn');
+    const formLabel = getElement('scope-form-label');
+
+    if (keyInput && labelInput && addBtn && cancelBtn && formLabel) {
+      keyInput.value = key;
+      keyInput.disabled = true; // Disable key editing
+      labelInput.value = label || '';
+      addBtn.textContent = 'Update';
+      addBtn.className = 'btn-primary';
+      cancelBtn.style.display = 'inline-block';
+      formLabel.textContent = 'Edit Scope:';
+      labelInput.focus(); // Focus on label since key is disabled
+    }
+  } else if (type === 'category') {
+    const keyInput = getElement<HTMLInputElement>('new-category-key-input');
+    const labelInput = getElement<HTMLInputElement>('new-category-label-input');
+    const addBtn = getElement('add-category-btn');
+    const cancelBtn = getElement('cancel-category-btn');
+    const formLabel = getElement('category-form-label');
+
+    if (keyInput && labelInput && addBtn && cancelBtn && formLabel) {
+      keyInput.value = key;
+      keyInput.disabled = true; // Disable key editing
+      labelInput.value = label || '';
+      addBtn.textContent = 'Update';
+      addBtn.className = 'btn-primary';
+      cancelBtn.style.display = 'inline-block';
+      formLabel.textContent = 'Edit Category:';
+      labelInput.focus(); // Focus on label since key is disabled
+    }
+  } else if (type === 'location') {
+    const input = getElement<HTMLInputElement>('new-location-input');
+    const addBtn = getElement('add-location-btn');
+    const cancelBtn = getElement('cancel-location-btn');
+    const formLabel = getElement('location-form-label');
+
+    if (input && addBtn && cancelBtn && formLabel) {
+      input.value = key;
+      addBtn.textContent = 'Update';
+      addBtn.className = 'btn-primary';
+      cancelBtn.style.display = 'inline-block';
+      formLabel.textContent = 'Edit Location:';
+      input.focus();
+    }
+  }
+}
+
+/**
+ * Exit edit mode and reset form to add mode.
+ */
+function exitEditMode(): void {
+  currentEditState = null;
+
+  // Reset scope form
+  const scopeKeyInput = getElement<HTMLInputElement>('new-scope-key-input');
+  const scopeLabelInput = getElement<HTMLInputElement>('new-scope-label-input');
+  const scopeAddBtn = getElement('add-scope-btn');
+  const scopeCancelBtn = getElement('cancel-scope-btn');
+  const scopeFormLabel = getElement('scope-form-label');
+
+  if (scopeKeyInput && scopeLabelInput && scopeAddBtn && scopeCancelBtn && scopeFormLabel) {
+    scopeKeyInput.value = '';
+    scopeKeyInput.disabled = false; // Re-enable key input
+    scopeLabelInput.value = '';
+    scopeAddBtn.textContent = 'Add';
+    scopeAddBtn.className = 'btn-secondary';
+    scopeCancelBtn.style.display = 'none';
+    scopeFormLabel.textContent = 'Add New Scope:';
+  }
+
+  // Reset category form
+  const categoryKeyInput = getElement<HTMLInputElement>('new-category-key-input');
+  const categoryLabelInput = getElement<HTMLInputElement>('new-category-label-input');
+  const categoryAddBtn = getElement('add-category-btn');
+  const categoryCancelBtn = getElement('cancel-category-btn');
+  const categoryFormLabel = getElement('category-form-label');
+
+  if (categoryKeyInput && categoryLabelInput && categoryAddBtn && categoryCancelBtn && categoryFormLabel) {
+    categoryKeyInput.value = '';
+    categoryKeyInput.disabled = false; // Re-enable key input
+    categoryLabelInput.value = '';
+    categoryAddBtn.textContent = 'Add';
+    categoryAddBtn.className = 'btn-secondary';
+    categoryCancelBtn.style.display = 'none';
+    categoryFormLabel.textContent = 'Add New Category:';
+  }
+
+  // Reset location form
+  const locationInput = getElement<HTMLInputElement>('new-location-input');
+  const locationAddBtn = getElement('add-location-btn');
+  const locationCancelBtn = getElement('cancel-location-btn');
+  const locationFormLabel = getElement('location-form-label');
+
+  if (locationInput && locationAddBtn && locationCancelBtn && locationFormLabel) {
+    locationInput.value = '';
+    locationAddBtn.textContent = 'Add';
+    locationAddBtn.className = 'btn-secondary';
+    locationCancelBtn.style.display = 'none';
+    locationFormLabel.textContent = 'Add New Location:';
+  }
+}/**
+ * Attach edit event handlers for all types.
+ */
+function attachEditHandlers(): void {
+  // Scope edit handlers
+  document.querySelectorAll('.scope-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const scope = target.getAttribute('data-scope');
+      if (scope) {
+        const currentLabel = getScopeLabel(scope);
+        enterEditMode('scope', scope, currentLabel);
+      }
+    });
+  });
+
+  // Category edit handlers
+  document.querySelectorAll('.category-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const category = target.getAttribute('data-category');
+      if (category) {
+        const currentLabel = getCategoryLabel(category);
+        enterEditMode('category', category, currentLabel);
+      }
+    });
+  });
+
+  // Location edit handlers
+  document.querySelectorAll('.location-edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const location = target.getAttribute('data-location');
+      if (location) {
+        enterEditMode('location', location);
+      }
+    });
+  });
+
+  // Cancel button handlers
+  const scopeCancelBtn = getElement('cancel-scope-btn');
+  if (scopeCancelBtn) {
+    scopeCancelBtn.addEventListener('click', exitEditMode);
+  }
+
+  const categoryCancelBtn = getElement('cancel-category-btn');
+  if (categoryCancelBtn) {
+    categoryCancelBtn.addEventListener('click', exitEditMode);
+  }
+
+  const locationCancelBtn = getElement('cancel-location-btn');
+  if (locationCancelBtn) {
+    locationCancelBtn.addEventListener('click', exitEditMode);
   }
 }
 

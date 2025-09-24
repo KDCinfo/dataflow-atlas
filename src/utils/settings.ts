@@ -321,6 +321,133 @@ export function removeCategory(category: string): void {
 }
 
 /**
+ * Edit an existing scope with new key and label.
+ */
+export function editScope(oldKey: string, newKey: string, newLabel: string): boolean {
+  const trimmedOldKey = oldKey.trim();
+  const trimmedNewKey = newKey.trim();
+  const trimmedNewLabel = newLabel.trim();
+
+  if (!trimmedOldKey || !trimmedNewKey) return false;
+
+  const settings = getSettings();
+  const oldIndex = settings.scopes.indexOf(trimmedOldKey);
+
+  if (oldIndex === -1) return false;
+
+  // Check if new key already exists (and is different from old key)
+  if (trimmedNewKey !== trimmedOldKey && settings.scopes.includes(trimmedNewKey)) {
+    return false;
+  }
+
+  // Update the scope key
+  settings.scopes[oldIndex] = trimmedNewKey;
+  settings.scopes.sort();
+
+  // Remove old label if it exists
+  delete settings.scopeLabels[trimmedOldKey];
+
+  // Add new label if provided and different from auto-generated
+  if (trimmedNewLabel && trimmedNewLabel !== trimmedNewKey.charAt(0).toUpperCase() + trimmedNewKey.slice(1)) {
+    settings.scopeLabels[trimmedNewKey] = trimmedNewLabel;
+  }
+
+  saveSettings(settings);
+  return true;
+}
+
+/**
+ * Edit an existing category with new key and label.
+ */
+export function editCategory(oldKey: string, newKey: string, newLabel: string): boolean {
+  const trimmedOldKey = oldKey.trim();
+  const trimmedNewKey = newKey.trim();
+  const trimmedNewLabel = newLabel.trim();
+
+  if (!trimmedOldKey || !trimmedNewKey) return false;
+
+  const settings = getSettings();
+  const oldIndex = settings.categories.indexOf(trimmedOldKey);
+
+  if (oldIndex === -1) return false;
+
+  // Check if new key already exists (and is different from old key)
+  if (trimmedNewKey !== trimmedOldKey && settings.categories.includes(trimmedNewKey)) {
+    return false;
+  }
+
+  // Update the category key
+  settings.categories[oldIndex] = trimmedNewKey;
+  settings.categories.sort();
+
+  // Remove old label if it exists
+  delete settings.categoryLabels[trimmedOldKey];
+
+  // Add new label if provided and different from auto-generated
+  if (trimmedNewLabel && trimmedNewLabel !== trimmedNewKey.charAt(0).toUpperCase() + trimmedNewKey.slice(1)) {
+    settings.categoryLabels[trimmedNewKey] = trimmedNewLabel;
+  }
+
+  saveSettings(settings);
+  return true;
+}
+
+/**
+ * Edit an existing location.
+ */
+export function editLocation(oldLocation: string, newLocation: string): boolean {
+  const trimmedOld = oldLocation.trim();
+  const trimmedNew = newLocation.trim();
+
+  if (!trimmedOld || !trimmedNew) return false;
+
+  const settings = getSettings();
+  const locations = getUniqueLocations();
+
+  if (!locations.includes(trimmedOld)) return false;
+
+  // Check if new location already exists (and is different from old location)
+  if (trimmedNew !== trimmedOld && locations.includes(trimmedNew)) {
+    return false;
+  }
+
+  // Update location in settings.locations if it exists there
+  const settingsIndex = settings.locations.indexOf(trimmedOld);
+  if (settingsIndex !== -1) {
+    settings.locations[settingsIndex] = trimmedNew;
+    settings.locations.sort();
+  } else {
+    // If not in settings.locations, add the new one
+    if (!settings.locations.includes(trimmedNew)) {
+      settings.locations.push(trimmedNew);
+      settings.locations.sort();
+    }
+  }
+
+  // Update references in existing cards
+  try {
+    const cards = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let cardsUpdated = false;
+
+    cards.forEach((card: any) => {
+      if (card.location === trimmedOld) {
+        card.location = trimmedNew;
+        cardsUpdated = true;
+      }
+    });
+
+    if (cardsUpdated) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+    }
+  } catch (error) {
+    console.warn('Failed to update card references during location edit:', error);
+  }
+
+  saveSettings(settings);
+  return true;
+}
+
+/**
  * Get temporary settings from sessionStorage (for dialog state).
  */
 export function getTempSettings(): Partial<SettingsConfig> {

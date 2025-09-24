@@ -905,6 +905,38 @@ button.card-action-btn.mini {
     outline: 1px solid cyan;
 }
 
+/* Edit Modal Styles */
+.modal-body .input-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-body .input-group label {
+    color: var(--color-text);
+    display: block;
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.modal-body .input-group input {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    font-size: 1rem;
+    padding: var(--spacing-sm);
+}
+
+.modal-body .input-group small {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    margin-top: var(--spacing-xs);
+}
+
+.modal-footer {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+    margin-top: var(--spacing-lg);
+}
+
 /* Settings Modal Styles */
 .settings-content {
     margin-bottom: var(--spacing-lg);
@@ -961,6 +993,9 @@ button.card-action-btn.mini {
     padding: var(--spacing-sm) var(--spacing-md);
     transition: border-color 0.2s ease;
 }
+.settings-item input:disabled {
+    color: lightgray;
+}
 
 .settings-item .setting-description {
     color: var(--color-text-muted);
@@ -982,8 +1017,8 @@ button.card-action-btn.mini {
     font-size: 0.75rem;
 }
 
-/* Scope and Category Management Styles */
-.scope-manager, .category-manager {
+/* Location, Scope and Category Management Styles */
+.location-manager, .scope-manager, .category-manager {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-all1);
     flex-grow: 1;
@@ -991,17 +1026,14 @@ button.card-action-btn.mini {
     overflow-y: auto;
     padding: var(--spacing-sm);
 }
-
-.scope-item, .category-item {
+.location-item, .scope-item, .category-item {
     align-items: center;
     display: flex;
     justify-content: space-between;
     padding: var(--spacing-xs);
 }
-
-.scope-item:hover, .category-item:hover {
-    background-color: var(--color-surface);
-    border-radius: var(--radius-all1);
+.location-item:hover, .scope-item:hover, .category-item:hover {
+    background-color: var(--color-background);
 }
 
 .scope-details, .category-details {
@@ -1021,53 +1053,10 @@ button.card-action-btn.mini {
     font-size: 0.8rem;
 }
 
-.scope-delete, .category-delete {
-    background-color: var(--color-danger);
-    border: none;
-    border-radius: var(--radius-all1);
-    color: white;
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: var(--spacing-xs) var(--spacing-sm);
-}
-
-.scope-delete:hover, .category-delete:hover {
-    background-color: #b91c1c;
-}
-
-/* Location Manager Styles */
-.location-manager {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-all1);
-    max-height: 200px;
-    overflow-y: auto;
-    padding: var(--spacing-sm);
-}
-
-.location-item {
-    align-items: center;
+/* Item Actions Styles */
+.item-actions {
     display: flex;
-    justify-content: space-between;
-    padding: var(--spacing-xs);
-}
-
-.location-item:hover {
-    background-color: var(--color-background);
-}
-
-.location-delete {
-    background: none;
-    border: none;
-    color: var(--color-danger);
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: var(--spacing-xs);
-}
-
-.location-delete:hover {
-    background-color: var(--color-danger);
-    border-radius: var(--radius-all1);
-    color: white;
+    gap: var(--spacing-xs);
 }
 
 /* Responsive Design */
@@ -1254,11 +1243,61 @@ button.card-action-btn.mini {
     font-size: 0.75rem;
     transition: background-color 0.2s ease;
 }
-.btn-compact:hover {
-    background: var(--color-primary-dark);
+.edit-btn {
+    background-color: blue;
+    border: none;
+    /* border-radius: var(--radius-all1); */
+    color: white;
+    cursor: pointer;
+    font-size: 0.75rem;
+    min-width: 55px;
+    padding: var(--spacing-xs) var(--spacing-sm);
 }
+.btn-compact:hover {
+    background: var(--color-primary);
+    color: black;
+}
+/*
 .btn-compact.layer-delete:hover {
     background: var(--color-danger);
+} */
+
+/* .layer-edit, */
+/* .scope-edit, .category-edit, .location-edit { */
+/* .scope-edit:hover, .category-edit:hover, .location-edit:hover { */
+/* '.btn-compact:hover' has this covered.
+.edit-btn:hover {
+    background-color: #475569;
+} */
+
+/*
+.location-delete {
+    background: none;
+    color: var(--color-danger);
+    padding: var(--spacing-xs);
+}
+.location-delete:hover {
+    background-color: var(--color-danger);
+    border-radius: var(--radius-all1);
+    color: white;
+} */
+
+/* .scope-delete, .category-delete, .location-delete { */
+.delete-btn,
+.btn-compact.delete-btn {
+    background-color: #b91c1c;
+    border: none;
+    /* border-radius: var(--radius-all1); */
+    color: white;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+/* .scope-delete:hover, .category-delete:hover, .location-delete:hover { */
+.delete-btn:hover,
+.btn-compact.delete-btn:hover {
+    background-color: red;
+    /* background-color: var(--color-danger); */
 }
 
 .empty-layer-list {
