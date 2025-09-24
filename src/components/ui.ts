@@ -705,7 +705,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
           ${linkedToSection}
         </div>
 
-        <div style="margin-top: 0.5rem;">
+        <div class="card-tags-container">
           ${card.category ? `<span class="dfa-card-tag">${formatCategory(card.category)}</span>` : ''}
         </div>
       </div>
@@ -752,7 +752,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
         ${extendedFields}
       </div>
 
-      <div style="margin-top: 1rem;">
+      <div class="card-tags-container-lg">
         <span class="dfa-card-tag scope-${card.scope || 'none'}">${formatScope(card.scope)}</span>
         ${card.category ? `<span class="dfa-card-tag">${formatCategory(card.category)}</span>` : ''}
       </div>

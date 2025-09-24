@@ -125,7 +125,7 @@ function generateDataLayerManagementSection(): string {
         <div class="settings-item">
           <label>Add New Data Layer:</label>
           <div class="data-layer-form">
-            <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name (e.g., 'Pinia Store')">
+            <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name ('Pinia Store')" title="Display name (e.g., 'Pinia Store')">
                         <select id="new-layer-type-select" class="form-control">
               <option value="">Choose classification...</option>
               <option value="${DataLayerType.Endpoint}">Endpoint - Data belongs to...</option>
@@ -189,11 +189,11 @@ function generateScopeManagementSection(): string {
 
         <div class="settings-item">
           <label id="scope-form-label">Add New Scope:</label>
-          <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
-            <input type="text" required id="new-scope-key-input" class="settings-input" placeholder="Key (e.g., global)" style="flex: 1;">
-            <input type="text" required id="new-scope-label-input" class="settings-input" placeholder="Display Label (e.g., Global)" style="flex: 1;">
+          <div class="settings-flex-row">
+            <input type="text" required id="new-scope-key-input" class="settings-input settings-flex-item" placeholder="Key (global)" title="Key (e.g., global)">
+            <input type="text" required id="new-scope-label-input" class="settings-input settings-flex-item" placeholder="Display Label (Global)" title="Display Label (e.g., Global)">
             <button id="add-scope-btn" class="btn-secondary">Add</button>
-            <button id="cancel-scope-btn" class="btn-secondary" style="display: none;">Cancel</button>
+            <button id="cancel-scope-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
             <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
@@ -242,11 +242,11 @@ function generateCategoryManagementSection(): string {
 
         <div class="settings-item">
           <label id="category-form-label">Add New Category:</label>
-          <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
-            <input type="text" required id="new-category-key-input" class="settings-input" placeholder="Key (e.g., ui-state)" style="flex: 1;">
-            <input type="text" required id="new-category-label-input" class="settings-input" placeholder="Display Label (e.g., UI State)" style="flex: 1;">
+          <div class="settings-flex-row">
+            <input type="text" required id="new-category-key-input" class="settings-input settings-flex-item" placeholder="Key (ui-state)" title="Key (e.g., ui-state)">
+            <input type="text" required id="new-category-label-input" class="settings-input settings-flex-item" placeholder="Display Label (UI State)" title="Display Label (e.g., UI State)">
             <button id="add-category-btn" class="btn-secondary">Add</button>
-            <button id="cancel-category-btn" class="btn-secondary" style="display: none;">Cancel</button>
+            <button id="cancel-category-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
             <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
@@ -298,11 +298,11 @@ export function populateSettingsContent(): void {
 
         <div class="settings-item">
           <label id="location-form-label">Add New Location:</label>
-          <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
-            <input type="text" required id="new-location-key-input" class="settings-input" placeholder="Key (e.g., user-store)" style="flex: 1;">
-            <input type="text" required id="new-location-label-input" class="settings-input" placeholder="Display Label (e.g., User Store)" style="flex: 1;">
+          <div class="settings-flex-row">
+            <input type="text" required id="new-location-key-input" class="settings-input settings-flex-item" placeholder="Key (userStore)" title="Key (e.g., user-store)">
+            <input type="text" required id="new-location-label-input" class="settings-input settings-flex-item" placeholder="Display Label (User Store)" title="Display Label (e.g., User Store)">
             <button id="add-location-btn" class="btn-secondary">Add</button>
-            <button id="cancel-location-btn" class="btn-secondary" style="display: none;">Cancel</button>
+            <button id="cancel-location-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
             <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
@@ -816,7 +816,7 @@ function enterEditMode(type: 'scope' | 'category' | 'location', key: string, lab
       labelInput.value = label || '';
       addBtn.textContent = 'Update';
       addBtn.className = 'btn-primary';
-      cancelBtn.style.display = 'inline-block';
+      cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Scope:';
       labelInput.focus(); // Focus on label since key is disabled
     }
@@ -833,7 +833,7 @@ function enterEditMode(type: 'scope' | 'category' | 'location', key: string, lab
       labelInput.value = label || '';
       addBtn.textContent = 'Update';
       addBtn.className = 'btn-primary';
-      cancelBtn.style.display = 'inline-block';
+      cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Category:';
       labelInput.focus(); // Focus on label since key is disabled
     }
@@ -850,7 +850,7 @@ function enterEditMode(type: 'scope' | 'category' | 'location', key: string, lab
       labelInput.value = label || '';
       addBtn.textContent = 'Update';
       addBtn.className = 'btn-primary';
-      cancelBtn.style.display = 'inline-block';
+      cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Location:';
       labelInput.focus(); // Focus on label since key is disabled
     }
@@ -876,7 +876,7 @@ function exitEditMode(): void {
     scopeLabelInput.value = '';
     scopeAddBtn.textContent = 'Add';
     scopeAddBtn.className = 'btn-secondary';
-    scopeCancelBtn.style.display = 'none';
+    scopeCancelBtn.classList.add('settings-hidden-btn');
     scopeFormLabel.textContent = 'Add New Scope:';
   }
 
@@ -893,7 +893,7 @@ function exitEditMode(): void {
     categoryLabelInput.value = '';
     categoryAddBtn.textContent = 'Add';
     categoryAddBtn.className = 'btn-secondary';
-    categoryCancelBtn.style.display = 'none';
+    categoryCancelBtn.classList.add('settings-hidden-btn');
     categoryFormLabel.textContent = 'Add New Category:';
   }
 
@@ -910,7 +910,7 @@ function exitEditMode(): void {
     locationLabelInput.value = '';
     locationAddBtn.textContent = 'Add';
     locationAddBtn.className = 'btn-secondary';
-    locationCancelBtn.style.display = 'none';
+    locationCancelBtn.classList.add('settings-hidden-btn');
     locationFormLabel.textContent = 'Add New Location:';
   }
 }/**
