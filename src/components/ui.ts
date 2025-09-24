@@ -1,6 +1,6 @@
 import type { DFACard, CardSize } from '../types/dfa.js';
 import { DATA_TYPES } from '../types/dfa.js';
-import { getUniqueLocations, getDataLayersByType, getScopes, getCategories, getScopeLabel, getCategoryLabel, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
+import { getUniqueLocations, getDataLayersByType, getScopes, getCategories, getScopeLabel, getCategoryLabel, getLocationLabel, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
 
 /**
@@ -66,7 +66,8 @@ export function updateLocationOptions(): void {
 
   locations.forEach(location => {
     const option = document.createElement('option');
-    option.value = location;
+    option.value = location; // Store the key as the value
+    option.textContent = getLocationLabel(location); // Display the label
     datalist.appendChild(option);
   });
 }
@@ -208,7 +209,8 @@ function generateConnectionOptions(currentCardId?: string, selectedConnection?: 
     html += '<optgroup label="Endpoints">';
     endpointCards.forEach(card => {
       const selected = selectedConnection === card.id ? 'selected' : '';
-      const displayName = card.location ? `${card.field} (${card.location})` : card.field;
+      const locationLabel = card.location ? getLocationLabel(card.location) : '';
+      const displayName = locationLabel ? `${card.field} (${locationLabel})` : card.field;
       html += `<option value="${card.id}" ${selected}>${escapeHtml(displayName)}</option>`;
     });
     html += '</optgroup>';
@@ -218,7 +220,8 @@ function generateConnectionOptions(currentCardId?: string, selectedConnection?: 
     html += '<optgroup label="Throughpoints">';
     throughpointCards.forEach(card => {
       const selected = selectedConnection === card.id ? 'selected' : '';
-      const displayName = card.location ? `${card.field} (${card.location})` : card.field;
+      const locationLabel = card.location ? getLocationLabel(card.location) : '';
+      const displayName = locationLabel ? `${card.field} (${locationLabel})` : card.field;
       html += `<option value="${card.id}" ${selected}>${escapeHtml(displayName)}</option>`;
     });
     html += '</optgroup>';
@@ -698,7 +701,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
           <div class="dfa-card-label">Layer:</div>
           <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
           <div class="dfa-card-label">Location:</div>
-          <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
+          <div class="dfa-card-value">${escapeHtml(card.location ? getLocationLabel(card.location) : 'Not specified')}</div>
         </div>
 
         <div style="margin-top: 0.5rem;">
@@ -713,7 +716,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
     <div class="dfa-card-label">Layer:</div>
     <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
     <div class="dfa-card-label">Location:</div>
-    <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>`;
+    <div class="dfa-card-value">${escapeHtml(card.location ? getLocationLabel(card.location) : 'Not specified')}</div>`;
 
   // Standard fields (shown in standard and compact)
   // const standardFields = (showAllFields || showCompactFields) ? `
