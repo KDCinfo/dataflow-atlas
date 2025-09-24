@@ -25,6 +25,7 @@ export interface FormVisibilitySettings {
 export interface SettingsConfig {
   locations: string[];
   dataLayers: DataLayer[];
+  scopes: string[];
   categories: string[];
   dataTypes: string[];
   formVisibility: FormVisibilitySettings;
@@ -32,6 +33,10 @@ export interface SettingsConfig {
 
 const SETTINGS_KEY = 'dfa__settings';
 const TEMP_SETTINGS_KEY = 'dfa__temp_settings';
+
+// Default scope and category values (based on types in dfa.ts)
+const DEFAULT_SCOPES = ['app', 'user', 'session'];
+const DEFAULT_CATEGORIES = ['user-preference', 'account-setting', 'runtime-state', 'feature-data', 'app-preference'];
 
 /**
  * Default form visibility settings - all optional fields hidden by default.
@@ -81,7 +86,8 @@ export function getSettings(): SettingsConfig {
       return {
         locations: parsed.locations || [],
         dataLayers,
-        categories: parsed.categories || [],
+        scopes: parsed.scopes || [...DEFAULT_SCOPES],
+        categories: parsed.categories || [...DEFAULT_CATEGORIES],
         dataTypes: parsed.dataTypes || [],
         formVisibility: parsed.formVisibility || { ...DEFAULT_FORM_VISIBILITY },
       };
@@ -94,7 +100,8 @@ export function getSettings(): SettingsConfig {
   return {
     locations: [],
     dataLayers: [...DEFAULT_DATA_LAYERS],
-    categories: [],
+    scopes: [...DEFAULT_SCOPES],
+    categories: [...DEFAULT_CATEGORIES],
     dataTypes: [],
     formVisibility: { ...DEFAULT_FORM_VISIBILITY },
   };
@@ -154,6 +161,70 @@ export function addLocation(location: string): void {
 export function removeLocation(location: string): void {
   const settings = getSettings();
   settings.locations = settings.locations.filter(loc => loc !== location);
+  saveSettings(settings);
+}
+
+/**
+ * Get all available scopes from settings.
+ */
+export function getScopes(): string[] {
+  const settings = getSettings();
+  return [...settings.scopes].sort();
+}
+
+/**
+ * Add a new scope to settings.
+ */
+export function addScope(scope: string): void {
+  const trimmed = scope.trim();
+  if (!trimmed) return;
+
+  const settings = getSettings();
+  if (!settings.scopes.includes(trimmed)) {
+    settings.scopes.push(trimmed);
+    settings.scopes.sort();
+    saveSettings(settings);
+  }
+}
+
+/**
+ * Remove a scope from settings.
+ */
+export function removeScope(scope: string): void {
+  const settings = getSettings();
+  settings.scopes = settings.scopes.filter(s => s !== scope);
+  saveSettings(settings);
+}
+
+/**
+ * Get all available categories from settings.
+ */
+export function getCategories(): string[] {
+  const settings = getSettings();
+  return [...settings.categories].sort();
+}
+
+/**
+ * Add a new category to settings.
+ */
+export function addCategory(category: string): void {
+  const trimmed = category.trim();
+  if (!trimmed) return;
+
+  const settings = getSettings();
+  if (!settings.categories.includes(trimmed)) {
+    settings.categories.push(trimmed);
+    settings.categories.sort();
+    saveSettings(settings);
+  }
+}
+
+/**
+ * Remove a category from settings.
+ */
+export function removeCategory(category: string): void {
+  const settings = getSettings();
+  settings.categories = settings.categories.filter(c => c !== category);
   saveSettings(settings);
 }
 

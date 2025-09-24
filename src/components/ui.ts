@@ -1,6 +1,6 @@
 import type { DFACard, CardSize } from '../types/dfa.js';
 import { DATA_TYPES } from '../types/dfa.js';
-import { getUniqueLocations, getDataLayersByType, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
+import { getUniqueLocations, getDataLayersByType, getScopes, getCategories, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
 
 /**
@@ -105,11 +105,41 @@ export function updateLayerOptions(): void {
  * Update the layer filter dropdown in the atlas view.
  */
 export function updateLayerFilterOptions(): void {
-  const filterLayer = document.getElementById('filter-layer') as HTMLSelectElement;
-  if (!filterLayer) return;
+  const select = document.getElementById('filter-layer') as HTMLSelectElement;
+  if (select) {
+    const currentValue = select.value;
+    select.innerHTML = generateLayerFilterOptions(currentValue);
+  }
+}
 
-  const currentValue = filterLayer.value;
-  filterLayer.innerHTML = generateLayerFilterOptions(currentValue);
+/**
+ * Update scope options in all forms.
+ */
+export function updateScopeOptions(): void {
+  const selects = ['scope', 'edit-scope'];
+
+  selects.forEach(id => {
+    const select = document.getElementById(id) as HTMLSelectElement;
+    if (select) {
+      const currentValue = select.value;
+      select.innerHTML = generateScopeOptions(currentValue);
+    }
+  });
+}
+
+/**
+ * Update category options in all forms.
+ */
+export function updateCategoryOptions(): void {
+  const selects = ['category', 'edit-category'];
+
+  selects.forEach(id => {
+    const select = document.getElementById(id) as HTMLSelectElement;
+    if (select) {
+      const currentValue = select.value;
+      select.innerHTML = generateCategoryOptions(currentValue);
+    }
+  });
 }
 
 /**
@@ -193,6 +223,59 @@ function generateConnectionOptions(currentCardId?: string, selectedConnection?: 
     });
     html += '</optgroup>';
   }
+
+  return html;
+}
+
+/**
+ * Generate scope options for form selects.
+ */
+function generateScopeOptions(selectedScope?: string): string {
+  const scopes = getScopes();
+  let html = '<option value="">Select Scope</option>';
+
+  scopes.forEach(scope => {
+    const selected = selectedScope === scope ? 'selected' : '';
+    // Provide user-friendly labels for common scopes
+    let label = scope;
+    switch (scope) {
+      case 'app': label = 'App-level (device/browser)'; break;
+      case 'user': label = 'User-level (account)'; break;
+      case 'session': label = 'Session-level (temporary)'; break;
+      default: label = scope.charAt(0).toUpperCase() + scope.slice(1); break;
+    }
+    html += `<option value="${scope}" ${selected}>${label}</option>`;
+  });
+
+  return html;
+}
+
+/**
+ * Generate category options for form selects.
+ */
+function generateCategoryOptions(selectedCategory?: string): string {
+  const categories = getCategories();
+  let html = '<option value="">Select Category</option>';
+
+  categories.forEach(category => {
+    const selected = selectedCategory === category ? 'selected' : '';
+    // Provide user-friendly labels for common categories
+    let label = category;
+    switch (category) {
+      case 'user-preference': label = 'User Preference'; break;
+      case 'account-setting': label = 'Account Setting'; break;
+      case 'runtime-state': label = 'Runtime State'; break;
+      case 'feature-data': label = 'Feature Data'; break;
+      case 'app-preference': label = 'App Preference'; break;
+      default:
+        // Convert kebab-case to title case
+        label = category.split('-').map(word =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        break;
+    }
+    html += `<option value="${category}" ${selected}>${label}</option>`;
+  });
 
   return html;
 }
@@ -303,22 +386,14 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       <div class="form-group">
         <label for="${idPrefix}scope">Scope:</label>
         <select id="${idPrefix}scope" name="scope">
-          <option value="">Select Scope</option>
-          <option value="app" ${c.scope === 'app' ? 'selected' : ''}>App-level (device/browser)</option>
-          <option value="user" ${c.scope === 'user' ? 'selected' : ''}>User-level (account)</option>
-          <option value="session" ${c.scope === 'session' ? 'selected' : ''}>Session-level (temporary)</option>
+          ${generateScopeOptions(c.scope)}
         </select>
       </div>
 
       <div class="form-group">
         <label for="${idPrefix}category">Category:</label>
         <select id="${idPrefix}category" name="category">
-          <option value="">Select Category</option>
-          <option value="user-preference" ${c.category === 'user-preference' ? 'selected' : ''}>User Preference</option>
-          <option value="account-setting" ${c.category === 'account-setting' ? 'selected' : ''}>Account Setting</option>
-          <option value="runtime-state" ${c.category === 'runtime-state' ? 'selected' : ''}>Runtime State</option>
-          <option value="feature-data" ${c.category === 'feature-data' ? 'selected' : ''}>Feature Data</option>
-          <option value="app-preference" ${c.category === 'app-preference' ? 'selected' : ''}>App Preference</option>
+          ${generateCategoryOptions(c.category)}
         </select>
       </div>
 

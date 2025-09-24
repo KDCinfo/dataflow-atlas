@@ -2,6 +2,12 @@ import {
   getUniqueLocations,
   addLocation,
   removeLocation,
+  getScopes,
+  addScope,
+  removeScope,
+  getCategories,
+  addCategory,
+  removeCategory,
   getDataLayersByType,
   saveDataLayer,
   deleteDataLayer,
@@ -10,7 +16,7 @@ import {
   DataLayerType,
   type DataLayer,
 } from '../utils/settings.js';
-import { getElement, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions } from './ui.js';
+import { getElement, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions, updateScopeOptions, updateCategoryOptions } from './ui.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -160,6 +166,90 @@ function generateDataLayerManagementSection(): string {
 }
 
 /**
+ * Generate Scope Management section.
+ */
+function generateScopeManagementSection(): string {
+  const scopes = getScopes();
+  const isScopesExpanded = isPanelExpanded('scope-management', false);
+
+  return `
+    <div class="settings-section">
+      <h4 class="collapsible-header" data-target="scope-management">
+        <span class="expand-icon ${isScopesExpanded ? 'expanded' : ''}">${isScopesExpanded ? '▼' : '►'}</span>
+        Scope Management
+      </h4>
+      <div id="scope-management" class="collapsible-content ${isScopesExpanded ? 'expanded' : ''}">
+        <p class="setting-description">Manage the list of data scopes for your DFA cards. These define the ownership level of data (app-wide, user-specific, session-only).</p>
+
+        <div class="settings-item">
+          <label>Add New Scope:</label>
+          <div style="display: flex; gap: var(--spacing-sm);">
+            <input type="text" id="new-scope-input" class="settings-input" placeholder="e.g., global">
+            <button id="add-scope-btn" class="btn-secondary">Add</button>
+          </div>
+        </div>
+
+        ${scopes.length > 0 ? `
+          <div class="settings-item">
+            <label>Existing Scopes:</label>
+            <div class="scope-manager">
+              ${scopes.map(scope => `
+                <div class="scope-item">
+                  <span>${escapeHtml(scope)}</span>
+                  <button class="scope-delete" data-scope="${escapeHtml(scope)}">Remove</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Generate Category Management section.
+ */
+function generateCategoryManagementSection(): string {
+  const categories = getCategories();
+  const isCategoriesExpanded = isPanelExpanded('category-management', false);
+
+  return `
+    <div class="settings-section">
+      <h4 class="collapsible-header" data-target="category-management">
+        <span class="expand-icon ${isCategoriesExpanded ? 'expanded' : ''}">${isCategoriesExpanded ? '▼' : '►'}</span>
+        Category Management
+      </h4>
+      <div id="category-management" class="collapsible-content ${isCategoriesExpanded ? 'expanded' : ''}">
+        <p class="setting-description">Manage the list of content categories for your DFA cards. These help classify the type of data being tracked.</p>
+
+        <div class="settings-item">
+          <label>Add New Category:</label>
+          <div style="display: flex; gap: var(--spacing-sm);">
+            <input type="text" id="new-category-input" class="settings-input" placeholder="e.g., ui-state">
+            <button id="add-category-btn" class="btn-secondary">Add</button>
+          </div>
+        </div>
+
+        ${categories.length > 0 ? `
+          <div class="settings-item">
+            <label>Existing Categories:</label>
+            <div class="category-manager">
+              ${categories.map(category => `
+                <div class="category-item">
+                  <span>${escapeHtml(category)}</span>
+                  <button class="category-delete" data-category="${escapeHtml(category)}">Remove</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/**
  * Populate the settings modal content.
  */
 export function populateSettingsContent(): void {
@@ -203,6 +293,10 @@ export function populateSettingsContent(): void {
     </div>
 
     ${generateDataLayerManagementSection()}
+
+    ${generateScopeManagementSection()}
+
+    ${generateCategoryManagementSection()}
 
     <div class="settings-section hidden">
       <h4>General Settings</h4>
@@ -275,6 +369,80 @@ function setupSettingsEventListeners(): void {
         removeLocation(location);
         populateSettingsContent(); // Refresh the content.
         updateLocationOptions(); // Update main form options.
+      }
+    });
+  });
+
+  // Scope management.
+  const addScopeBtn = getElement('add-scope-btn');
+  const scopeInput = getElement<HTMLInputElement>('new-scope-input');
+
+  if (addScopeBtn && scopeInput) {
+    const handleAddScope = (): void => {
+      const scope = scopeInput.value.trim();
+      if (scope) {
+        addScope(scope);
+        scopeInput.value = '';
+        populateSettingsContent(); // Refresh the content.
+        updateScopeOptions(); // Update main form scope options.
+      }
+    };
+
+    addScopeBtn.addEventListener('click', handleAddScope);
+    scopeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddScope();
+      }
+    });
+  }
+
+  // Remove scope buttons.
+  document.querySelectorAll('.scope-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const scope = target.getAttribute('data-scope');
+      if (scope) {
+        removeScope(scope);
+        populateSettingsContent(); // Refresh the content.
+        updateScopeOptions(); // Update main form scope options.
+      }
+    });
+  });
+
+  // Category management.
+  const addCategoryBtn = getElement('add-category-btn');
+  const categoryInput = getElement<HTMLInputElement>('new-category-input');
+
+  if (addCategoryBtn && categoryInput) {
+    const handleAddCategory = (): void => {
+      const category = categoryInput.value.trim();
+      if (category) {
+        addCategory(category);
+        categoryInput.value = '';
+        populateSettingsContent(); // Refresh the content.
+        updateCategoryOptions(); // Update main form category options.
+      }
+    };
+
+    addCategoryBtn.addEventListener('click', handleAddCategory);
+    categoryInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddCategory();
+      }
+    });
+  }
+
+  // Remove category buttons.
+  document.querySelectorAll('.category-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const category = target.getAttribute('data-category');
+      if (category) {
+        removeCategory(category);
+        populateSettingsContent(); // Refresh the content.
+        updateCategoryOptions(); // Update main form category options.
       }
     });
   });
