@@ -1,5 +1,6 @@
 import type { DFACard, AtlasFilter, CardSize } from './types/dfa.js';
 import { loadCards, importCards } from './utils/storage.js';
+import { getDataLayersByType, type DataLayer } from './utils/settings.js';
 import {
   showNotification,
   renderDFACard,
@@ -768,8 +769,30 @@ export class DFDAtlas {
       if (filters.category && card.category !== filters.category) return false;
 
       // Orphans filter
-      if (filters.orphans === 'endpoints' && card.linkedTo) return false;
-      if (filters.orphans === 'throughpoints' && !card.linkedTo) return false;
+      if (filters.orphans === 'endpoints') {
+        // For endpoints: show only cards that are NOT being linked to by any other card
+        const { endpoints } = getDataLayersByType();
+        const isEndpointLayer = endpoints.some((layer: DataLayer) => layer.name === card.layer);
+        if (!isEndpointLayer) return false; // Only show endpoint layer cards
+
+        // Check if any other card links to this card
+        const isLinkedTo = cards.some(otherCard =>
+          otherCard.id !== card.id &&
+          otherCard.linkedTo &&
+          otherCard.linkedTo.includes(card.id)
+        );
+        if (isLinkedTo) return false; // Hide cards that are being linked to
+      }
+
+      if (filters.orphans === 'throughpoints') {
+        // For throughpoints: show only cards that have empty linkedTo property
+        const { throughpoints } = getDataLayersByType();
+        const isThroughpointLayer = throughpoints.some((layer: DataLayer) => layer.name === card.layer);
+        if (!isThroughpointLayer) return false; // Only show throughpoint layer cards
+
+        // Show only cards with empty linkedTo
+        if (card.linkedTo && card.linkedTo.length > 0) return false;
+      }
 
       // Search filter
       if (filters.searchTerm && filters.searchTerm.trim()) {
