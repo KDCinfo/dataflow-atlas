@@ -939,6 +939,7 @@ button.card-action-btn.mini {
 .settings-item {
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     margin-top: var(--spacing-md);
 }
@@ -950,6 +951,15 @@ button.card-action-btn.mini {
 .settings-item label {
     color: var(--color-text);
     font-weight: 500;
+    padding: 0 var(--spacing-xmd) 0 0;
+}
+
+.settings-item input {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    font-size: 1rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: border-color 0.2s ease;
 }
 
 .settings-item .setting-description {
@@ -976,6 +986,7 @@ button.card-action-btn.mini {
 .scope-manager, .category-manager {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-all1);
+    flex-grow: 1;
     max-height: 200px;
     overflow-y: auto;
     padding: var(--spacing-sm);

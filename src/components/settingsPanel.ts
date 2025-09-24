@@ -185,9 +185,9 @@ function generateScopeManagementSection(): string {
 
         <div class="settings-item">
           <label>Add New Scope:</label>
-          <div style="display: flex; gap: var(--spacing-sm);">
-            <input type="text" id="new-scope-key-input" class="settings-input" placeholder="Key (e.g., global)" style="flex: 1;">
-            <input type="text" id="new-scope-label-input" class="settings-input" placeholder="Display Label (e.g., Global)" style="flex: 1;">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
+            <input type="text" required id="new-scope-key-input" class="settings-input" placeholder="Key (e.g., global)" style="flex: 1;">
+            <input type="text" required id="new-scope-label-input" class="settings-input" placeholder="Display Label (e.g., Global)" style="flex: 1;">
             <button id="add-scope-btn" class="btn-secondary">Add</button>
           </div>
           <div class="input-help">
@@ -234,9 +234,9 @@ function generateCategoryManagementSection(): string {
 
         <div class="settings-item">
           <label>Add New Category:</label>
-          <div style="display: flex; gap: var(--spacing-sm);">
-            <input type="text" id="new-category-key-input" class="settings-input" placeholder="Key (e.g., ui-state)" style="flex: 1;">
-            <input type="text" id="new-category-label-input" class="settings-input" placeholder="Display Label (e.g., UI State)" style="flex: 1;">
+          <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
+            <input type="text" required id="new-category-key-input" class="settings-input" placeholder="Key (e.g., ui-state)" style="flex: 1;">
+            <input type="text" required id="new-category-label-input" class="settings-input" placeholder="Display Label (e.g., UI State)" style="flex: 1;">
             <button id="add-category-btn" class="btn-secondary">Add</button>
           </div>
           <div class="input-help">
@@ -398,12 +398,14 @@ function setupSettingsEventListeners(): void {
     const handleAddScope = (): void => {
       const key = scopeKeyInput.value.trim();
       const label = scopeLabelInput.value.trim();
-      if (key) {
+      if (key && label) {
         addScopeWithLabel(key, label);
         scopeKeyInput.value = '';
         scopeLabelInput.value = '';
         populateSettingsContent(); // Refresh the content.
         updateScopeOptions(); // Update main form scope options.
+      } else {
+        alert('Please fill in both key and label for the new scope.');
       }
     };
 
@@ -444,12 +446,14 @@ function setupSettingsEventListeners(): void {
     const handleAddCategory = (): void => {
       const key = categoryKeyInput.value.trim();
       const label = categoryLabelInput.value.trim();
-      if (key) {
+      if (key && label) {
         addCategoryWithLabel(key, label);
         categoryKeyInput.value = '';
         categoryLabelInput.value = '';
         populateSettingsContent(); // Refresh the content.
         updateCategoryOptions(); // Update main form category options.
+      } else {
+        alert('Please fill in both key and label for the new category.');
       }
     };
 
