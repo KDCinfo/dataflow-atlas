@@ -27,6 +27,8 @@ export interface SettingsConfig {
   dataLayers: DataLayer[];
   scopes: string[];
   categories: string[];
+  scopeLabels: Record<string, string>; // Custom labels for scope keys
+  categoryLabels: Record<string, string>; // Custom labels for category keys
   dataTypes: string[];
   formVisibility: FormVisibilitySettings;
 }
@@ -34,11 +36,46 @@ export interface SettingsConfig {
 const SETTINGS_KEY = 'dfa__settings';
 const TEMP_SETTINGS_KEY = 'dfa__temp_settings';
 
-// Default scope and category values (based on types in dfa.ts)
-const DEFAULT_SCOPES = ['app', 'user', 'session'];
-const DEFAULT_CATEGORIES = ['user-preference', 'account-setting', 'runtime-state', 'feature-data', 'app-preference'];
+// Default scope and category definitions with display labels
+const DEFAULT_SCOPES_MAP: Record<string, string> = {
+  'app': 'App-level (device/browser)',
+  'user': 'User-level (account)',
+  'session': 'Session-level (temporary)'
+};
+
+const DEFAULT_CATEGORIES_MAP: Record<string, string> = {
+  'user-preference': 'User Preference',
+  'account-setting': 'Account Setting',
+  'runtime-state': 'Runtime State',
+  'feature-data': 'Feature Data',
+  'app-preference': 'App Preference'
+};
+
+// Helper functions to get arrays from the maps
+const getDefaultScopes = (): string[] => Object.keys(DEFAULT_SCOPES_MAP);
+const getDefaultCategories = (): string[] => Object.keys(DEFAULT_CATEGORIES_MAP);
 
 /**
+ * Get display label for a scope value.
+ */
+export function getScopeLabel(scope: string): string {
+  const settings = getSettings();
+  // Check custom labels first, then defaults, then auto-generate
+  return settings.scopeLabels[scope] ||
+         DEFAULT_SCOPES_MAP[scope] ||
+         scope.charAt(0).toUpperCase() + scope.slice(1);
+}
+
+/**
+ * Get display label for a category value.
+ */
+export function getCategoryLabel(category: string): string {
+  const settings = getSettings();
+  // Check custom labels first, then defaults, then auto-generate
+  return settings.categoryLabels[category] ||
+         DEFAULT_CATEGORIES_MAP[category] ||
+         category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}/**
  * Default form visibility settings - all optional fields hidden by default.
  */
 const DEFAULT_FORM_VISIBILITY: FormVisibilitySettings = {
@@ -86,8 +123,10 @@ export function getSettings(): SettingsConfig {
       return {
         locations: parsed.locations || [],
         dataLayers,
-        scopes: parsed.scopes || [...DEFAULT_SCOPES],
-        categories: parsed.categories || [...DEFAULT_CATEGORIES],
+        scopes: (parsed.scopes && parsed.scopes.length > 0) ? parsed.scopes : getDefaultScopes(),
+        categories: (parsed.categories && parsed.categories.length > 0) ? parsed.categories : getDefaultCategories(),
+        scopeLabels: parsed.scopeLabels || {},
+        categoryLabels: parsed.categoryLabels || {},
         dataTypes: parsed.dataTypes || [],
         formVisibility: parsed.formVisibility || { ...DEFAULT_FORM_VISIBILITY },
       };
@@ -100,8 +139,10 @@ export function getSettings(): SettingsConfig {
   return {
     locations: [],
     dataLayers: [...DEFAULT_DATA_LAYERS],
-    scopes: [...DEFAULT_SCOPES],
-    categories: [...DEFAULT_CATEGORIES],
+    scopes: getDefaultScopes(),
+    categories: getDefaultCategories(),
+    scopeLabels: {},
+    categoryLabels: {},
     dataTypes: [],
     formVisibility: { ...DEFAULT_FORM_VISIBILITY },
   };
@@ -188,12 +229,39 @@ export function addScope(scope: string): void {
 }
 
 /**
+ * Add a new scope with custom label to settings.
+ */
+export function addScopeWithLabel(scope: string, label: string): void {
+  const trimmedScope = scope.trim();
+  const trimmedLabel = label.trim();
+  if (!trimmedScope) return;
+
+  const settings = getSettings();
+  if (!settings.scopes.includes(trimmedScope)) {
+    settings.scopes.push(trimmedScope);
+    settings.scopes.sort();
+
+    // Add custom label if provided and different from auto-generated
+    if (trimmedLabel && trimmedLabel !== trimmedScope.charAt(0).toUpperCase() + trimmedScope.slice(1)) {
+      settings.scopeLabels[trimmedScope] = trimmedLabel;
+    }
+
+    saveSettings(settings);
+  }
+}
+
+/**
  * Remove a scope from settings.
  */
 export function removeScope(scope: string): void {
   const settings = getSettings();
-  settings.scopes = settings.scopes.filter(s => s !== scope);
-  saveSettings(settings);
+  const index = settings.scopes.indexOf(scope);
+  if (index !== -1) {
+    settings.scopes.splice(index, 1);
+    // Also remove custom label if it exists
+    delete settings.scopeLabels[scope];
+    saveSettings(settings);
+  }
 }
 
 /**
@@ -220,11 +288,35 @@ export function addCategory(category: string): void {
 }
 
 /**
+ * Add a new category with custom label to settings.
+ */
+export function addCategoryWithLabel(category: string, label: string): void {
+  const trimmedCategory = category.trim();
+  const trimmedLabel = label.trim();
+  if (!trimmedCategory) return;
+
+  const settings = getSettings();
+  if (!settings.categories.includes(trimmedCategory)) {
+    settings.categories.push(trimmedCategory);
+    settings.categories.sort();
+
+    // Add custom label if provided and different from auto-generated
+    if (trimmedLabel && trimmedLabel !== trimmedCategory.charAt(0).toUpperCase() + trimmedCategory.slice(1)) {
+      settings.categoryLabels[trimmedCategory] = trimmedLabel;
+    }
+
+    saveSettings(settings);
+  }
+}
+
+/**
  * Remove a category from settings.
  */
 export function removeCategory(category: string): void {
   const settings = getSettings();
   settings.categories = settings.categories.filter(c => c !== category);
+  // Also remove custom label if it exists
+  delete settings.categoryLabels[category];
   saveSettings(settings);
 }
 

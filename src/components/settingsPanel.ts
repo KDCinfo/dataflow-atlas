@@ -3,11 +3,13 @@ import {
   addLocation,
   removeLocation,
   getScopes,
-  addScope,
+  addScopeWithLabel,
   removeScope,
+  getScopeLabel,
   getCategories,
-  addCategory,
+  addCategoryWithLabel,
   removeCategory,
+  getCategoryLabel,
   getDataLayersByType,
   saveDataLayer,
   deleteDataLayer,
@@ -184,8 +186,12 @@ function generateScopeManagementSection(): string {
         <div class="settings-item">
           <label>Add New Scope:</label>
           <div style="display: flex; gap: var(--spacing-sm);">
-            <input type="text" id="new-scope-input" class="settings-input" placeholder="e.g., global">
+            <input type="text" id="new-scope-key-input" class="settings-input" placeholder="Key (e.g., global)" style="flex: 1;">
+            <input type="text" id="new-scope-label-input" class="settings-input" placeholder="Display Label (e.g., Global)" style="flex: 1;">
             <button id="add-scope-btn" class="btn-secondary">Add</button>
+          </div>
+          <div class="input-help">
+            <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
           </div>
         </div>
 
@@ -195,7 +201,10 @@ function generateScopeManagementSection(): string {
             <div class="scope-manager">
               ${scopes.map(scope => `
                 <div class="scope-item">
-                  <span>${escapeHtml(scope)}</span>
+                  <div class="scope-details">
+                    <span class="scope-key">${escapeHtml(scope)}</span>
+                    <span class="scope-label">${escapeHtml(getScopeLabel(scope))}</span>
+                  </div>
                   <button class="scope-delete" data-scope="${escapeHtml(scope)}">Remove</button>
                 </div>
               `).join('')}
@@ -226,8 +235,12 @@ function generateCategoryManagementSection(): string {
         <div class="settings-item">
           <label>Add New Category:</label>
           <div style="display: flex; gap: var(--spacing-sm);">
-            <input type="text" id="new-category-input" class="settings-input" placeholder="e.g., ui-state">
+            <input type="text" id="new-category-key-input" class="settings-input" placeholder="Key (e.g., ui-state)" style="flex: 1;">
+            <input type="text" id="new-category-label-input" class="settings-input" placeholder="Display Label (e.g., UI State)" style="flex: 1;">
             <button id="add-category-btn" class="btn-secondary">Add</button>
+          </div>
+          <div class="input-help">
+            <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
           </div>
         </div>
 
@@ -237,7 +250,10 @@ function generateCategoryManagementSection(): string {
             <div class="category-manager">
               ${categories.map(category => `
                 <div class="category-item">
-                  <span>${escapeHtml(category)}</span>
+                  <div class="category-details">
+                    <span class="category-key">${escapeHtml(category)}</span>
+                    <span class="category-label">${escapeHtml(getCategoryLabel(category))}</span>
+                  </div>
                   <button class="category-delete" data-category="${escapeHtml(category)}">Remove</button>
                 </div>
               `).join('')}
@@ -375,21 +391,30 @@ function setupSettingsEventListeners(): void {
 
   // Scope management.
   const addScopeBtn = getElement('add-scope-btn');
-  const scopeInput = getElement<HTMLInputElement>('new-scope-input');
+  const scopeKeyInput = getElement<HTMLInputElement>('new-scope-key-input');
+  const scopeLabelInput = getElement<HTMLInputElement>('new-scope-label-input');
 
-  if (addScopeBtn && scopeInput) {
+  if (addScopeBtn && scopeKeyInput && scopeLabelInput) {
     const handleAddScope = (): void => {
-      const scope = scopeInput.value.trim();
-      if (scope) {
-        addScope(scope);
-        scopeInput.value = '';
+      const key = scopeKeyInput.value.trim();
+      const label = scopeLabelInput.value.trim();
+      if (key) {
+        addScopeWithLabel(key, label);
+        scopeKeyInput.value = '';
+        scopeLabelInput.value = '';
         populateSettingsContent(); // Refresh the content.
         updateScopeOptions(); // Update main form scope options.
       }
     };
 
     addScopeBtn.addEventListener('click', handleAddScope);
-    scopeInput.addEventListener('keypress', (e) => {
+    scopeKeyInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddScope();
+      }
+    });
+    scopeLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         handleAddScope();
@@ -412,21 +437,30 @@ function setupSettingsEventListeners(): void {
 
   // Category management.
   const addCategoryBtn = getElement('add-category-btn');
-  const categoryInput = getElement<HTMLInputElement>('new-category-input');
+  const categoryKeyInput = getElement<HTMLInputElement>('new-category-key-input');
+  const categoryLabelInput = getElement<HTMLInputElement>('new-category-label-input');
 
-  if (addCategoryBtn && categoryInput) {
+  if (addCategoryBtn && categoryKeyInput && categoryLabelInput) {
     const handleAddCategory = (): void => {
-      const category = categoryInput.value.trim();
-      if (category) {
-        addCategory(category);
-        categoryInput.value = '';
+      const key = categoryKeyInput.value.trim();
+      const label = categoryLabelInput.value.trim();
+      if (key) {
+        addCategoryWithLabel(key, label);
+        categoryKeyInput.value = '';
+        categoryLabelInput.value = '';
         populateSettingsContent(); // Refresh the content.
         updateCategoryOptions(); // Update main form category options.
       }
     };
 
     addCategoryBtn.addEventListener('click', handleAddCategory);
-    categoryInput.addEventListener('keypress', (e) => {
+    categoryKeyInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddCategory();
+      }
+    });
+    categoryLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         handleAddCategory();

@@ -1,6 +1,6 @@
 import type { DFACard, CardSize } from '../types/dfa.js';
 import { DATA_TYPES } from '../types/dfa.js';
-import { getUniqueLocations, getDataLayersByType, getScopes, getCategories, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
+import { getUniqueLocations, getDataLayersByType, getScopes, getCategories, getScopeLabel, getCategoryLabel, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
 
 /**
@@ -236,14 +236,7 @@ function generateScopeOptions(selectedScope?: string): string {
 
   scopes.forEach(scope => {
     const selected = selectedScope === scope ? 'selected' : '';
-    // Provide user-friendly labels for common scopes
-    let label = scope;
-    switch (scope) {
-      case 'app': label = 'App-level (device/browser)'; break;
-      case 'user': label = 'User-level (account)'; break;
-      case 'session': label = 'Session-level (temporary)'; break;
-      default: label = scope.charAt(0).toUpperCase() + scope.slice(1); break;
-    }
+    const label = getScopeLabel(scope);
     html += `<option value="${scope}" ${selected}>${label}</option>`;
   });
 
@@ -259,21 +252,7 @@ function generateCategoryOptions(selectedCategory?: string): string {
 
   categories.forEach(category => {
     const selected = selectedCategory === category ? 'selected' : '';
-    // Provide user-friendly labels for common categories
-    let label = category;
-    switch (category) {
-      case 'user-preference': label = 'User Preference'; break;
-      case 'account-setting': label = 'Account Setting'; break;
-      case 'runtime-state': label = 'Runtime State'; break;
-      case 'feature-data': label = 'Feature Data'; break;
-      case 'app-preference': label = 'App Preference'; break;
-      default:
-        // Convert kebab-case to title case
-        label = category.split('-').map(word =>
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-        break;
-    }
+    const label = getCategoryLabel(category);
     html += `<option value="${category}" ${selected}>${label}</option>`;
   });
 
