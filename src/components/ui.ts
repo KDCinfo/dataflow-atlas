@@ -702,6 +702,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'standard'): strin
           <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
           <div class="dfa-card-label">Location:</div>
           <div class="dfa-card-value">${escapeHtml(card.location ? getLocationLabel(card.location) : 'Not specified')}</div>
+          ${linkedToSection}
         </div>
 
         <div style="margin-top: 0.5rem;">

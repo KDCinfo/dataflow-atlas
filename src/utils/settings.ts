@@ -3,7 +3,7 @@
  * Handles localStorage and sessionStorage for various application settings.
  */
 
-import { STORAGE_KEY } from './storage.js';
+import { STORAGE_KEY, loadCards, saveCards } from './storage.js';
 
 export enum DataLayerType {
   Endpoint = 'endpoint',
@@ -252,7 +252,37 @@ export function addLocationWithLabel(location: string, label: string): void {
 }
 
 /**
- * Remove a location from settings.
+ * Helper function to remove a field value from all cards that use it.
+ * This makes affected cards appear in the Orphans filter.
+ */
+function removeFieldFromCards(fieldName: 'location' | 'scope' | 'category', valueToRemove: string): void {
+  const cards = loadCards();
+  let hasChanges = false;
+
+  const updatedCards = cards.map(card => {
+    if (card[fieldName] === valueToRemove) {
+      hasChanges = true;
+      return {
+        ...card,
+        [fieldName]: undefined // Remove the field value, making it orphaned
+      };
+    }
+    return card;
+  });
+
+  if (hasChanges) {
+    saveCards(updatedCards);
+
+    // Refresh the UI to show the changes
+    const dfdAtlas = (window as any).dfdAtlas;
+    if (dfdAtlas && typeof dfdAtlas.refreshDisplay === 'function') {
+      dfdAtlas.refreshDisplay();
+    }
+  }
+}
+
+/**
+ * Remove a location from settings and clean up any cards using this location.
  */
 export function removeLocation(location: string): void {
   const settings = getSettings();
@@ -260,6 +290,9 @@ export function removeLocation(location: string): void {
   // Also remove custom label if it exists
   delete settings.locationLabels[location];
   saveSettings(settings);
+
+  // Remove this location from any cards that use it
+  removeFieldFromCards('location', location);
 }
 
 /**
@@ -308,7 +341,7 @@ export function addScopeWithLabel(scope: string, label: string): void {
 }
 
 /**
- * Remove a scope from settings.
+ * Remove a scope from settings and clean up any cards using this scope.
  */
 export function removeScope(scope: string): void {
   const settings = getSettings();
@@ -318,6 +351,9 @@ export function removeScope(scope: string): void {
     // Also remove custom label if it exists
     delete settings.scopeLabels[scope];
     saveSettings(settings);
+
+    // Remove this scope from any cards that use it
+    removeFieldFromCards('scope', scope);
   }
 }
 
@@ -367,7 +403,7 @@ export function addCategoryWithLabel(category: string, label: string): void {
 }
 
 /**
- * Remove a category from settings.
+ * Remove a category from settings and clean up any cards using this category.
  */
 export function removeCategory(category: string): void {
   const settings = getSettings();
@@ -375,6 +411,9 @@ export function removeCategory(category: string): void {
   // Also remove custom label if it exists
   delete settings.categoryLabels[category];
   saveSettings(settings);
+
+  // Remove this category from any cards that use it
+  removeFieldFromCards('category', category);
 }
 
 /**

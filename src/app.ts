@@ -822,6 +822,15 @@ export class DFDAtlas {
   }
 
   /**
+   * Public method to refresh the display after data changes.
+   * Can be called from external components like settings.
+   */
+  public refreshDisplay(): void {
+    this.renderAtlas();
+    this.updateStats();
+  }
+
+  /**
    * Render the data flow atlas.
    */
   private renderAtlas(): void {
