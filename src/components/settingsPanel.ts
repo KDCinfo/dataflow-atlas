@@ -23,6 +23,15 @@ import {
   type DataLayer,
 } from '../utils/settings.js';
 import { getElement, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions, updateScopeOptions, updateCategoryOptions } from './ui.js';
+import {
+  validateAtlasName,
+  createAtlas,
+  deleteAtlas,
+  renameAtlas,
+  getAtlasInfoList,
+  getActiveAtlas,
+  setActiveAtlas
+} from '../utils/atlasManager.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -102,6 +111,49 @@ export function closeSettingsModal(): void {
   if (dfdAtlas && typeof dfdAtlas.restorePreviousActiveTab === 'function') {
     dfdAtlas.restorePreviousActiveTab();
   }
+}
+
+/**
+ * Generate the atlas management section HTML.
+ */
+function generateAtlasManagementSection(): string {
+  // Import atlas management functions at the top level
+  // For now, we'll import them dynamically to avoid circular dependencies
+
+  const isExpanded = isPanelExpanded('atlas-management', true); // Default to expanded
+
+  return `
+    <div class="settings-section">
+      <h4 class="collapsible-header" data-target="atlas-management">
+        <span class="expand-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '►'}</span>
+        Atlas Management
+      </h4>
+      <div id="atlas-management" class="collapsible-content ${isExpanded ? 'expanded' : ''}">
+        <p class="setting-description">Create, rename, and manage multiple atlas instances. Each atlas stores its own set of DFA cards independently.</p>
+
+        <div class="settings-item">
+          <label id="atlas-form-label">Create New Atlas:</label>
+          <div class="settings-flex-row">
+            <input type="text" required id="new-atlas-name-input" class="settings-input settings-flex-item" placeholder="Atlas name (e.g., myProject)" title="Use camelCase or snake_case">
+            <button id="create-atlas-btn" class="btn-secondary">Create</button>
+          </div>
+          <div class="input-help">
+            <small>Atlas names must use camelCase or snake_case format, starting with a lowercase letter.</small>
+          </div>
+          <div id="atlas-error-message" class="input-help" style="color: var(--color-danger); display: none;">
+            <small></small>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <label>Existing Atlases:</label>
+          <div id="atlas-list-container" class="atlas-manager">
+            <!-- Atlas list will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 /**
@@ -288,6 +340,8 @@ export function populateSettingsContent(): void {
   const isLocationsExpanded = isPanelExpanded('layer-names', false); // Default to collapsed
 
   container.innerHTML = `
+    ${generateAtlasManagementSection()}
+
     <div class="settings-section">
       <h4 class="collapsible-header" data-target="layer-names">
         <span class="expand-icon ${isLocationsExpanded ? 'expanded' : ''}">${isLocationsExpanded ? '▼' : '►'}</span>
@@ -657,6 +711,9 @@ function setupSettingsEventListeners(): void {
       alert('Tips modal coming soon!');
     });
   }
+
+  // Atlas Management Handlers
+  setupAtlasManagementHandlers();
 }
 
 /**
@@ -967,6 +1024,221 @@ function attachEditHandlers(): void {
   const locationCancelBtn = getElement('cancel-location-btn');
   if (locationCancelBtn) {
     locationCancelBtn.addEventListener('click', exitEditMode);
+  }
+}
+
+/**
+ * Setup event handlers for atlas management.
+ */
+function setupAtlasManagementHandlers(): void {
+  // Create Atlas Form
+  const createAtlasBtn = document.getElementById('create-atlas-btn') as HTMLButtonElement;
+  const atlasNameInput = document.getElementById('atlas-name') as HTMLInputElement;
+
+  if (createAtlasBtn && atlasNameInput) {
+    const handleCreateAtlas = () => {
+      const name = atlasNameInput.value.trim();
+      if (!name) {
+        showAtlasError('Atlas name is required.');
+        return;
+      }
+
+      const validation = validateAtlasName(name);
+      if (!validation.valid) {
+        showAtlasError(validation.error || 'Invalid atlas name.');
+        return;
+      }
+
+      try {
+        const success = createAtlas(name);
+        if (success) {
+          atlasNameInput.value = '';
+          hideAtlasError();
+          refreshAtlasList();
+          alert(`Atlas "${name}" created successfully!`);
+        } else {
+          showAtlasError('Failed to create atlas.');
+        }
+      } catch (error) {
+        console.error('Error creating atlas:', error);
+        showAtlasError('Failed to create atlas.');
+      }
+    };
+
+    createAtlasBtn.addEventListener('click', handleCreateAtlas);
+    atlasNameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCreateAtlas();
+      }
+    });
+  }
+
+  // Refresh atlas list on initial load
+  refreshAtlasList();
+}
+
+/**
+ * Show atlas error message.
+ */
+function showAtlasError(message: string): void {
+  const errorElement = document.getElementById('atlas-error');
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+  }
+}
+
+/**
+ * Hide atlas error message.
+ */
+function hideAtlasError(): void {
+  const errorElement = document.getElementById('atlas-error');
+  if (errorElement) {
+    errorElement.style.display = 'none';
+  }
+}
+
+/**
+ * Refresh the atlas list display.
+ */
+function refreshAtlasList(): void {
+  const listContainer = document.getElementById('atlas-list');
+  if (!listContainer) return;
+
+  const atlases = getAtlasInfoList();
+  const activeAtlas = getActiveAtlas();
+
+  if (atlases.length === 0) {
+    listContainer.innerHTML = '<p class="empty-atlas-list">No atlases found.</p>';
+    return;
+  }
+
+  const atlasItems = atlases.map(atlas => {
+    const isActive = atlas.name === activeAtlas;
+    const activeClass = isActive ? 'active-atlas' : '';
+    const lastModified = atlas.lastModified
+      ? new Date(atlas.lastModified).toLocaleDateString()
+      : 'Unknown';
+
+    return `
+      <div class="atlas-item ${activeClass}" data-atlas-name="${escapeHtml(atlas.name)}">
+        <div class="atlas-details">
+          <div class="atlas-name">${escapeHtml(atlas.name)}</div>
+          <div class="atlas-meta">${atlas.cardCount} cards • Modified: ${lastModified}</div>
+        </div>
+        <div class="atlas-actions">
+          ${!isActive ? `<button class="btn btn-sm atlas-activate-btn" data-atlas-name="${escapeHtml(atlas.name)}">Activate</button>` : ''}
+          <button class="btn btn-sm atlas-rename-btn" data-atlas-name="${escapeHtml(atlas.name)}">Rename</button>
+          ${!isActive ? `<button class="btn btn-sm btn-danger atlas-delete-btn" data-atlas-name="${escapeHtml(atlas.name)}">Delete</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  listContainer.innerHTML = atlasItems;
+
+  // Attach event handlers for atlas actions
+  attachAtlasActionHandlers();
+}
+
+/**
+ * Attach event handlers for atlas action buttons.
+ */
+function attachAtlasActionHandlers(): void {
+  // Activate buttons
+  document.querySelectorAll('.atlas-activate-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const atlasName = (e.target as HTMLElement).getAttribute('data-atlas-name');
+      if (atlasName) {
+        handleActivateAtlas(atlasName);
+      }
+    });
+  });
+
+  // Rename buttons
+  document.querySelectorAll('.atlas-rename-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const atlasName = (e.target as HTMLElement).getAttribute('data-atlas-name');
+      if (atlasName) {
+        handleRenameAtlas(atlasName);
+      }
+    });
+  });
+
+  // Delete buttons
+  document.querySelectorAll('.atlas-delete-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const atlasName = (e.target as HTMLElement).getAttribute('data-atlas-name');
+      if (atlasName) {
+        handleDeleteAtlas(atlasName);
+      }
+    });
+  });
+}
+
+/**
+ * Handle atlas activation.
+ */
+function handleActivateAtlas(atlasName: string): void {
+  if (confirm(`Switch to atlas "${atlasName}"? This will reload the page.`)) {
+    setActiveAtlas(atlasName);
+    window.location.reload();
+  }
+}
+
+/**
+ * Handle atlas renaming.
+ */
+function handleRenameAtlas(atlasName: string): void {
+  const newName = prompt(`Rename atlas "${atlasName}" to:`, atlasName);
+  if (!newName || newName.trim() === '' || newName === atlasName) {
+    return;
+  }
+
+  const validation = validateAtlasName(newName.trim());
+  if (!validation.valid) {
+    alert(`Invalid name: ${validation.error}`);
+    return;
+  }
+
+  try {
+    const success = renameAtlas(atlasName, newName.trim());
+    if (success) {
+      refreshAtlasList();
+      alert(`Atlas renamed to "${newName.trim()}" successfully!`);
+    } else {
+      alert('Failed to rename atlas.');
+    }
+  } catch (error) {
+    console.error('Error renaming atlas:', error);
+    alert('Failed to rename atlas.');
+  }
+}
+
+/**
+ * Handle atlas deletion.
+ */
+function handleDeleteAtlas(atlasName: string): void {
+  const activeAtlas = getActiveAtlas();
+  if (atlasName === activeAtlas) {
+    alert('Cannot delete the active atlas.');
+    return;
+  }
+
+  if (confirm(`Are you sure you want to delete atlas "${atlasName}"? This action cannot be undone.`)) {
+    try {
+      const success = deleteAtlas(atlasName);
+      if (success) {
+        refreshAtlasList();
+        alert(`Atlas "${atlasName}" deleted successfully!`);
+      } else {
+        alert('Failed to delete atlas.');
+      }
+    } catch (error) {
+      console.error('Error deleting atlas:', error);
+      alert('Failed to delete atlas.');
+    }
   }
 }
 

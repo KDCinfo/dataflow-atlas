@@ -232,6 +232,69 @@
     text-align: center;
 }
 
+/* Atlas Management Styles */
+.atlas-manager {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    max-height: 300px;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+}
+
+.atlas-item {
+    align-items: center;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-sm);
+}
+
+.atlas-item:hover {
+    background-color: var(--color-surface);
+}
+
+.atlas-item.active-atlas {
+    background: var(--color-primary);
+    color: black;
+}
+
+.atlas-item.active-atlas .atlas-name {
+    color: black;
+    font-weight: 600;
+}
+
+.atlas-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.atlas-name {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.atlas-meta {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.atlas-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.empty-atlas-list {
+    color: var(--color-text-muted);
+    font-style: italic;
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
 /* Legacy Layer Manager Styles */
 .layer-manager {
     display: flex;
@@ -340,6 +403,52 @@
 .delete-btn:hover,
 .btn-compact.delete-btn:hover {
     background-color: red;
+}
+
+/* Atlas Selector Styles */
+.atlas-selector {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-left: auto;
+    margin-right: var(--spacing-md);
+}
+
+.atlas-label {
+    color: var(--color-text);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.atlas-dropdown {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    max-width: 150px;
+    min-width: 120px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.atlas-dropdown:focus {
+    border-color: var(--color-primary);
+    outline: none;
+}
+
+.atlas-activate-btn {
+    font-size: 0.8rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.atlas-activate-btn.btn-active {
+    background: var(--color-primary);
+    color: black;
+}
+
+.atlas-activate-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* Card Tag Spacing Utilities */

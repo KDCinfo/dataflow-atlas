@@ -22,6 +22,7 @@ import {
 import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
 import { initializeSettingsPanel } from './components/settingsPanel.js';
+import { AtlasSelector } from './components/atlasSelector.js';
 
 /**
  * Main Data Flow Atlas application class.
@@ -31,10 +32,12 @@ export class DFDAtlas {
   private relationshipsFilterCardId: string | null = null; // Track active relationships filter
   private isTreeViewActive: boolean = false; // Track tree view state
   private treeView: TreeView = new TreeView(); // Tree view system
+  private atlasSelector: AtlasSelector; // Atlas selection component
 
   constructor() {
     this.initializeEventListeners();
     this.initializeUI();
+    this.atlasSelector = new AtlasSelector(); // Initialize atlas selector
     this.renderAtlas();
     this.updateStats();
   }
@@ -962,6 +965,15 @@ export class DFDAtlas {
       showNotification('All data cleared', 'success');
       this.renderAtlas();
       this.updateStats();
+    }
+  }
+
+  /**
+   * Refresh atlas selector when atlas list changes.
+   */
+  public refreshAtlasSelector(): void {
+    if (this.atlasSelector) {
+      this.atlasSelector.refresh();
     }
   }
 

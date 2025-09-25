@@ -1,17 +1,25 @@
 import type { DFACard, ImportMode } from '../types/dfa.js';
+import { getActiveAtlas, getAtlasStorageKey, touchAtlas } from './atlasManager.js';
 
 /**
  * Storage key for DFA cards in localStorage.
  */
-// const STORAGE_KEY = 'dataflow-atlas-cards';
 export const STORAGE_KEY = 'dfa_default';
 
 /**
- * Load DFA cards from localStorage.
+ * Get the current storage key based on active atlas.
+ */
+export function getCurrentStorageKey(): string {
+  return getAtlasStorageKey(getActiveAtlas());
+}
+
+/**
+ * Load DFA cards from localStorage using the current active atlas.
  */
 export function loadCards(): DFACard[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const storageKey = getCurrentStorageKey();
+    const stored = localStorage.getItem(storageKey);
     if (!stored) return [];
 
     const parsed = JSON.parse(stored);
@@ -23,11 +31,16 @@ export function loadCards(): DFACard[] {
 }
 
 /**
- * Save DFA cards to localStorage.
+ * Save DFA cards to localStorage using the current active atlas.
  */
 export function saveCards(cards: DFACard[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards, null, 2));
+    const storageKey = getCurrentStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify(cards, null, 2));
+
+    // Update the last modified timestamp
+    const activeAtlas = getActiveAtlas();
+    touchAtlas(activeAtlas);
   } catch (error) {
     console.error('Failed to save cards to localStorage:', error);
   }
