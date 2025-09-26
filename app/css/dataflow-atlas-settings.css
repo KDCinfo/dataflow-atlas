@@ -60,7 +60,7 @@
     margin-left: 1px;
 }
 .settings-item input.storage-new-name-input {
-    min-width: 250px;
+    min-width: 225px;
 }
 .settings-item select {
     padding: var(--spacing-sm);
@@ -466,6 +466,33 @@
 .atlas-activate-btn.btn-active {
     background: var(--color-primary);
     color: black;
+}
+
+/* Help Icon Styles */
+.help-icon {
+    color: var(--color-text-muted);
+    font-size: 0.8em;
+    margin-left: 0.25rem;
+    opacity: 0.8;
+}
+
+.help-icon-overlay {
+    background: var(--color-warning);
+    border: 1px solid #d97706;
+    border-radius: 50%;
+    color: white;
+    cursor: help;
+    font-size: 0.75em;
+    font-weight: bold;
+    height: 18px;
+    left: -6px;
+    line-height: 16px;
+    position: absolute;
+    text-align: center;
+    top: -6px;
+    /* transform: translateY(-50%); */
+    width: 18px;
+    z-index: 10;
 }
 
 .atlas-activate-btn:disabled {

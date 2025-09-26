@@ -3,13 +3,14 @@
  * Handles multiple atlas instances with localStorage persistence.
  */
 
-export const ATLAS_PREFIX = 'dfa_';
-export const DEFAULT_ATLAS_NAME = 'default';
+import AppConstants from './appConstants.js';
+
+export const ATLAS_PREFIX = AppConstants.atlasPrefix;
+export const DEFAULT_ATLAS_NAME = AppConstants.defaultAtlasName;
 export const ATLAS_LIST_KEY = 'dataflow_atlas_list';
 
 // Regex pattern for valid atlas names (matches AppConstants.keyNamePattern from reference app)
-// Either camelCase OR snake_case, but not mixed
-export const ATLAS_NAME_PATTERN = /^(?:[a-z][a-zA-Z0-9]*|[a-z][a-z0-9_]*[a-z0-9])$/;
+export const ATLAS_NAME_PATTERN = AppConstants.keyNamePattern;
 
 /**
  * Interface for atlas management settings.
@@ -55,7 +56,7 @@ export function getAtlasDisplayName(storageKey: string): string {
  */
 export function validateAtlasName(name: string): { valid: boolean; error?: string } {
   if (!name || name.trim() === '') {
-    return { valid: false, error: 'Atlas name cannot be empty.' };
+    return { valid: false, error: AppConstants.atlasNameErrTextNameEmpty };
   }
 
   const trimmedName = name.trim();
@@ -63,12 +64,12 @@ export function validateAtlasName(name: string): { valid: boolean; error?: strin
   if (!ATLAS_NAME_PATTERN.test(trimmedName)) {
     return {
       valid: false,
-      error: 'For consistent atlas names: Start with a lowercase character. Use either camelCase or snake_case.'
+      error: AppConstants.atlasNameErrTextInvalid
     };
   }
 
   if (atlasExists(trimmedName)) {
-    return { valid: false, error: 'An atlas with this name already exists.' };
+    return { valid: false, error: AppConstants.atlasNameErrTextNameExists };
   }
 
   return { valid: true };

@@ -136,13 +136,13 @@ function generateAtlasManagementSection(): string {
           <label id="atlas-form-label">Create New Atlas:</label>
           <div class="settings-flex-row storage-create-name-modal">
             <input type="text" required id="new-atlas-name-input" class="storage-new-name-input settings-input settings-flex-item" placeholder="my_project or myProject">
-            <button disabled id="create-atlas-btn" class="btn-primary storage-new-name-button" title="Please provide an atlas name.">Create</button>
+            <span style="position: relative;">
+              <button disabled id="create-atlas-btn" class="btn-primary storage-new-name-button" title="Please provide an atlas name.">Create</button>
+              <span id="create-atlas-help-icon" class="help-icon-overlay" style="display: none;" title="Atlas name format help">ⓘ</span>
+            </span>
           </div>
-          <div class="input-help hidden">
+          <div class="input-help full-width text-right">
             <small>Atlas names must use camelCase or snake_case format, starting with a lowercase letter.</small>
-          </div>
-          <div id="atlas-error-message" class="input-help" style="color: var(--color-danger); display: none;">
-            <small></small>
           </div>
         </div>
 
@@ -1039,14 +1039,11 @@ function setupAtlasManagementHandlers(): void {
   if (createAtlasBtn && atlasNameInput) {
     const handleCreateAtlas = () => {
       const name = atlasNameInput.value.trim();
-      if (!name) {
-        showAtlasError('Atlas name is required.');
-        return;
-      }
-
       const validation = validateAtlasName(name);
+
       if (!validation.valid) {
-        showAtlasError(validation.error || 'Invalid atlas name.');
+        // Button should already be disabled, but show alert anyway
+        alert(validation.error || 'Invalid atlas name.');
         return;
       }
 
@@ -1054,15 +1051,15 @@ function setupAtlasManagementHandlers(): void {
         const success = createAtlas(name);
         if (success) {
           atlasNameInput.value = '';
-          hideAtlasError();
+          updateAtlasButtonStates(); // Reset button states after clearing input
           refreshAtlasList();
           alert(`Atlas "${name}" created successfully!`);
         } else {
-          showAtlasError('Failed to create atlas.');
+          alert('Failed to create atlas.');
         }
       } catch (error) {
         console.error('Error creating atlas:', error);
-        showAtlasError('Failed to create atlas.');
+        alert('Failed to create atlas.');
       }
     };
 
@@ -1070,6 +1067,7 @@ function setupAtlasManagementHandlers(): void {
     const updateAtlasButtonStates = () => {
       const inputValue = atlasNameInput.value.trim();
       const validation = validateAtlasName(inputValue);
+      const helpIcon = document.getElementById('create-atlas-help-icon');
 
       // Apply validation styling to input
       if (inputValue === '') {
@@ -1082,23 +1080,21 @@ function setupAtlasManagementHandlers(): void {
         atlasNameInput.classList.add('invalid');
       }
 
-      // Update button state and tooltip (like AppSettings toggleStorageButtons)
+      // Update button state, tooltip, and help icon visibility
       if (inputValue === '') {
         createAtlasBtn.disabled = true;
         createAtlasBtn.title = 'Atlas name cannot be empty';
-        hideAtlasError();
+        if (helpIcon) helpIcon.style.display = 'inline';
       } else if (!validation.valid) {
         createAtlasBtn.disabled = true;
         createAtlasBtn.title = validation.error || 'Invalid atlas name';
-        showAtlasError(validation.error || 'Invalid atlas name');
+        if (helpIcon) helpIcon.style.display = 'inline';
       } else {
         createAtlasBtn.disabled = false;
         createAtlasBtn.title = '';
-        hideAtlasError();
+        if (helpIcon) helpIcon.style.display = 'none';
       }
-    };
-
-    // Input event listener (like AppSettings newStorageNameInput)
+    };    // Input event listener (like AppSettings newStorageNameInput)
     atlasNameInput.addEventListener('input', updateAtlasButtonStates);
 
     // Enter key handler
@@ -1134,29 +1130,7 @@ function setupAtlasManagementHandlers(): void {
   }, 100);
 }
 
-/**
- * Show atlas error message.
- */
-function showAtlasError(message: string): void {
-  const errorElement = document.getElementById('atlas-error-message');
-  if (errorElement) {
-    const smallElement = errorElement.querySelector('small');
-    if (smallElement) {
-      smallElement.textContent = message;
-    }
-    errorElement.style.display = 'block';
-  }
-}
 
-/**
- * Hide atlas error message.
- */
-function hideAtlasError(): void {
-  const errorElement = document.getElementById('atlas-error-message');
-  if (errorElement) {
-    errorElement.style.display = 'none';
-  }
-}
 
 /**
  * Refresh the atlas list display.

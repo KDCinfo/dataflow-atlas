@@ -980,6 +980,12 @@ button.card-action-btn.mini {
 .required {
     color: var(--color-text) !important;
 }
+.full-width {
+    width: 100%;
+}
+.text-right {
+    text-align: right;
+}
 
 .sr-only {
     clip: rect(0, 0, 0, 0);
