@@ -23,6 +23,7 @@ import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
 import { initializeSettingsPanel } from './components/settingsPanel.js';
 import { AtlasSelector } from './components/atlasSelector.js';
+import { initializeDefaultAtlas } from './utils/atlasManagerOptimized.js';
 
 /**
  * Main Data Flow Atlas application class.
@@ -37,7 +38,12 @@ export class DFDAtlas {
   constructor() {
     this.initializeEventListeners();
     this.initializeUI();
+
+    // Initialize atlas system and load active atlas.
+    initializeDefaultAtlas(); // Lightweight: only creates empty storage if needed
     this.atlasSelector = new AtlasSelector(); // Initialize atlas selector
+
+    // Render the active atlas (loads only the cards we need).
     this.renderAtlas();
     this.updateStats();
   }

@@ -31,8 +31,10 @@ import {
   getAtlasInfoList,
   getActiveAtlas,
   setActiveAtlas,
-  initializeDefaultAtlas
-} from '../utils/atlasManager.js';
+  initializeDefaultAtlas,
+  restoreFromBackup,
+  hasActiveBackup
+} from '../utils/atlasManagerOptimized.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -144,6 +146,18 @@ function generateAtlasManagementSection(): string {
           </div>
           <div class="input-help full-width text-right">
             <small>Atlas names must use camelCase or snake_case format, starting with a lowercase letter.</small>
+          </div>
+        </div>
+
+        <div class="settings-item">
+          <label>Auto-Backup:</label>
+          <div class="settings-flex-row">
+            <button id="restore-backup-btn" class="btn-secondary" disabled title="No backup available for the active atlas">
+              Restore Active Auto-Backup
+            </button>
+          </div>
+          <div class="input-help">
+            <small>Auto-backups are created each time you edit cards (not when creating). Only available for the currently active atlas.</small>
           </div>
         </div>
 
@@ -1087,6 +1101,20 @@ function attachEditHandlers(): void {
 }
 
 /**
+ * Update the backup button state based on whether active atlas has backup.
+ */
+function updateBackupButtonState(): void {
+  const restoreBackupBtn = document.getElementById('restore-backup-btn') as HTMLButtonElement;
+  if (restoreBackupBtn) {
+    const hasBackup = hasActiveBackup();
+    restoreBackupBtn.disabled = !hasBackup;
+    restoreBackupBtn.title = hasBackup
+      ? `Restore ${getActiveAtlas()} from auto-backup`
+      : 'No backup available for the active atlas';
+  }
+}
+
+/**
  * Setup event handlers for atlas management.
  */
 function setupAtlasManagementHandlers(): void {
@@ -1196,6 +1224,37 @@ function setupAtlasManagementHandlers(): void {
     updateAtlasButtonStates();
   }
 
+  // Restore Backup Button Handler
+  const restoreBackupBtn = document.getElementById('restore-backup-btn') as HTMLButtonElement;
+  if (restoreBackupBtn) {
+    restoreBackupBtn.addEventListener('click', () => {
+      const backupWarning = `\n!!! WARNING !!! All current data WILL BE REPLACED!
+            \nActive atlas: ${getActiveAtlas()}
+            \nThis will restore from the auto-backup created before your last edit.
+            \nYou can also consider using the import/export options.\n`;
+
+      if (confirm(backupWarning)) {
+        try {
+          const success = restoreFromBackup();
+          if (success) {
+            refreshAtlasList();
+            updateBackupButtonState();
+            // Refresh the main atlas view if we're on the main page
+            if (window.location.pathname.includes('app') && (window as any).app) {
+              (window as any).app.renderAtlas();
+            }
+            alert('Atlas restored from backup successfully!');
+          } else {
+            alert('Failed to restore from backup. No backup available.');
+          }
+        } catch (error) {
+          console.error('Error restoring backup:', error);
+          alert('Failed to restore from backup.');
+        }
+      }
+    });
+  }
+
   // Initialize default atlas and refresh list
   console.log('[Atlas] Initializing atlas management...');
   initializeDefaultAtlas();
@@ -1287,6 +1346,9 @@ function renderAtlasList(atlases: any[], activeAtlas: string, listContainer: HTM
 
   // Attach edit handlers for rename buttons
   attachEditHandlers();
+
+  // Update backup button state
+  updateBackupButtonState();
 }
 
 /**

@@ -269,13 +269,6 @@ function getAtlasMetadata(atlasName: string, key: string): string | null {
 }
 
 /**
- * Set atlas metadata.
- */
-export function setAtlasMetadata(atlasName: string, key: string, value: string): void {
-  localStorage.setItem(`${getAtlasStorageKey(atlasName)}_${key}`, value);
-}
-
-/**
  * Remove all metadata for an atlas.
  */
 function removeAtlasMetadata(atlasName: string): void {
@@ -290,6 +283,13 @@ function removeAtlasMetadata(atlasName: string): void {
   }
 
   keysToRemove.forEach(key => localStorage.removeItem(key));
+}
+
+/**
+ * Set atlas metadata.
+ */
+export function setAtlasMetadata(atlasName: string, key: string, value: string): void {
+  localStorage.setItem(`${getAtlasStorageKey(atlasName)}_${key}`, value);
 }
 
 /**

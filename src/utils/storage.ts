@@ -1,8 +1,13 @@
 import type { DFACard, ImportMode } from '../types/dfa.js';
-import { getActiveAtlas, getAtlasStorageKey, touchAtlas } from './atlasManager.js';
+import {
+  getActiveAtlas,
+  getAtlasStorageKey,
+  loadCards as atlasLoadCards,
+  saveCards as atlasSaveCards
+} from './atlasManagerOptimized.js';
 
 /**
- * Storage key for DFA cards in localStorage.
+ * Storage key for DFA cards in localStorage (legacy).
  */
 export const STORAGE_KEY = 'dfa_default';
 
@@ -15,35 +20,22 @@ export function getCurrentStorageKey(): string {
 
 /**
  * Load DFA cards from localStorage using the current active atlas.
+ * Now uses the optimized atlas manager with automatic format migration.
  */
 export function loadCards(): DFACard[] {
-  try {
-    const storageKey = getCurrentStorageKey();
-    const stored = localStorage.getItem(storageKey);
-    if (!stored) return [];
-
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.error('Failed to load cards from localStorage:', error);
-    return [];
-  }
+  return atlasLoadCards();
 }
 
 /**
  * Save DFA cards to localStorage using the current active atlas.
+ * Now uses the optimized atlas manager with automatic backup creation.
  */
 export function saveCards(cards: DFACard[]): void {
-  try {
-    const storageKey = getCurrentStorageKey();
-    localStorage.setItem(storageKey, JSON.stringify(cards, null, 2));
-
-    // Update the last modified timestamp
-    const activeAtlas = getActiveAtlas();
-    touchAtlas(activeAtlas);
-  } catch (error) {
-    console.error('Failed to save cards to localStorage:', error);
-  }
+  // Use the optimized atlas manager which handles:
+  // - Consolidated storage format
+  // - Automatic backup creation on edit
+  // - Metadata updates
+  atlasSaveCards(cards, true); // true = create backup on edit
 }
 
 /**
