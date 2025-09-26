@@ -1084,15 +1084,24 @@ function setupAtlasManagementHandlers(): void {
       if (inputValue === '') {
         createAtlasBtn.disabled = true;
         createAtlasBtn.title = 'Atlas name cannot be empty';
-        if (helpIcon) helpIcon.style.display = 'inline';
+        if (helpIcon) {
+          helpIcon.title = 'Atlas name cannot be empty';
+          helpIcon.style.display = 'inline';
+        }
       } else if (!validation.valid) {
         createAtlasBtn.disabled = true;
         createAtlasBtn.title = validation.error || 'Invalid atlas name';
-        if (helpIcon) helpIcon.style.display = 'inline';
+        if (helpIcon) {
+          helpIcon.title = validation.error || 'Invalid atlas name';
+          helpIcon.style.display = 'inline';
+        }
       } else {
         createAtlasBtn.disabled = false;
         createAtlasBtn.title = '';
-        if (helpIcon) helpIcon.style.display = 'none';
+        if (helpIcon) {
+          helpIcon.title = '';
+          helpIcon.style.display = 'none';
+        }
       }
     };    // Input event listener (like AppSettings newStorageNameInput)
     atlasNameInput.addEventListener('input', updateAtlasButtonStates);
