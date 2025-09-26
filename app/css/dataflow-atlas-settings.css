@@ -386,6 +386,10 @@
 }
 
 /* Settings Button Styles */
+.btn {
+    cursor: pointer;
+}
+
 .btn-compact {
     background: var(--color-secondary);
     border: none;

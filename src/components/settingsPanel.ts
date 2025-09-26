@@ -140,6 +140,7 @@ function generateAtlasManagementSection(): string {
               <button disabled id="create-atlas-btn" class="btn-primary storage-new-name-button" title="Please provide an atlas name.">Create</button>
               <span id="create-atlas-help-icon" class="help-icon-overlay" style="display: none;" title="Atlas name format help">ⓘ</span>
             </span>
+            <button id="cancel-atlas-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help full-width text-right">
             <small>Atlas names must use camelCase or snake_case format, starting with a lowercase letter.</small>
@@ -851,14 +852,14 @@ export function initializeSettingsPanel(): void {
 
 // Track editing state
 let currentEditState: {
-  type: 'scope' | 'category' | 'location';
+  type: 'scope' | 'category' | 'location' | 'atlas';
   originalKey: string;
 } | null = null;
 
 /**
  * Enter edit mode for an item by populating the form fields.
  */
-function enterEditMode(type: 'scope' | 'category' | 'location', key: string, label?: string): void {
+function enterEditMode(type: 'scope' | 'category' | 'location' | 'atlas', key: string, label?: string): void {
   currentEditState = { type, originalKey: key };
 
   if (type === 'scope') {
@@ -911,6 +912,20 @@ function enterEditMode(type: 'scope' | 'category' | 'location', key: string, lab
       cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Location:';
       labelInput.focus(); // Focus on label since key is disabled
+    }
+  } else if (type === 'atlas') {
+    const nameInput = getElement<HTMLInputElement>('new-atlas-name-input');
+    const createBtn = getElement('create-atlas-btn');
+    const cancelBtn = getElement('cancel-atlas-btn');
+    const formLabel = getElement('atlas-form-label');
+
+    if (nameInput && createBtn && cancelBtn && formLabel) {
+      nameInput.value = key;
+      createBtn.textContent = 'Update';
+      createBtn.className = 'btn-primary';
+      cancelBtn.classList.remove('settings-hidden-btn');
+      formLabel.textContent = 'Edit Atlas Name:';
+      nameInput.focus();
     }
   }
 }
@@ -971,6 +986,20 @@ function exitEditMode(): void {
     locationCancelBtn.classList.add('settings-hidden-btn');
     locationFormLabel.textContent = 'Add New Location:';
   }
+
+  // Reset atlas form
+  const atlasNameInput = getElement<HTMLInputElement>('new-atlas-name-input');
+  const atlasCreateBtn = getElement('create-atlas-btn');
+  const atlasCancelBtn = getElement('cancel-atlas-btn');
+  const atlasFormLabel = getElement('atlas-form-label');
+
+  if (atlasNameInput && atlasCreateBtn && atlasCancelBtn && atlasFormLabel) {
+    atlasNameInput.value = '';
+    atlasCreateBtn.textContent = 'Create';
+    atlasCreateBtn.className = 'btn-primary';
+    atlasCancelBtn.classList.add('settings-hidden-btn');
+    atlasFormLabel.textContent = 'Create New Atlas:';
+  }
 }/**
  * Attach edit event handlers for all types.
  */
@@ -1011,6 +1040,30 @@ function attachEditHandlers(): void {
     });
   });
 
+  // Atlas edit handlers
+  document.querySelectorAll('.atlas-rename-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const atlasName = target.getAttribute('data-atlas-name');
+      if (atlasName) {
+        // Prevent renaming default atlas
+        if (atlasName === 'default') {
+          alert('Cannot rename the default atlas.');
+          return;
+        }
+
+        // Prevent renaming active atlas
+        const activeAtlas = getActiveAtlas();
+        if (atlasName === activeAtlas) {
+          alert('Cannot rename the currently active atlas.');
+          return;
+        }
+
+        enterEditMode('atlas', atlasName);
+      }
+    });
+  });
+
   // Cancel button handlers
   const scopeCancelBtn = getElement('cancel-scope-btn');
   if (scopeCancelBtn) {
@@ -1026,6 +1079,11 @@ function attachEditHandlers(): void {
   if (locationCancelBtn) {
     locationCancelBtn.addEventListener('click', exitEditMode);
   }
+
+  const atlasCancelBtn = getElement('cancel-atlas-btn');
+  if (atlasCancelBtn) {
+    atlasCancelBtn.addEventListener('click', exitEditMode);
+  }
 }
 
 /**
@@ -1037,7 +1095,7 @@ function setupAtlasManagementHandlers(): void {
   const atlasNameInput = document.getElementById('new-atlas-name-input') as HTMLInputElement;
 
   if (createAtlasBtn && atlasNameInput) {
-    const handleCreateAtlas = () => {
+    const handleCreateOrUpdateAtlas = () => {
       const name = atlasNameInput.value.trim();
       const validation = validateAtlasName(name);
 
@@ -1048,18 +1106,33 @@ function setupAtlasManagementHandlers(): void {
       }
 
       try {
-        const success = createAtlas(name);
-        if (success) {
-          atlasNameInput.value = '';
-          updateAtlasButtonStates(); // Reset button states after clearing input
-          refreshAtlasList();
-          alert(`Atlas "${name}" created successfully!`);
+        let success = false;
+
+        if (currentEditState && currentEditState.type === 'atlas') {
+          // Update mode
+          success = renameAtlas(currentEditState.originalKey, name);
+          if (success) {
+            exitEditMode();
+            refreshAtlasList();
+            alert(`Atlas renamed to "${name}" successfully!`);
+          } else {
+            alert('Failed to rename atlas.');
+          }
         } else {
-          alert('Failed to create atlas.');
+          // Create mode
+          success = createAtlas(name);
+          if (success) {
+            atlasNameInput.value = '';
+            updateAtlasButtonStates(); // Reset button states after clearing input
+            refreshAtlasList();
+            alert(`Atlas "${name}" created successfully!`);
+          } else {
+            alert('Failed to create atlas.');
+          }
         }
       } catch (error) {
-        console.error('Error creating atlas:', error);
-        alert('Failed to create atlas.');
+        console.error('Error creating/updating atlas:', error);
+        alert('Failed to create/update atlas.');
       }
     };
 
@@ -1111,13 +1184,13 @@ function setupAtlasManagementHandlers(): void {
       if (event.key === 'Enter') {
         event.preventDefault();
         if (!createAtlasBtn.disabled) {
-          handleCreateAtlas();
+          handleCreateOrUpdateAtlas();
         }
       }
     });
 
     // Click handler
-    createAtlasBtn.addEventListener('click', handleCreateAtlas);
+    createAtlasBtn.addEventListener('click', handleCreateOrUpdateAtlas);
 
     // Initial button state
     updateAtlasButtonStates();
@@ -1211,6 +1284,9 @@ function renderAtlasList(atlases: any[], activeAtlas: string, listContainer: HTM
 
   // Attach event handlers for atlas actions
   attachAtlasActionHandlers();
+
+  // Attach edit handlers for rename buttons
+  attachEditHandlers();
 }
 
 /**
@@ -1227,15 +1303,7 @@ function attachAtlasActionHandlers(): void {
     });
   });
 
-  // Rename buttons
-  document.querySelectorAll('.atlas-rename-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const atlasName = (e.target as HTMLElement).getAttribute('data-atlas-name');
-      if (atlasName) {
-        handleRenameAtlas(atlasName);
-      }
-    });
-  });
+
 
   // Delete buttons
   document.querySelectorAll('.atlas-delete-btn').forEach(btn => {
@@ -1258,47 +1326,6 @@ function handleActivateAtlas(atlasName: string): void {
   }
 }
 
-/**
- * Handle atlas renaming.
- */
-function handleRenameAtlas(atlasName: string): void {
-  // Prevent renaming default atlas
-  if (atlasName === 'default') {
-    alert('Cannot rename the default atlas.');
-    return;
-  }
-
-  // Prevent renaming active atlas
-  const activeAtlas = getActiveAtlas();
-  if (atlasName === activeAtlas) {
-    alert('Cannot rename the currently active atlas.');
-    return;
-  }
-
-  const newName = prompt(`Rename atlas "${atlasName}" to:`, atlasName);
-  if (!newName || newName.trim() === '' || newName === atlasName) {
-    return;
-  }
-
-  const validation = validateAtlasName(newName.trim());
-  if (!validation.valid) {
-    alert(`Invalid name: ${validation.error}`);
-    return;
-  }
-
-  try {
-    const success = renameAtlas(atlasName, newName.trim());
-    if (success) {
-      refreshAtlasList();
-      alert(`Atlas renamed to "${newName.trim()}" successfully!`);
-    } else {
-      alert('Failed to rename atlas.');
-    }
-  } catch (error) {
-    console.error('Error renaming atlas:', error);
-    alert('Failed to rename atlas.');
-  }
-}
 
 /**
  * Handle atlas deletion.
