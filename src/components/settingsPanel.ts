@@ -30,7 +30,8 @@ import {
   renameAtlas,
   getAtlasInfoList,
   getActiveAtlas,
-  setActiveAtlas
+  setActiveAtlas,
+  initializeDefaultAtlas
 } from '../utils/atlasManager.js';
 
 /**
@@ -1031,9 +1032,9 @@ function attachEditHandlers(): void {
  * Setup event handlers for atlas management.
  */
 function setupAtlasManagementHandlers(): void {
-  // Create Atlas Form
+  // Create Atlas Form - fix element ID to match HTML
   const createAtlasBtn = document.getElementById('create-atlas-btn') as HTMLButtonElement;
-  const atlasNameInput = document.getElementById('atlas-name') as HTMLInputElement;
+  const atlasNameInput = document.getElementById('new-atlas-name-input') as HTMLInputElement;
 
   if (createAtlasBtn && atlasNameInput) {
     const handleCreateAtlas = () => {
@@ -1065,26 +1066,84 @@ function setupAtlasManagementHandlers(): void {
       }
     };
 
-    createAtlasBtn.addEventListener('click', handleCreateAtlas);
-    atlasNameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleCreateAtlas();
+    // Real-time button state management (following AppSettings.js pattern)
+    const updateAtlasButtonStates = () => {
+      const inputValue = atlasNameInput.value.trim();
+      const validation = validateAtlasName(inputValue);
+
+      // Apply validation styling to input
+      if (inputValue === '') {
+        atlasNameInput.classList.remove('valid', 'invalid');
+      } else if (validation.valid) {
+        atlasNameInput.classList.remove('invalid');
+        atlasNameInput.classList.add('valid');
+      } else {
+        atlasNameInput.classList.remove('valid');
+        atlasNameInput.classList.add('invalid');
+      }
+
+      // Update button state and tooltip (like AppSettings toggleStorageButtons)
+      if (inputValue === '') {
+        createAtlasBtn.disabled = true;
+        createAtlasBtn.title = 'Atlas name cannot be empty';
+        hideAtlasError();
+      } else if (!validation.valid) {
+        createAtlasBtn.disabled = true;
+        createAtlasBtn.title = validation.error || 'Invalid atlas name';
+        showAtlasError(validation.error || 'Invalid atlas name');
+      } else {
+        createAtlasBtn.disabled = false;
+        createAtlasBtn.title = '';
+        hideAtlasError();
+      }
+    };
+
+    // Input event listener (like AppSettings newStorageNameInput)
+    atlasNameInput.addEventListener('input', updateAtlasButtonStates);
+
+    // Enter key handler
+    atlasNameInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (!createAtlasBtn.disabled) {
+          handleCreateAtlas();
+        }
       }
     });
+
+    // Click handler
+    createAtlasBtn.addEventListener('click', handleCreateAtlas);
+
+    // Initial button state
+    updateAtlasButtonStates();
   }
 
-  // Refresh atlas list on initial load
-  refreshAtlasList();
+  // Initialize default atlas and refresh list
+  console.log('[Atlas] Initializing atlas management...');
+  initializeDefaultAtlas();
+
+  // Debug: Check if elements exist
+  console.log('[Atlas] Create button found:', !!createAtlasBtn);
+  console.log('[Atlas] Input found:', !!atlasNameInput);
+  console.log('[Atlas] List container exists:', !!document.getElementById('atlas-list-container'));
+
+  // Add a small delay to ensure initialization is complete
+  setTimeout(() => {
+    console.log('[Atlas] Refreshing atlas list...');
+    refreshAtlasList();
+  }, 100);
 }
 
 /**
  * Show atlas error message.
  */
 function showAtlasError(message: string): void {
-  const errorElement = document.getElementById('atlas-error');
+  const errorElement = document.getElementById('atlas-error-message');
   if (errorElement) {
-    errorElement.textContent = message;
+    const smallElement = errorElement.querySelector('small');
+    if (smallElement) {
+      smallElement.textContent = message;
+    }
     errorElement.style.display = 'block';
   }
 }
@@ -1093,7 +1152,7 @@ function showAtlasError(message: string): void {
  * Hide atlas error message.
  */
 function hideAtlasError(): void {
-  const errorElement = document.getElementById('atlas-error');
+  const errorElement = document.getElementById('atlas-error-message');
   if (errorElement) {
     errorElement.style.display = 'none';
   }
@@ -1103,23 +1162,50 @@ function hideAtlasError(): void {
  * Refresh the atlas list display.
  */
 function refreshAtlasList(): void {
-  const listContainer = document.getElementById('atlas-list');
-  if (!listContainer) return;
+  const listContainer = document.getElementById('atlas-list-container');
+  if (!listContainer) {
+    console.warn('[Settings] Atlas list container not found');
+    return;
+  }
 
   const atlases = getAtlasInfoList();
   const activeAtlas = getActiveAtlas();
 
+  console.log('[Settings] Refreshing atlas list:', { atlases, activeAtlas });
+
   if (atlases.length === 0) {
-    listContainer.innerHTML = '<p class="empty-atlas-list">No atlases found.</p>';
-    return;
+    console.warn('[Settings] No atlases found, initializing default');
+    initializeDefaultAtlas();
+    // Try again after initialization
+    const retryAtlases = getAtlasInfoList();
+    if (retryAtlases.length === 0) {
+      listContainer.innerHTML = '<p class="empty-atlas-list">No atlases found. Try refreshing the page.</p>';
+      return;
+    } else {
+      // Use the retry results
+      console.log('[Settings] Found atlases after initialization:', retryAtlases);
+      renderAtlasList(retryAtlases, activeAtlas, listContainer);
+      return;
+    }
   }
+
+  renderAtlasList(atlases, activeAtlas, listContainer);
+}
+
+function renderAtlasList(atlases: any[], activeAtlas: string, listContainer: HTMLElement): void {
 
   const atlasItems = atlases.map(atlas => {
     const isActive = atlas.name === activeAtlas;
+    const isDefault = atlas.name === 'default';
     const activeClass = isActive ? 'active-atlas' : '';
     const lastModified = atlas.lastModified
       ? new Date(atlas.lastModified).toLocaleDateString()
       : 'Unknown';
+
+    // Determine which buttons to show
+    const showActivate = !isActive;
+    const showRename = !isDefault && !isActive;
+    const showDelete = !isDefault && !isActive;
 
     return `
       <div class="atlas-item ${activeClass}" data-atlas-name="${escapeHtml(atlas.name)}">
@@ -1128,9 +1214,11 @@ function refreshAtlasList(): void {
           <div class="atlas-meta">${atlas.cardCount} cards • Modified: ${lastModified}</div>
         </div>
         <div class="atlas-actions">
-          ${!isActive ? `<button class="btn btn-sm atlas-activate-btn" data-atlas-name="${escapeHtml(atlas.name)}">Activate</button>` : ''}
-          <button class="btn btn-sm atlas-rename-btn" data-atlas-name="${escapeHtml(atlas.name)}">Rename</button>
-          ${!isActive ? `<button class="btn btn-sm btn-danger atlas-delete-btn" data-atlas-name="${escapeHtml(atlas.name)}">Delete</button>` : ''}
+          ${showActivate ? `<button class="btn btn-sm atlas-activate-btn" data-atlas-name="${escapeHtml(atlas.name)}">Activate</button>` : ''}
+          ${showRename ? `<button class="btn btn-sm atlas-rename-btn" data-atlas-name="${escapeHtml(atlas.name)}">Rename</button>` : ''}
+          ${showDelete ? `<button class="btn btn-sm btn-danger atlas-delete-btn" data-atlas-name="${escapeHtml(atlas.name)}">Delete</button>` : ''}
+          ${isActive ? '<span class="atlas-status">Current</span>' : ''}
+          ${isDefault && !isActive ? '<span class="atlas-status">Default</span>' : ''}
         </div>
       </div>
     `;
@@ -1191,6 +1279,19 @@ function handleActivateAtlas(atlasName: string): void {
  * Handle atlas renaming.
  */
 function handleRenameAtlas(atlasName: string): void {
+  // Prevent renaming default atlas
+  if (atlasName === 'default') {
+    alert('Cannot rename the default atlas.');
+    return;
+  }
+
+  // Prevent renaming active atlas
+  const activeAtlas = getActiveAtlas();
+  if (atlasName === activeAtlas) {
+    alert('Cannot rename the currently active atlas.');
+    return;
+  }
+
   const newName = prompt(`Rename atlas "${atlasName}" to:`, atlasName);
   if (!newName || newName.trim() === '' || newName === atlasName) {
     return;
@@ -1220,9 +1321,16 @@ function handleRenameAtlas(atlasName: string): void {
  * Handle atlas deletion.
  */
 function handleDeleteAtlas(atlasName: string): void {
+  // Prevent deleting default atlas
+  if (atlasName === 'default') {
+    alert('Cannot delete the default atlas.');
+    return;
+  }
+
+  // Prevent deleting active atlas
   const activeAtlas = getActiveAtlas();
   if (atlasName === activeAtlas) {
-    alert('Cannot delete the active atlas.');
+    alert('Cannot delete the currently active atlas.');
     return;
   }
 

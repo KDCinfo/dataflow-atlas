@@ -7,7 +7,8 @@ export const ATLAS_PREFIX = 'dfa_';
 export const DEFAULT_ATLAS_NAME = 'default';
 export const ATLAS_LIST_KEY = 'dataflow_atlas_list';
 
-// Regex pattern for valid atlas names (camelCase or snake_case)
+// Regex pattern for valid atlas names (matches AppConstants.keyNamePattern from reference app)
+// Either camelCase OR snake_case, but not mixed
 export const ATLAS_NAME_PATTERN = /^(?:[a-z][a-zA-Z0-9]*|[a-z][a-z0-9_]*[a-z0-9])$/;
 
 /**
@@ -50,7 +51,7 @@ export function getAtlasDisplayName(storageKey: string): string {
 }
 
 /**
- * Validate an atlas name.
+ * Validate an atlas name using the same pattern as the reference app.
  */
 export function validateAtlasName(name: string): { valid: boolean; error?: string } {
   if (!name || name.trim() === '') {
@@ -62,7 +63,7 @@ export function validateAtlasName(name: string): { valid: boolean; error?: strin
   if (!ATLAS_NAME_PATTERN.test(trimmedName)) {
     return {
       valid: false,
-      error: 'Atlas name must use camelCase or snake_case format, starting with a lowercase letter.'
+      error: 'For consistent atlas names: Start with a lowercase character. Use either camelCase or snake_case.'
     };
   }
 
@@ -82,9 +83,32 @@ export function atlasExists(atlasName: string): boolean {
 }
 
 /**
+ * Initialize default atlas if it doesn't exist.
+ */
+export function initializeDefaultAtlas(): void {
+  const defaultStorageKey = getAtlasStorageKey(DEFAULT_ATLAS_NAME);
+  if (!localStorage.getItem(defaultStorageKey)) {
+    const now = new Date().toISOString();
+    localStorage.setItem(defaultStorageKey, JSON.stringify([], null, 2));
+    setAtlasMetadata(DEFAULT_ATLAS_NAME, 'created', now);
+    setAtlasMetadata(DEFAULT_ATLAS_NAME, 'lastModified', now);
+    console.log('[Atlas] Default atlas initialized');
+  }
+
+  // Ensure active atlas is set if none exists
+  if (!localStorage.getItem('active_atlas')) {
+    setActiveAtlas(DEFAULT_ATLAS_NAME);
+    console.log('[Atlas] Active atlas set to default');
+  }
+}
+
+/**
  * Get all available atlas names.
  */
 export function getAllAtlases(): string[] {
+  // Ensure default atlas exists
+  initializeDefaultAtlas();
+
   const atlasNames: string[] = [];
 
   // Scan localStorage for keys that start with our prefix
@@ -100,7 +124,7 @@ export function getAllAtlases(): string[] {
     }
   }
 
-  // Always ensure default exists
+  // Always ensure default exists in the list
   if (!atlasNames.includes(DEFAULT_ATLAS_NAME)) {
     atlasNames.push(DEFAULT_ATLAS_NAME);
   }
@@ -246,7 +270,7 @@ function getAtlasMetadata(atlasName: string, key: string): string | null {
 /**
  * Set atlas metadata.
  */
-function setAtlasMetadata(atlasName: string, key: string, value: string): void {
+export function setAtlasMetadata(atlasName: string, key: string, value: string): void {
   localStorage.setItem(`${getAtlasStorageKey(atlasName)}_${key}`, value);
 }
 
