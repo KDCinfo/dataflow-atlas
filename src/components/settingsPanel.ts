@@ -35,6 +35,7 @@ import {
   restoreFromBackup,
   hasActiveBackup
 } from '../utils/atlasManagerOptimized.js';
+import AppConstants from '../utils/appConstants.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -1184,13 +1185,15 @@ function setupAtlasManagementHandlers(): void {
       // Update button state, tooltip, and help icon visibility
       if (inputValue === '') {
         createAtlasBtn.disabled = true;
-        createAtlasBtn.title = 'Atlas name cannot be empty';
+        atlasNameInput.title = AppConstants.atlasNameErrTextNameEmpty;
+        createAtlasBtn.title = AppConstants.atlasNameErrTextNameEmpty;
         if (helpIcon) {
-          helpIcon.title = 'Atlas name cannot be empty';
+          helpIcon.title = AppConstants.atlasNameErrTextNameEmpty;
           helpIcon.style.display = 'inline';
         }
       } else if (!validation.valid) {
         createAtlasBtn.disabled = true;
+        atlasNameInput.title = validation.error || 'Invalid atlas name';
         createAtlasBtn.title = validation.error || 'Invalid atlas name';
         if (helpIcon) {
           helpIcon.title = validation.error || 'Invalid atlas name';
@@ -1198,6 +1201,7 @@ function setupAtlasManagementHandlers(): void {
         }
       } else {
         createAtlasBtn.disabled = false;
+        atlasNameInput.title = '';
         createAtlasBtn.title = '';
         if (helpIcon) {
           helpIcon.title = '';
