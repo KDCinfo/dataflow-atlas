@@ -14,7 +14,6 @@ export interface AtlasMetadata {
 export interface AtlasStorageData {
   cards: DFACard[];
   metadata: AtlasMetadata;
-  backup?: DFACard[]; // Auto-backup cards (created on edit, not create)
 }
 
 export interface AtlasInfo {

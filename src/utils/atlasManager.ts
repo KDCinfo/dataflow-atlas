@@ -1,7 +1,7 @@
 /**
  * Atlas Management utility for Data Flow Atlas.
  * Handles multiple atlas instances with localStorage persistence.
- */
+ * /
 
 import AppConstants from './appConstants.js';
 
@@ -14,7 +14,7 @@ export const ATLAS_NAME_PATTERN = AppConstants.keyNamePattern;
 
 /**
  * Interface for atlas management settings.
- */
+ * /
 export interface AtlasInfo {
   name: string;           // Display name (without prefix)
   storageKey: string;     // Full storage key (with prefix)
@@ -25,35 +25,35 @@ export interface AtlasInfo {
 
 /**
  * Get the current active atlas name from settings.
- */
+ * /
 export function getActiveAtlas(): string {
   return localStorage.getItem('active_atlas') || DEFAULT_ATLAS_NAME;
 }
 
 /**
  * Set the active atlas name.
- */
+ * /
 export function setActiveAtlas(atlasName: string): void {
   localStorage.setItem('active_atlas', atlasName);
 }
 
 /**
  * Get the full storage key for an atlas name.
- */
+ * /
 export function getAtlasStorageKey(atlasName: string): string {
   return `${ATLAS_PREFIX}${atlasName}`;
 }
 
 /**
  * Get the display name from a storage key.
- */
+ * /
 export function getAtlasDisplayName(storageKey: string): string {
   return storageKey.startsWith(ATLAS_PREFIX) ? storageKey.slice(ATLAS_PREFIX.length) : storageKey;
 }
 
 /**
  * Validate an atlas name using the same pattern as the reference app.
- */
+ * /
 export function validateAtlasName(name: string): { valid: boolean; error?: string } {
   if (!name || name.trim() === '') {
     return { valid: false, error: AppConstants.atlasNameErrTextNameEmpty };
@@ -77,7 +77,7 @@ export function validateAtlasName(name: string): { valid: boolean; error?: strin
 
 /**
  * Check if an atlas exists.
- */
+ * /
 export function atlasExists(atlasName: string): boolean {
   const storageKey = getAtlasStorageKey(atlasName);
   return localStorage.getItem(storageKey) !== null;
@@ -85,7 +85,7 @@ export function atlasExists(atlasName: string): boolean {
 
 /**
  * Initialize default atlas if it doesn't exist.
- */
+ * /
 export function initializeDefaultAtlas(): void {
   const defaultStorageKey = getAtlasStorageKey(DEFAULT_ATLAS_NAME);
   if (!localStorage.getItem(defaultStorageKey)) {
@@ -105,7 +105,7 @@ export function initializeDefaultAtlas(): void {
 
 /**
  * Get all available atlas names.
- */
+ * /
 export function getAllAtlases(): string[] {
   // Ensure default atlas exists
   initializeDefaultAtlas();
@@ -135,7 +135,7 @@ export function getAllAtlases(): string[] {
 
 /**
  * Sort atlas names alphabetically, but keep 'default' first.
- */
+ * /
 export function sortAtlasNames(names: string[]): string[] {
   const sorted = [...names].sort((a, b) => a.localeCompare(b));
   const defaultIndex = sorted.indexOf(DEFAULT_ATLAS_NAME);
@@ -150,7 +150,7 @@ export function sortAtlasNames(names: string[]): string[] {
 
 /**
  * Get detailed information about all atlases.
- */
+ * /
 export function getAtlasInfoList(): AtlasInfo[] {
   const atlasNames = getAllAtlases();
 
@@ -180,7 +180,7 @@ export function getAtlasInfoList(): AtlasInfo[] {
 
 /**
  * Create a new atlas.
- */
+ * /
 export function createAtlas(name: string): boolean {
   const validation = validateAtlasName(name);
   if (!validation.valid) {
@@ -202,7 +202,7 @@ export function createAtlas(name: string): boolean {
 
 /**
  * Rename an atlas.
- */
+ * /
 export function renameAtlas(oldName: string, newName: string): boolean {
   if (oldName === DEFAULT_ATLAS_NAME) {
     return false; // Cannot rename default
@@ -244,7 +244,7 @@ export function renameAtlas(oldName: string, newName: string): boolean {
 
 /**
  * Delete an atlas.
- */
+ * /
 export function deleteAtlas(name: string): boolean {
   if (name === DEFAULT_ATLAS_NAME) {
     return false; // Cannot delete default
@@ -263,14 +263,14 @@ export function deleteAtlas(name: string): boolean {
 
 /**
  * Get atlas metadata.
- */
+ * /
 function getAtlasMetadata(atlasName: string, key: string): string | null {
   return localStorage.getItem(`${getAtlasStorageKey(atlasName)}_${key}`);
 }
 
 /**
  * Remove all metadata for an atlas.
- */
+ * /
 function removeAtlasMetadata(atlasName: string): void {
   const prefix = `${getAtlasStorageKey(atlasName)}_`;
   const keysToRemove: string[] = [];
@@ -287,14 +287,15 @@ function removeAtlasMetadata(atlasName: string): void {
 
 /**
  * Set atlas metadata.
- */
+ * /
 export function setAtlasMetadata(atlasName: string, key: string, value: string): void {
   localStorage.setItem(`${getAtlasStorageKey(atlasName)}_${key}`, value);
 }
 
 /**
  * Update the last modified timestamp for an atlas.
- */
+ * /
 export function touchAtlas(atlasName: string): void {
   setAtlasMetadata(atlasName, 'lastModified', new Date().toISOString());
 }
+*/

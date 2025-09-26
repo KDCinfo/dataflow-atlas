@@ -55,12 +55,6 @@ function getAtlasData(atlasName: string): AtlasStorageData | null {
 
     const parsed = JSON.parse(stored);
 
-    // Handle legacy format migration
-    if (Array.isArray(parsed)) {
-      console.log(`[Atlas] Migrating legacy format for: ${atlasName}`);
-      return migrateLegacyFormat(atlasName, parsed);
-    }
-
     // Ensure proper structure
     if (!parsed.cards || !parsed.metadata) {
       console.warn(`[Atlas] Invalid data structure for: ${atlasName}`);
@@ -75,39 +69,28 @@ function getAtlasData(atlasName: string): AtlasStorageData | null {
 }
 
 /**
- * Migrate legacy storage format to new consolidated format.
+ * Get atlas backup data from storage.
  */
-function migrateLegacyFormat(atlasName: string, cards: DFACard[]): AtlasStorageData {
-  const storageKey = getAtlasStorageKey(atlasName);
+function getAtlasBackupData(atlasName: string): AtlasStorageData | null {
+  try {
+    const backupKey = `${getAtlasStorageKey(atlasName)}_backup`;
+    const stored = localStorage.getItem(backupKey);
+    if (!stored) return null;
 
-  // Try to get legacy metadata
-  const created = localStorage.getItem(`${storageKey}_created`);
-  const lastModified = localStorage.getItem(`${storageKey}_lastModified`);
+    const parsed = JSON.parse(stored);
 
-  const metadata: AtlasMetadata = {
-    created: created || new Date().toISOString(),
-    lastModified: lastModified || new Date().toISOString(),
-    cardCount: cards.length,
-    hasBackup: false
-  };
+    // Ensure proper structure
+    if (!parsed.cards || !parsed.metadata) {
+      console.warn(`[Atlas] Invalid backup data structure for: ${atlasName}`);
+      return null;
+    }
 
-  const newData: AtlasStorageData = {
-    cards,
-    metadata
-  };
-
-  // Save in new format
-  setAtlasData(atlasName, newData);
-
-  // Clean up legacy metadata entries
-  localStorage.removeItem(`${storageKey}_created`);
-  localStorage.removeItem(`${storageKey}_lastModified`);
-
-  console.log(`[Atlas] Migrated ${atlasName} from legacy format`);
-  return newData;
-}
-
-/**
+    return parsed;
+  } catch (error) {
+    console.error(`[Atlas] Failed to parse backup data for ${atlasName}:`, error);
+    return null;
+  }
+}/**
  * Save atlas data to storage (consolidated format).
  */
 function setAtlasData(atlasName: string, data: AtlasStorageData): void {
@@ -186,13 +169,14 @@ export function getAtlasInfoList(): AtlasInfo[] {
   return atlasNames.map(name => {
     const data = getAtlasData(name);
     const defaultMetadata = createDefaultMetadata();
+    const hasBackup = getAtlasBackupData(name) !== null;
 
     return {
       name,
       cardCount: data?.metadata.cardCount || 0,
       created: data?.metadata.created || defaultMetadata.created,
       lastModified: data?.metadata.lastModified || defaultMetadata.lastModified,
-      hasBackup: data?.metadata.hasBackup || false,
+      hasBackup,
       isActive: name === activeAtlas
     };
   });
@@ -290,7 +274,7 @@ export function loadCards(): DFACard[] {
 }
 
 /**
- * Save cards to the active atlas with auto-backup.
+ * Save cards to the active atlas with full atlas backup.
  */
 export function saveCards(cards: DFACard[], createBackup: boolean = true): void {
   const activeAtlas = getActiveAtlas();
@@ -304,40 +288,58 @@ export function saveCards(cards: DFACard[], createBackup: boolean = true): void 
     };
   }
 
-  // Create auto-backup before modifying (if cards exist and createBackup is true)
-  if (createBackup && data.cards.length > 0 && cards.length > 0) {
-    data.backup = [...data.cards]; // Store current cards as backup
-    data.metadata.hasBackup = true;
-    console.log(`[Atlas] Created auto-backup for ${activeAtlas} (${data.backup.length} cards)`);
+  // Create full atlas backup before modifying (if existing data and createBackup is true)
+  if (createBackup && data.cards.length > 0) {
+    const backupKey = `${getAtlasStorageKey(activeAtlas)}_backup`;
+
+    // Create complete backup of current atlas state
+    const backupData: AtlasStorageData = {
+      cards: [...data.cards],
+      metadata: { ...data.metadata }
+    };
+
+    try {
+      localStorage.setItem(backupKey, JSON.stringify(backupData, null, 2));
+      data.metadata.hasBackup = true;
+      console.log(`[Atlas] Created full atlas backup for ${activeAtlas} (${backupData.cards.length} cards)`);
+    } catch (error) {
+      console.error(`[Atlas] Failed to create backup for ${activeAtlas}:`, error);
+    }
   }
 
-  // Update cards
+  // Update cards and save
   data.cards = cards;
-
-  // Save updated data
   setAtlasData(activeAtlas, data);
 }
 
 /**
- * Restore from auto-backup for the active atlas.
+ * Restore from full atlas backup for the active atlas.
  */
 export function restoreFromBackup(): boolean {
   try {
     const activeAtlas = getActiveAtlas();
-    const data = getAtlasData(activeAtlas);
+    const backupData = getAtlasBackupData(activeAtlas);
 
-    if (!data || !data.backup || data.backup.length === 0) {
+    if (!backupData) {
       console.warn(`[Atlas] No backup found for ${activeAtlas}`);
       return false;
     }
 
-    // Restore backup as current cards
-    data.cards = [...data.backup];
-    delete data.backup;
-    data.metadata.hasBackup = false;
+    // Restore the entire backup atlas data
+    setAtlasData(activeAtlas, backupData);
 
-    setAtlasData(activeAtlas, data);
-    console.log(`[Atlas] Restored ${activeAtlas} from backup (${data.cards.length} cards)`);
+    // Remove the backup entry and update metadata
+    const backupKey = `${getAtlasStorageKey(activeAtlas)}_backup`;
+    localStorage.removeItem(backupKey);
+
+    // Update hasBackup flag
+    const currentData = getAtlasData(activeAtlas);
+    if (currentData) {
+      currentData.metadata.hasBackup = false;
+      setAtlasData(activeAtlas, currentData);
+    }
+
+    console.log(`[Atlas] Restored ${activeAtlas} from full atlas backup (${backupData.cards.length} cards)`);
     return true;
   } catch (error) {
     console.error(`[Atlas] Failed to restore backup:`, error);
@@ -350,8 +352,8 @@ export function restoreFromBackup(): boolean {
  */
 export function hasActiveBackup(): boolean {
   const activeAtlas = getActiveAtlas();
-  const data = getAtlasData(activeAtlas);
-  return data?.metadata.hasBackup || false;
+  const backupData = getAtlasBackupData(activeAtlas);
+  return backupData !== null;
 }
 
 /**
