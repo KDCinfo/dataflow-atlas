@@ -59,6 +59,9 @@
     min-width: 150px;
     margin-left: 1px;
 }
+.settings-item input.storage-new-name-input {
+    min-width: 250px;
+}
 .settings-item select {
     padding: var(--spacing-sm);
 }
@@ -302,6 +305,16 @@
     font-style: italic;
     padding: var(--spacing-md);
     text-align: center;
+}
+
+/* Borrowed from [dataflow-modal.css] */
+.storage-buttons-modal button:disabled {
+  background-color: rgba(239, 239, 239, 0.7);
+  box-shadow: none;
+  color: #444444;
+  cursor: default;
+  font-weight: normal;
+  outline: none;
 }
 
 /* Legacy Layer Manager Styles */

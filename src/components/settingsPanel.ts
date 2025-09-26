@@ -118,8 +118,8 @@ export function closeSettingsModal(): void {
  * Generate the atlas management section HTML.
  */
 function generateAtlasManagementSection(): string {
-  // Import atlas management functions at the top level
   // For now, we'll import them dynamically to avoid circular dependencies
+  // Import atlas management functions at the top level.
 
   const isExpanded = isPanelExpanded('atlas-management', true); // Default to expanded
 
@@ -129,16 +129,16 @@ function generateAtlasManagementSection(): string {
         <span class="expand-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '►'}</span>
         Atlas Management
       </h4>
-      <div id="atlas-management" class="collapsible-content ${isExpanded ? 'expanded' : ''}">
+      <div id="atlas-management" class="collapsible-content storage-buttons-modal ${isExpanded ? 'expanded' : ''}">
         <p class="setting-description">Create, rename, and manage multiple atlas instances. Each atlas stores its own set of DFA cards independently.</p>
 
         <div class="settings-item">
           <label id="atlas-form-label">Create New Atlas:</label>
-          <div class="settings-flex-row">
-            <input type="text" required id="new-atlas-name-input" class="settings-input settings-flex-item" placeholder="Atlas name (e.g., myProject)" title="Use camelCase or snake_case">
-            <button id="create-atlas-btn" class="btn-secondary">Create</button>
+          <div class="settings-flex-row storage-create-name-modal">
+            <input type="text" required id="new-atlas-name-input" class="storage-new-name-input settings-input settings-flex-item" placeholder="my_project or myProject">
+            <button disabled id="create-atlas-btn" class="btn-primary storage-new-name-button" title="Please provide an atlas name.">Create</button>
           </div>
-          <div class="input-help">
+          <div class="input-help hidden">
             <small>Atlas names must use camelCase or snake_case format, starting with a lowercase letter.</small>
           </div>
           <div id="atlas-error-message" class="input-help" style="color: var(--color-danger); display: none;">
