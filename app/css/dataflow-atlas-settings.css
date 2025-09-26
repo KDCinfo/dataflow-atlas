@@ -38,6 +38,10 @@
     justify-content: space-between;
     margin-top: var(--spacing-md);
 }
+.settings-item-column {
+    align-items: end;
+    flex-direction: column;
+}
 
 .settings-item:last-child {
     margin-bottom: 0;
@@ -47,6 +51,10 @@
     color: var(--color-text);
     font-weight: 500;
     padding: 0 var(--spacing-xmd) 0 0;
+    position: relative;
+}
+.settings-item-label-right {
+    float: right;
 }
 
 .settings-item select,
@@ -86,7 +94,7 @@
 
 .input-help small {
     color: var(--color-text-muted);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
 }
 
 /* Location, Scope and Category Management Styles */
@@ -289,6 +297,7 @@
 .atlas-actions {
     display: flex;
     gap: var(--spacing-xs);
+    margin-left: var(--spacing-md);
 }
 
 .atlas-status {

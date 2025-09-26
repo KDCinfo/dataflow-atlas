@@ -162,8 +162,8 @@ function generateAtlasManagementSection(): string {
           </div>
         </div>
 
-        <div class="settings-item">
-          <label>Existing Atlases:</label>
+        <div class="settings-item settings-item-column">
+          <label class="full-width">Existing Atlases:<span id="storage-capacity" class="settings-item-label-right font-small muted"></span></label>
           <div id="atlas-list-container" class="atlas-manager">
             <!-- Atlas list will be populated by JavaScript -->
           </div>
@@ -1118,7 +1118,7 @@ function updateBackupButtonState(): void {
 /**
  * Setup event handlers for atlas management.
  */
-function setupAtlasManagementHandlers(): void {
+async function setupAtlasManagementHandlers(): Promise<void> {
   // Create Atlas Form - fix element ID to match HTML
   const createAtlasBtn = document.getElementById('create-atlas-btn') as HTMLButtonElement;
   const atlasNameInput = document.getElementById('new-atlas-name-input') as HTMLInputElement;
@@ -1257,6 +1257,15 @@ function setupAtlasManagementHandlers(): void {
         }
       }
     });
+  }
+
+  const storageCapacity = document.getElementById('storage-capacity') as HTMLSpanElement;
+  if (storageCapacity) {
+    const { usageMB, limitMB, percent, keysLength } = await AppConstants.getLocalStorageUsage();
+    const localUsage = usageMB.toFixed(2);
+    const localRemaining = limitMB.toFixed(2);
+    const localPercent = percent.toFixed(0);
+    storageCapacity.innerHTML = `localStorage [${keysLength}] | Usage (MB): ${localUsage} | <span class="no-wrap">Remaining: ${localRemaining} | ${localPercent}%</span>`;
   }
 
   // Initialize default atlas and refresh list

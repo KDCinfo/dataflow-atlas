@@ -52,4 +52,24 @@ export default class AppConstants {
     persists_in: [],
     notes: 'Error Notes'
   };
+
+  // Usage: const {usageMB, limitMB, percent, keysLength} = await AppConstants.getLocalStorageUsage();
+  static async getLocalStorageUsage(): Promise<{ usageMB: number; limitMB: number; percent: number; keysLength: number }> {
+    let totalBytes = 0;
+    const keysLength = localStorage.length;
+    for (let i = 0; i < keysLength; i++) {
+      const key = localStorage.key(i) ?? '';
+      const value = localStorage.getItem(key) ?? '';
+      totalBytes +=
+        encodeURIComponent(key).replace(/%[A-F\d]{2}/g, 'X').length +
+        encodeURIComponent(value).replace(/%[A-F\d]{2}/g, 'X').length;
+    }
+    const usageKB = totalBytes / 1024;
+    const usageMB = usageKB / 1024;
+    const limitKB = 5120; // 5MB
+    const limitMB = limitKB / 1024;
+    const percent = Math.min(usageKB / limitKB * 100, 100);
+
+    return { usageMB, limitMB, percent, keysLength };
+  }
 }

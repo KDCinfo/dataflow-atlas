@@ -986,6 +986,12 @@ button.card-action-btn.mini {
 .text-right {
     text-align: right;
 }
+.font-small {
+    font-size: 0.8rem;
+}
+.muted {
+    color: var(--color-text-muted);
+}
 
 .sr-only {
     clip: rect(0, 0, 0, 0);
