@@ -202,7 +202,7 @@ export function getUniqueLocations(): string[] {
   // Add locations from existing cards.
   try {
     const cards = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    cards.cards.forEach((card: any) => {
+    cards.cards?.forEach((card: any) => {
       if (card.location && card.location.trim()) {
         existingLocations.add(card.location.trim());
       }
