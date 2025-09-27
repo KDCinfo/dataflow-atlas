@@ -557,6 +557,26 @@ header img.logo-img:hover {
     display: none;
 }
 
+.relationships-tips {
+    border: 1px solid var(--color-primary);
+    border-radius: 6px;
+    color: var(--color-text-muted);
+    margin: 0 auto var(--spacing-lg);
+    padding: 2px 12px;
+    width: fit-content;
+}
+.link-icon {
+    background-color: blue;
+    border: 1px solid gray;
+    border-radius: 50%;
+    display: inline-block;
+    height: 24px;
+    line-height: 0.4;
+    padding: 8px 3px;
+    vertical-align: baseline;
+    width: 24px;
+}
+
 .relationships-controls {
     display: flex;
     gap: var(--spacing-md);
@@ -973,6 +993,8 @@ button.card-action-btn.mini {
 /* Utility Classes */
 .hidden {
     display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 .no-wrap {
     white-space: nowrap;

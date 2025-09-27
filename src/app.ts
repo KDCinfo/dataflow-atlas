@@ -706,6 +706,7 @@ export class DFDAtlas {
    * Update the relationships status display.
    */
   private updateRelationshipsStatus(): void {
+    const tipsElement = document.getElementById('relationships-tips');
     const statusElement = document.getElementById('relationships-status');
     const cardNameElement = document.getElementById('relationships-card-name');
 
@@ -717,9 +718,11 @@ export class DFDAtlas {
       const card = cards.find(c => c.id === this.relationshipsFilterCardId);
       const cardName = card ? card.field : 'Unknown Card';
 
+      tipsElement?.classList.add('hidden');
       statusElement.classList.remove('hidden');
       cardNameElement.textContent = cardName;
     } else {
+      tipsElement?.classList.remove('hidden');
       statusElement.classList.add('hidden');
     }
   }
