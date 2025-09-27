@@ -657,7 +657,7 @@ export class DFDAtlas {
     const treeViewBtn = document.getElementById('toggle-tree-view') as HTMLButtonElement;
     if (treeViewBtn) {
       if (this.relationshipsFilterCardId) {
-        treeViewBtn.textContent = this.isTreeViewActive ? 'Grid View' : 'Tree View';
+        treeViewBtn.textContent = this.isTreeViewActive ? 'Grid Flow View' : 'Tree View';
         treeViewBtn.disabled = false;
       } else {
         treeViewBtn.textContent = 'Tree View';

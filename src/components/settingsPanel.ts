@@ -362,10 +362,10 @@ export function populateSettingsContent(): void {
     <div class="settings-section">
       <h4 class="collapsible-header" data-target="layer-names">
         <span class="expand-icon ${isLocationsExpanded ? 'expanded' : ''}">${isLocationsExpanded ? '▼' : '►'}</span>
-        Layer Object Names
+        Layer Names
       </h4>
       <div id="layer-names" class="collapsible-content ${isLocationsExpanded ? 'expanded' : ''}">
-        <p class="setting-description">Manage the list of 'layer object names' for your DFA cards. These will appear as dropdown options when creating or editing cards.</p>
+        <p class="setting-description">Manage the list of 'layer names' (data locations) for your DFA cards. These will appear as dropdown options when creating or editing cards.</p>
 
         <div class="settings-item">
           <label id="location-form-label">Add New Location:</label>
