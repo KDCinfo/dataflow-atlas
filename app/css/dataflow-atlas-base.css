@@ -1073,3 +1073,98 @@ optgroup option {
     color: var(--color-text);
     padding-left: var(--spacing-sm);
 }
+
+/* Code Viewer Styles */
+.getter-value, .setter-value {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: space-between;
+}
+
+.code-view-btn {
+    background: var(--color-primary-dark);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-all1);
+    color: var(--color-primary);
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    transition: all 0.2s ease;
+}
+
+.code-view-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-primary-dark);
+}
+
+.code-viewer {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    grid-column: span 2;
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-md);
+}
+
+.code-header {
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+}
+
+.code-title {
+    color: var(--color-primary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.code-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.code-close-btn:hover {
+    color: var(--color-danger);
+}
+
+.code-content {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-all1);
+    color: var(--color-text);
+    font-family: 'Courier New', Monaco, monospace;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.code-copy-btn {
+    background: var(--color-success);
+    border: none;
+    border-radius: var(--radius-all1);
+    color: white;
+    cursor: pointer;
+    font-size: 0.75rem;
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    transition: background 0.2s ease;
+}
+
+.code-copy-btn:hover {
+    background: #047857;
+}

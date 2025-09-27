@@ -659,12 +659,34 @@ export function renderDFACard(card: DFACard, size: CardSize = 'mini'): string {
 
   const getterSection = card.getter_name
     ? `<div class="dfa-card-label">Getter:</div>
-       <div class="dfa-card-value">${escapeHtml(card.getter_name)}</div>`
+       <div class="dfa-card-value getter-value">
+         ${escapeHtml(card.getter_name)}
+         ${card.getter_code ? `<button class="code-view-btn" data-action="view-code" data-code-type="getter" data-card-id="${card.id}" title="View getter code">{ }</button>` : ''}
+       </div>
+       ${card.getter_code ? `<div class="code-viewer" id="getter-code-${card.id}" style="display: none;">
+         <div class="code-header">
+           <span class="code-title">Getter Code</span>
+           <button class="code-close-btn" data-action="close-code" data-code-type="getter" data-card-id="${card.id}">×</button>
+         </div>
+         <pre class="code-content"><code>${escapeHtml(card.getter_code)}</code></pre>
+         <button class="code-copy-btn" data-action="copy-code" data-code-type="getter" data-card-id="${card.id}">Copy</button>
+       </div>` : ''}`
     : '';
 
   const setterSection = card.setter_name
     ? `<div class="dfa-card-label">Setter:</div>
-       <div class="dfa-card-value">${escapeHtml(card.setter_name)}</div>`
+       <div class="dfa-card-value setter-value">
+         ${escapeHtml(card.setter_name)}
+         ${card.setter_code ? `<button class="code-view-btn" data-action="view-code" data-code-type="setter" data-card-id="${card.id}" title="View setter code">{ }</button>` : ''}
+       </div>
+       ${card.setter_code ? `<div class="code-viewer" id="setter-code-${card.id}" style="display: none;">
+         <div class="code-header">
+           <span class="code-title">Setter Code</span>
+           <button class="code-close-btn" data-action="close-code" data-code-type="setter" data-card-id="${card.id}">×</button>
+         </div>
+         <pre class="code-content"><code>${escapeHtml(card.setter_code)}</code></pre>
+         <button class="code-copy-btn" data-action="copy-code" data-code-type="setter" data-card-id="${card.id}">Copy</button>
+       </div>` : ''}`
     : '';
 
   // Get linked card name for display

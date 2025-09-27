@@ -180,13 +180,16 @@ export class DFDAtlas {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
 
-      if (target.classList.contains('card-action-btn') || target.classList.contains('card-expand-btn')) {
+      if (target.classList.contains('card-action-btn') || target.classList.contains('card-expand-btn') ||
+          target.classList.contains('code-view-btn') || target.classList.contains('code-close-btn') ||
+          target.classList.contains('code-copy-btn')) {
         e.preventDefault();
         const action = target.getAttribute('data-action');
         const cardId = target.getAttribute('data-card-id');
+        const codeType = target.getAttribute('data-code-type');
 
         if (action && cardId) {
-          this.handleCardAction(action, cardId);
+          this.handleCardAction(action, cardId, codeType || undefined);
         }
       }
     });
@@ -223,7 +226,7 @@ export class DFDAtlas {
   }  /**
    * Handle card actions (edit, delete, relationships).
    */
-  private handleCardAction(action: string, cardId: string): void {
+  private handleCardAction(action: string, cardId: string, codeType?: string): void {
     const cards = loadCards();
     const card = cards.find(c => c.id === cardId);
 
@@ -249,6 +252,21 @@ export class DFDAtlas {
         break;
       case 'expand':
         this.toggleCardDetails(cardId);
+        break;
+      case 'view-code':
+        if (codeType) {
+          this.showCodeViewer(cardId, codeType);
+        }
+        break;
+      case 'close-code':
+        if (codeType) {
+          this.hideCodeViewer(cardId, codeType);
+        }
+        break;
+      case 'copy-code':
+        if (codeType) {
+          this.copyCode(card, codeType);
+        }
         break;
       default:
         console.warn('Unknown card action:', action);
@@ -315,6 +333,45 @@ export class DFDAtlas {
 
     this.currentEditCard = null;
     clearFormValidation();
+  }
+
+  /**
+   * Show code viewer for a specific card's getter or setter code.
+   */
+  private showCodeViewer(cardId: string, codeType: string): void {
+    const codeViewer = document.getElementById(`${codeType}-code-${cardId}`);
+    if (codeViewer) {
+      codeViewer.style.display = 'block';
+    }
+  }
+
+  /**
+   * Hide code viewer for a specific card's getter or setter code.
+   */
+  private hideCodeViewer(cardId: string, codeType: string): void {
+    const codeViewer = document.getElementById(`${codeType}-code-${cardId}`);
+    if (codeViewer) {
+      codeViewer.style.display = 'none';
+    }
+  }
+
+  /**
+   * Copy code to clipboard for a specific card's getter or setter.
+   */
+  private copyCode(card: DFACard, codeType: string): void {
+    const code = codeType === 'getter' ? card.getter_code : card.setter_code;
+
+    if (!code) {
+      showNotification(`No ${codeType} code available to copy`, 'info');
+      return;
+    }
+
+    navigator.clipboard.writeText(code).then(() => {
+      showNotification(`${codeType.charAt(0).toUpperCase() + codeType.slice(1)} code copied to clipboard`, 'success');
+    }).catch(err => {
+      console.error('Failed to copy code:', err);
+      showNotification('Failed to copy code to clipboard', 'error');
+    });
   }
 
   /**
