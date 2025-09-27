@@ -56,12 +56,22 @@ export function importCards(jsonData: string, mode: ImportMode): DFACard[] {
     } else {
       // Merge mode: combine existing with imported, imported takes precedence for duplicates.
       const existingCards = loadCards();
-      const existingFields = new Set(existingCards.map(card => card.field));
 
-      finalCards = [
-        ...existingCards,
-        ...importedCards.filter(card => !existingFields.has(card.field)),
-      ];
+      // Start with existing cards
+      finalCards = [...existingCards];
+
+      // Process imported cards
+      importedCards.forEach(importedCard => {
+        const existingIndex = finalCards.findIndex(card => card.field === importedCard.field);
+
+        if (existingIndex >= 0) {
+          // Update existing card with imported data
+          finalCards[existingIndex] = importedCard;
+        } else {
+          // Add new card
+          finalCards.push(importedCard);
+        }
+      });
     }
 
     saveCards(finalCards);

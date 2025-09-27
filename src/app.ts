@@ -1,4 +1,4 @@
-import type { DFACard, AtlasFilter, CardSize } from './types/dfa.js';
+import type { DFACard, AtlasFilter, CardSize, ImportMode } from './types/dfa.js';
 import { loadCards, importCards } from './utils/storage.js';
 import { getDataLayersByType, type DataLayer } from './utils/settings.js';
 import {
@@ -1020,8 +1020,12 @@ export class DFDAtlas {
           throw new Error('Invalid data format - expected array of cards or object with cards property');
         }
 
+        // Get the selected import mode from radio buttons
+        const importModeRadio = document.querySelector('input[name="import-mode"]:checked') as HTMLInputElement;
+        const importMode = importModeRadio ? importModeRadio.value as ImportMode : 'replace';
+
         // Import the cards
-        importCards(JSON.stringify(cards), 'replace');
+        importCards(JSON.stringify(cards), importMode);
         showNotification('Data imported successfully', 'success');
         this.renderAtlas();
         this.updateStats();
