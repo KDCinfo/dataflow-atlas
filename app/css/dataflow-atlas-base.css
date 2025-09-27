@@ -635,6 +635,9 @@ button.card-action-btn.mini {
     line-height: 1.0;
     vertical-align: middle;
 }
+button.card-action-btn.mini.no-back {
+    background-color: transparent;
+}
 .card-action-btn:hover {
     background-color: var(--color-background);
     color: var(--color-text);

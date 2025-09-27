@@ -103,7 +103,8 @@ export function getLocationLabel(location: string): string {
   // Check custom labels first, then defaults, then auto-generate
   return settings.locationLabels[location] ||
          DEFAULT_LOCATIONS_MAP[location] ||
-         location.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+         location;
+        //  location.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 /**
