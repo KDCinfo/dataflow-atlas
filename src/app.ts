@@ -219,6 +219,7 @@ export class DFDAtlas {
 
       this.renderAtlas();
       this.updateStats();
+      this.refreshAtlasSelector();
     } catch (error) {
       console.error('Error handling form submission:', error);
       showNotification('Error saving card', 'error');
@@ -245,6 +246,7 @@ export class DFDAtlas {
           showNotification('Card deleted successfully', 'success');
           this.renderAtlas();
           this.updateStats();
+          this.refreshAtlasSelector();
         }
         break;
       case 'relationships':
@@ -1023,6 +1025,7 @@ export class DFDAtlas {
         showNotification('Data imported successfully', 'success');
         this.renderAtlas();
         this.updateStats();
+        this.refreshAtlasSelector();
       } catch (error) {
         console.error('Import error:', error);
         showNotification('Import failed - invalid JSON format', 'error');
@@ -1042,6 +1045,7 @@ export class DFDAtlas {
       showNotification('All data cleared', 'success');
       this.renderAtlas();
       this.updateStats();
+      this.refreshAtlasSelector();
     }
   }
 

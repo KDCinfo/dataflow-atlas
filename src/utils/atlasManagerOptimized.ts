@@ -161,6 +161,14 @@ export function getAllAtlases(): string[] {
 }
 
 /**
+ * Get card count for a specific atlas.
+ */
+export function getAtlasCardCount(atlasName: string): number {
+  const data = getAtlasData(atlasName);
+  return data ? data.cards.length : 0;
+}
+
+/**
  * Get atlas information list for display.
  */
 export function getAtlasInfoList(): AtlasInfo[] {

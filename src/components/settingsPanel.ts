@@ -1143,6 +1143,10 @@ async function setupAtlasManagementHandlers(): Promise<void> {
           if (success) {
             exitEditMode();
             refreshAtlasList();
+            // Refresh the main atlas selector if we're on the main page
+            if (window.location.pathname.includes('app') && (window as any).app) {
+              (window as any).app.refreshAtlasSelector();
+            }
             alert(`Atlas renamed to "${name}" successfully!`);
           } else {
             alert('Failed to rename atlas.');
@@ -1154,6 +1158,10 @@ async function setupAtlasManagementHandlers(): Promise<void> {
             atlasNameInput.value = '';
             updateAtlasButtonStates(); // Reset button states after clearing input
             refreshAtlasList();
+            // Refresh the main atlas selector if we're on the main page
+            if (window.location.pathname.includes('app') && (window as any).app) {
+              (window as any).app.refreshAtlasSelector();
+            }
             alert(`Atlas "${name}" created successfully!`);
           } else {
             alert('Failed to create atlas.');
@@ -1246,6 +1254,8 @@ async function setupAtlasManagementHandlers(): Promise<void> {
             // Refresh the main atlas view if we're on the main page
             if (window.location.pathname.includes('app') && (window as any).app) {
               (window as any).app.renderAtlas();
+              (window as any).app.updateStats();
+              (window as any).app.refreshAtlasSelector();
             }
             alert('Atlas restored from backup successfully!');
           } else {
@@ -1424,6 +1434,10 @@ function handleDeleteAtlas(atlasName: string): void {
       const success = deleteAtlas(atlasName);
       if (success) {
         refreshAtlasList();
+        // Refresh the main atlas selector if we're on the main page
+        if (window.location.pathname.includes('app') && (window as any).app) {
+          (window as any).app.refreshAtlasSelector();
+        }
         alert(`Atlas "${atlasName}" deleted successfully!`);
       } else {
         alert('Failed to delete atlas.');

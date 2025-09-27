@@ -2,7 +2,7 @@
  * Atlas Selector Component for managing multiple atlases in the navigation bar.
  */
 
-import { getAllAtlases, getActiveAtlas, setActiveAtlas } from '../utils/atlasManagerOptimized.js';
+import { getAllAtlases, getActiveAtlas, setActiveAtlas, getAtlasCardCount } from '../utils/atlasManagerOptimized.js';
 
 export class AtlasSelector {
   private dropdownElement: HTMLSelectElement | null = null;
@@ -45,7 +45,10 @@ export class AtlasSelector {
     atlases.forEach(atlas => {
       const option = document.createElement('option');
       option.value = atlas;
-      option.textContent = atlas;
+
+      const cardCount = getAtlasCardCount(atlas);
+      option.textContent = `${atlas} (${cardCount})`;
+
       option.selected = atlas === activeAtlas;
       this.dropdownElement!.appendChild(option);
     });
