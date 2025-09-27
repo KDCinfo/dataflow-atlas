@@ -23,7 +23,7 @@ import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
 import { initializeSettingsPanel } from './components/settingsPanel.js';
 import { AtlasSelector } from './components/atlasSelector.js';
-import { initializeDefaultAtlas } from './utils/atlasManagerOptimized.js';
+import { initializeDefaultAtlas, saveCards } from './utils/atlasManagerOptimized.js';
 
 /**
  * Main Data Flow Atlas application class.
@@ -1045,7 +1045,8 @@ export class DFDAtlas {
    */
   private clearAllData(): void {
     if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-      localStorage.removeItem('dfa-cards');
+      // Use the atlas manager to properly clear the current atlas data
+      saveCards([]); // This will create a backup and clear the data properly
       showNotification('All data cleared', 'success');
       this.renderAtlas();
       this.updateStats();
