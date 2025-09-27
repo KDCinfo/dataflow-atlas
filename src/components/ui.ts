@@ -693,6 +693,7 @@ export function renderDFACard(card: DFACard, size: CardSize = 'mini'): string {
         <div class="dfa-card-header">
           <h3 class="dfa-card-title">${escapeHtml(card.field)}</h3>
           <div class="dfa-card-mini-actions">
+            <button class="card-action-btn mini" data-action="edit" data-card-id="${card.id}" title="Edit">✏️</button>
             <button class="card-action-btn mini" data-action="relationships" data-card-id="${card.id}" title="Show Connected Network">🔗</button>
           </div>
         </div>

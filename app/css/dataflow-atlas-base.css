@@ -562,10 +562,13 @@ header img.logo-img:hover {
     border-radius: 6px;
     color: var(--color-text-muted);
     margin: 0 auto var(--spacing-lg);
-    padding: 2px 12px;
+    padding: 4px 12px;
     width: fit-content;
 }
-.link-icon {
+.relationships-tips li {
+    margin-left: var(--spacing-md);
+}
+.relationships-tips .link-icon {
     background-color: blue;
     border: 1px solid gray;
     border-radius: 50%;
