@@ -969,10 +969,6 @@ button.card-action-btn.mini {
         grid-template-columns: 1fr;
     }
 
-    .atlas-controls {
-        flex-direction: column;
-    }
-
     .atlas-grid {
         grid-template-columns: 1fr;
     }
