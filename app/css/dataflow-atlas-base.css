@@ -1016,6 +1016,9 @@ button.card-action-btn.mini.no-back {
 .muted {
     color: var(--color-text-muted);
 }
+code {
+    color: white;
+}
 
 .sr-only {
     clip: rect(0, 0, 0, 0);

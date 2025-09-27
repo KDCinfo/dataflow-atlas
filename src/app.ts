@@ -727,7 +727,13 @@ export class DFDAtlas {
       statusElement.classList.remove('hidden');
       cardNameElement.textContent = cardName;
     } else {
-      tipsElement?.classList.remove('hidden');
+      const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
+      const currentSize = (viewSizeSelect?.value as CardSize) || 'mini';
+      if (currentSize !== 'mini') {
+        tipsElement?.classList.add('hidden');
+      } else {
+        tipsElement?.classList.remove('hidden');
+      }
       statusElement.classList.add('hidden');
     }
   }
