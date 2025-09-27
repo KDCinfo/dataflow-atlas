@@ -854,7 +854,7 @@ export class DFDAtlas {
 
     // Get current view size
     const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
-    const currentSize = (viewSizeSelect?.value as CardSize) || 'standard';
+    const currentSize = (viewSizeSelect?.value as CardSize) || 'mini';
 
     if (filteredCards.length === 0) {
       atlasGrid.innerHTML = renderEmptyState();

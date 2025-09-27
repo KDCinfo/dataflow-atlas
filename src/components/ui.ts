@@ -651,7 +651,7 @@ export function formatCategory(category: string): string {
 /**
  * Render a single DFA card as HTML.
  */
-export function renderDFACard(card: DFACard, size: CardSize = 'standard'): string {
+export function renderDFACard(card: DFACard, size: CardSize = 'mini'): string {
   const persistsInList = card.persists_in && card.persists_in.length > 0
     ? `<div class="dfa-card-label">Also persists in:</div>
        <div class="dfa-card-value">${card.persists_in.join(', ')}</div>`
