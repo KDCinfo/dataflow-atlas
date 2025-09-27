@@ -63,6 +63,28 @@
       <!-- <h2>Data Flow Atlas</h2> -->
       <div class="atlas-controls">
         <div class="filter-group">
+          <label for="filter-search">Search Cards:</label>
+          <input type="text" autofocus id="filter-search" placeholder="Search by card name..." />
+        </div>
+        <div class="filter-group">
+          <!-- <label for="view-size">Card Size/<br>Relationship Filter <small>(via mini cards)</small>:</label> -->
+          <label for="view-size">Card Size:</label>
+          <select id="view-size">
+            <option value="mini">Mini (relationship view)</option>
+            <option value="compact">Compact</option>
+            <option value="standard">Full</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="filter-orphans">Orphans:</label>
+          <select id="filter-orphans">
+            <option value="">All Cards</option>
+            <option value="endpoints">Endpoints (Not linked from anywhere)</option>
+            <option value="throughpoints">Throughpoints (Not linked to anywhere)</option>
+            <!-- <option value="all">All Orphaned Cards</option> -->
+          </select>
+        </div>
+        <div class="filter-group">
           <label for="filter-layer">Filter by Layer:</label>
           <select id="filter-layer">
             <option value="">All Layers</option>
@@ -92,27 +114,6 @@
             <option value="auth">Authentication</option>
             <option value="runtime">Runtime State</option>
             <option value="feature">Core/Feature Data</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="filter-orphans">Orphans:</label>
-          <select id="filter-orphans">
-            <option value="">All Cards</option>
-            <option value="endpoints">Endpoints (Not linked from anywhere)</option>
-            <option value="throughpoints">Throughpoints (Not linked to anywhere)</option>
-            <!-- <option value="all">All Orphaned Cards</option> -->
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="filter-search">Search Cards:</label>
-          <input type="text" id="filter-search" placeholder="Search by card name..." />
-        </div>
-        <div class="filter-group">
-          <label for="view-size">Card Size/<br>Relationship Filter <small>(via mini cards)</small>:</label>
-          <select id="view-size">
-            <option value="mini">Mini (relationship view)</option>
-            <option value="compact">Compact</option>
-            <option value="standard">Full</option>
           </select>
         </div>
         <button id="clear-filters" class="btn-secondary">Clear Filters</button>
