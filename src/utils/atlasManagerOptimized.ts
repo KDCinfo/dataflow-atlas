@@ -40,7 +40,8 @@ function createDefaultMetadata(): AtlasMetadata {
     created: now,
     lastModified: now,
     cardCount: 0,
-    hasBackup: false
+    // The '_backup'  storage entry could be deleted manually, making this potentially invalid.
+    // hasBackup: false
   };
 }
 
@@ -300,7 +301,7 @@ export function saveCards(cards: DFACard[], createBackup: boolean = true): void 
 
     try {
       localStorage.setItem(backupKey, JSON.stringify(backupData, null, 2));
-      data.metadata.hasBackup = true;
+      // data.metadata.hasBackup = true;
       console.log(`[Atlas] Created full atlas backup for ${activeAtlas} (${backupData.cards.length} cards)`);
     } catch (error) {
       console.error(`[Atlas] Failed to create backup for ${activeAtlas}:`, error);
@@ -332,10 +333,10 @@ export function restoreFromBackup(): boolean {
     const backupKey = `${getAtlasStorageKey(activeAtlas)}_backup`;
     localStorage.removeItem(backupKey);
 
-    // Update hasBackup flag
+    // ~~Update hasBackup flag~~
     const currentData = getAtlasData(activeAtlas);
     if (currentData) {
-      currentData.metadata.hasBackup = false;
+      // currentData.metadata.hasBackup = false;
       setAtlasData(activeAtlas, currentData);
     }
 
