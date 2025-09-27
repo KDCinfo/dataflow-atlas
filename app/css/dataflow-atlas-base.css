@@ -409,9 +409,9 @@ header img.logo-img:hover {
 
 /* .filter-group input#filter-search { */
 .filter-group input {
-    border-radius: 5px;
+    border-radius: var(--radius-all1);
     min-width: 170px;
-    padding: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .atlas-container {

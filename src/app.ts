@@ -339,6 +339,11 @@ export class DFDAtlas {
     sections.forEach(section => {
       if (section.id === `${sectionName}-section`) {
         section.classList.add('active');
+        // const textInput = section.querySelector('input[type="text"]') as HTMLInputElement;
+        const textInput = section.querySelector('input[type="text"], select, textarea') as HTMLElement;
+        if (textInput) {
+          textInput.focus();
+        }
       } else {
         section.classList.remove('active');
       }

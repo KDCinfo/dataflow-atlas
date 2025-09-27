@@ -304,7 +304,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       <!-- What (Content Type) -->
       <div class="form-group">
         <label class="required" for="${idPrefix}field">${isEdit ? 'Field/Key Name:' : 'Field/Key Name:'} *</label>
-        <input class="required-input" type="text" id="${idPrefix}field" name="field" ${isEdit ? `value="${escapeHtml(c.field || '')}"` : ''} required
+        <input autofocus class="required-input" type="text" id="${idPrefix}field" name="field" ${isEdit ? `value="${escapeHtml(c.field || '')}"` : ''} required
                placeholder="e.g., nightmode, userToken, email">
       </div>
 
