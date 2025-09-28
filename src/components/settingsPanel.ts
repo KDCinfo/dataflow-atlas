@@ -1480,6 +1480,12 @@ function handleDeleteAtlas(atlasName: string): void {
         if (window.location.pathname.includes('app') && (window as any).app) {
           (window as any).app.refreshAtlasSelector();
         }
+        // Trigger re-validation of input field to update button state
+        const atlasNameInput = document.getElementById('new-atlas-name-input') as HTMLInputElement;
+        if (atlasNameInput) {
+          const event = new Event('input', { bubbles: true });
+          atlasNameInput.dispatchEvent(event);
+        }
         showNotification(`Atlas "${atlasName}" deleted successfully!`, 'success');
       } else {
         alert('Failed to delete atlas.');
