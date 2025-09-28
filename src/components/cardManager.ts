@@ -195,14 +195,25 @@ export function deleteDFACard(field: string): boolean {
   }
 
   const existingCards = loadCards();
-  const filteredCards = existingCards.filter(card => card.field !== field);
+  const cardToDelete = existingCards.find(card => card.field === field);
 
-  if (filteredCards.length === existingCards.length) {
+  if (!cardToDelete) {
     showNotification('Card not found for deletion', 'error');
     return false;
   }
 
-  saveCards(filteredCards);
+  // Remove the card and clean up any linkedTo references pointing to it.
+  const cleanedCards = existingCards
+    .filter(card => card.field !== field) // Remove the card itself
+    .map(card => {
+      // Clean up linkedTo references that point to the deleted card.
+      if (card.linkedTo === cardToDelete.id) {
+        return { ...card, linkedTo: '' }; // Clear the broken reference
+      }
+      return card;
+    });
+
+  saveCards(cleanedCards);
 
   // Update connection options since a card was removed.
   updateConnectionOptions();
