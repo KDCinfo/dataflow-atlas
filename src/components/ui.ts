@@ -573,7 +573,16 @@ export function requireElement<T extends HTMLElement>(id: string): T {
  * Show a notification message to the user.
  */
 export function showNotification(message: string, type: NotificationType = 'info'): void {
+  // Remove any existing notifications first to prevent overlapping
+  const existingNotifications = document.querySelectorAll('.dfa-notification');
+  existingNotifications.forEach(notification => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  });
+
   const notification = document.createElement('div');
+  notification.className = 'dfa-notification'; // Add class for identification
   notification.style.cssText = `
     position: fixed;
     top: 20px;
