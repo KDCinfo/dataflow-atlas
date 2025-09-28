@@ -891,19 +891,19 @@ function renderVisibilityCheckboxes(mode: 'create' | 'edit'): void {
       <div class="checkbox-group">
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-scope" ${visibility.showScope ? 'checked' : ''}>
-          <span class="checkmark"></span>
+          <span class="checkmark hidden"></span>
           <span class="label-text">${visibility.showScope ? 'Hide' : 'Show'} 'Scope'</span>
         </label>
 
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-category" ${visibility.showCategory ? 'checked' : ''}>
-          <span class="checkmark"></span>
+          <span class="checkmark hidden"></span>
           <span class="label-text">${visibility.showCategory ? 'Hide' : 'Show'} 'Category'</span>
         </label>
 
         <label class="checkbox-label">
           <input type="checkbox" id="${prefix}show-persists-in" ${visibility.showPersistsIn ? 'checked' : ''}>
-          <span class="checkmark"></span>
+          <span class="checkmark hidden"></span>
           <span class="label-text">${visibility.showPersistsIn ? 'Hide' : 'Show'} 'Also Persists In'</span>
         </label>
       </div>
