@@ -340,6 +340,28 @@
     /* opacity: 0.6; */
 }
 
+/* Atlas Copy Name Button */
+.atlas-copy-name-btn {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    transition: all 0.2s ease;
+}
+
+.atlas-copy-name-btn:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.atlas-copy-name-btn:active {
+    transform: translateY(0);
+}
+
 /* Legacy Layer Manager Styles */
 .layer-manager {
     display: flex;
@@ -531,3 +553,4 @@ input.invalid {
 .card-tags-container-lg {
     margin-top: var(--spacing-md);
 }
+

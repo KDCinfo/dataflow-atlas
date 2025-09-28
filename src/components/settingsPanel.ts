@@ -731,6 +731,9 @@ function setupSettingsEventListeners(): void {
 
   // Atlas Management Handlers
   setupAtlasManagementHandlers();
+
+  // Initialize atlas list and name selector
+  refreshAtlasList();
 }
 
 /**
@@ -1364,6 +1367,7 @@ function renderAtlasList(atlases: any[], activeAtlas: string, listContainer: HTM
           <div class="atlas-meta">${atlas.cardCount} cards • Modified: ${lastModified}</div>
         </div>
         <div class="atlas-actions">
+          <button class="btn btn-sm atlas-copy-name-btn" data-atlas-name="${escapeHtml(atlas.name)}" title="Copy atlas name to input field">📋</button>
           ${showActivate ? `<button class="btn btn-sm atlas-activate-btn" data-atlas-name="${escapeHtml(atlas.name)}">Activate</button>` : ''}
           ${showRename ? `<button class="btn btn-sm atlas-rename-btn" data-atlas-name="${escapeHtml(atlas.name)}">Rename</button>` : ''}
           ${showDelete ? `<button class="btn btn-sm btn-danger atlas-delete-btn" data-atlas-name="${escapeHtml(atlas.name)}">Delete</button>` : ''}
@@ -1390,6 +1394,16 @@ function renderAtlasList(atlases: any[], activeAtlas: string, listContainer: HTM
  * Attach event handlers for atlas action buttons.
  */
 function attachAtlasActionHandlers(): void {
+  // Copy name buttons
+  document.querySelectorAll('.atlas-copy-name-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const atlasName = (e.target as HTMLElement).getAttribute('data-atlas-name');
+      if (atlasName) {
+        handleCopyAtlasName(atlasName);
+      }
+    });
+  });
+
   // Activate buttons
   document.querySelectorAll('.atlas-activate-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1411,6 +1425,22 @@ function attachAtlasActionHandlers(): void {
       }
     });
   });
+}
+
+/**
+ * Handle copying atlas name to input field.
+ */
+function handleCopyAtlasName(atlasName: string): void {
+  const atlasNameInput = document.getElementById('new-atlas-name-input') as HTMLInputElement;
+  if (atlasNameInput) {
+    atlasNameInput.value = atlasName;
+    atlasNameInput.focus();
+
+    // Trigger validation update by calling the update function if it exists
+    // We need to call the updateAtlasButtonStates function from setupAtlasManagementHandlers
+    const event = new Event('input', { bubbles: true });
+    atlasNameInput.dispatchEvent(event);
+  }
 }
 
 /**
