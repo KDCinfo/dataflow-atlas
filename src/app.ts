@@ -782,9 +782,10 @@ export class DFDAtlas {
 
     if (!statusElement || !cardNameElement) return;
 
+    const cards = loadCards();
+
     if (this.relationshipsFilterCardId) {
       // Find the card name to display
-      const cards = loadCards();
       const card = cards.find(c => c.id === this.relationshipsFilterCardId);
       const cardName = card ? card.field : 'Unknown Card';
 
@@ -794,7 +795,7 @@ export class DFDAtlas {
     } else {
       const viewSizeSelect = document.getElementById('view-size') as HTMLSelectElement;
       const currentSize = (viewSizeSelect?.value as CardSize) || 'mini';
-      if (currentSize !== 'mini') {
+      if (currentSize !== 'mini' || cards.length === 0) {
         tipsElement?.classList.add('hidden');
       } else {
         tipsElement?.classList.remove('hidden');
