@@ -22,7 +22,7 @@ import {
   DataLayerType,
   type DataLayer,
 } from '../utils/settings.js';
-import { getElement, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions, updateScopeOptions, updateCategoryOptions } from './ui.js';
+import { getElement, showNotification, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions, updateScopeOptions, updateCategoryOptions } from './ui.js';
 import {
   validateAtlasName,
   createAtlas,
@@ -1162,7 +1162,7 @@ async function setupAtlasManagementHandlers(): Promise<void> {
             if (window.location.pathname.includes('app') && (window as any).app) {
               (window as any).app.refreshAtlasSelector();
             }
-            alert(`Atlas renamed to "${name}" successfully!`);
+            showNotification(`Atlas renamed to "${name}" successfully!`, 'success');
           } else {
             alert('Failed to rename atlas.');
           }
@@ -1177,7 +1177,7 @@ async function setupAtlasManagementHandlers(): Promise<void> {
             if (window.location.pathname.includes('app') && (window as any).app) {
               (window as any).app.refreshAtlasSelector();
             }
-            alert(`Atlas "${name}" created successfully!`);
+            showNotification(`Atlas "${name}" created successfully!`, 'success');
           } else {
             alert('Failed to create atlas.');
           }
@@ -1272,7 +1272,7 @@ async function setupAtlasManagementHandlers(): Promise<void> {
               (window as any).app.updateStats();
               (window as any).app.refreshAtlasSelector();
             }
-            alert('Atlas restored from backup successfully!');
+            showNotification('Atlas restored from backup successfully!', 'success');
           } else {
             alert('Failed to restore from backup. No backup available.');
           }
@@ -1480,7 +1480,7 @@ function handleDeleteAtlas(atlasName: string): void {
         if (window.location.pathname.includes('app') && (window as any).app) {
           (window as any).app.refreshAtlasSelector();
         }
-        alert(`Atlas "${atlasName}" deleted successfully!`);
+        showNotification(`Atlas "${atlasName}" deleted successfully!`, 'success');
       } else {
         alert('Failed to delete atlas.');
       }
