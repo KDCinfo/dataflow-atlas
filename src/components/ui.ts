@@ -1044,3 +1044,15 @@ export function downloadJson(data: any, filename: string): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Sets focus on first form element found, if any.
+ * @param section HTMLElement
+ */
+export function setFocus(section: HTMLElement) {
+  // const textInput = section.querySelector('input[type="text"]') as HTMLInputElement;
+  const textInput = section.querySelector('input[type="text"], select, textarea') as HTMLElement;
+  if (textInput) {
+    textInput.focus();
+  }
+}

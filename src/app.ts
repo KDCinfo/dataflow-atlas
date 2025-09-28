@@ -18,6 +18,7 @@ import {
   initializeFormVisibilityCheckboxes,
   updateFormSectionVisibility,
   updateLayerFilterOptions,
+  setFocus,
 } from './components/ui.js';
 import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
@@ -404,11 +405,7 @@ export class DFDAtlas {
     sections.forEach(section => {
       if (section.id === `${sectionName}-section`) {
         section.classList.add('active');
-        // const textInput = section.querySelector('input[type="text"]') as HTMLInputElement;
-        const textInput = section.querySelector('input[type="text"], select, textarea') as HTMLElement;
-        if (textInput) {
-          textInput.focus();
-        }
+        setFocus(section as HTMLElement);
       } else {
         section.classList.remove('active');
       }

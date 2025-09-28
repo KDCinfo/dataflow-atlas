@@ -22,7 +22,17 @@ import {
   DataLayerType,
   type DataLayer,
 } from '../utils/settings.js';
-import { getElement, showNotification, updateLocationOptions, updateLayerOptions, updateLayerFilterOptions, updateConnectionOptions, updateScopeOptions, updateCategoryOptions } from './ui.js';
+import {
+  getElement,
+  showNotification,
+  updateLocationOptions,
+  updateLayerOptions,
+  updateLayerFilterOptions,
+  updateConnectionOptions,
+  updateScopeOptions,
+  updateCategoryOptions,
+  setFocus,
+} from './ui.js';
 import {
   validateAtlasName,
   createAtlas,
@@ -33,7 +43,7 @@ import {
   setActiveAtlas,
   initializeDefaultAtlas,
   restoreFromBackup,
-  hasActiveBackup
+  hasActiveBackup,
 } from '../utils/atlasManagerOptimized.js';
 import AppConstants from '../utils/appConstants.js';
 
@@ -484,6 +494,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateLocationOptions(); // Update main form options.
       }
+
+      locationKeyInput.focus();
     };
 
     addLocationBtn.addEventListener('click', handleAddOrUpdateLocation);
@@ -511,6 +523,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateLocationOptions(); // Update main form options.
       }
+      const locationKeyInput = getElement<HTMLInputElement>('new-location-key-input');
+      locationKeyInput?.focus();
     });
   });
 
@@ -551,6 +565,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateScopeOptions(); // Update main form scope options.
       }
+
+      scopeKeyInput.focus();
     };
 
     addScopeBtn.addEventListener('click', handleAddOrUpdateScope);
@@ -578,6 +594,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateScopeOptions(); // Update main form scope options.
       }
+      const scopeKeyInput = getElement<HTMLInputElement>('new-scope-key-input');
+      scopeKeyInput?.focus();
     });
   });
 
@@ -618,6 +636,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateCategoryOptions(); // Update main form category options.
       }
+
+      categoryKeyInput.focus();
     };
 
     addCategoryBtn.addEventListener('click', handleAddOrUpdateCategory);
@@ -645,6 +665,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateCategoryOptions(); // Update main form category options.
       }
+      const categoryKeyInput = getElement<HTMLInputElement>('new-category-key-input');
+      categoryKeyInput?.focus();
     });
   });
 
@@ -683,6 +705,8 @@ function setupSettingsEventListeners(): void {
 
       // Refresh the settings panel
       populateSettingsContent();
+
+      layerNameInput.focus();
     };
 
     addLayerBtn.addEventListener('click', handleAddLayer);
@@ -696,6 +720,8 @@ function setupSettingsEventListeners(): void {
       if (layerId) {
         handleEditDataLayer(layerId);
       }
+      const layerNameInput = getElement<HTMLInputElement>('new-layer-name-input');
+      layerNameInput?.focus();
     });
   });
 
@@ -706,6 +732,8 @@ function setupSettingsEventListeners(): void {
       if (layerId) {
         handleDeleteDataLayer(layerId);
       }
+      const layerNameInput = getElement<HTMLInputElement>('new-layer-name-input');
+      layerNameInput?.focus();
     });
   });
 
@@ -757,6 +785,9 @@ function toggleCollapsibleSection(sectionId: string): void {
     content.classList.add('expanded');
     icon.classList.add('expanded');
     icon.textContent = '▼';
+
+    setFocus(content as HTMLElement);
+
     setPanelExpanded(sectionId, true);
   }
 }
@@ -828,7 +859,9 @@ function handleDeleteDataLayer(layerId: string): void {
     // Refresh the settings panel
     populateSettingsContent();
   }
-}/**
+}
+
+/**
  * Initialize settings panel functionality.
  */
 export function initializeSettingsPanel(): void {
@@ -1018,7 +1051,9 @@ function exitEditMode(): void {
     atlasCancelBtn.classList.add('settings-hidden-btn');
     atlasFormLabel.textContent = 'Create New Atlas:';
   }
-}/**
+}
+
+/**
  * Attach edit event handlers for all types.
  */
 function attachEditHandlers(): void {
@@ -1085,22 +1120,50 @@ function attachEditHandlers(): void {
   // Cancel button handlers
   const scopeCancelBtn = getElement('cancel-scope-btn');
   if (scopeCancelBtn) {
-    scopeCancelBtn.addEventListener('click', exitEditMode);
+    scopeCancelBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      exitEditMode();
+      const target = e.target as HTMLElement;
+      if (target.parentElement) {
+        setFocus(target.parentElement as HTMLElement); // Button and input are siblings.
+      }
+    });
   }
 
   const categoryCancelBtn = getElement('cancel-category-btn');
   if (categoryCancelBtn) {
-    categoryCancelBtn.addEventListener('click', exitEditMode);
+    categoryCancelBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      exitEditMode();
+      const target = e.target as HTMLElement;
+      if (target.parentElement) {
+        setFocus(target.parentElement as HTMLElement); // Button and input are siblings.
+      }
+    });
   }
 
   const locationCancelBtn = getElement('cancel-location-btn');
   if (locationCancelBtn) {
-    locationCancelBtn.addEventListener('click', exitEditMode);
+    locationCancelBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      exitEditMode();
+      const target = e.target as HTMLElement;
+      if (target.parentElement) {
+        setFocus(target.parentElement as HTMLElement); // Button and input are siblings.
+      }
+    });
   }
 
   const atlasCancelBtn = getElement('cancel-atlas-btn');
   if (atlasCancelBtn) {
-    atlasCancelBtn.addEventListener('click', exitEditMode);
+    atlasCancelBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      exitEditMode();
+      const target = e.target as HTMLElement;
+      if (target.parentElement) {
+        setFocus(target.parentElement as HTMLElement); // Button and input are siblings.
+      }
+    });
   }
 }
 
@@ -1185,6 +1248,10 @@ async function setupAtlasManagementHandlers(): Promise<void> {
       } catch (error) {
         console.error('Error creating/updating atlas:', error);
         alert('Failed to create/update atlas.');
+      } finally {
+        if (atlasNameInput.parentElement) {
+          setFocus(atlasNameInput.parentElement as HTMLElement);
+        }
       }
     };
 
@@ -1453,7 +1520,6 @@ function handleActivateAtlas(atlasName: string): void {
   }
 }
 
-
 /**
  * Handle atlas deletion.
  */
@@ -1485,6 +1551,7 @@ function handleDeleteAtlas(atlasName: string): void {
         if (atlasNameInput) {
           const event = new Event('input', { bubbles: true });
           atlasNameInput.dispatchEvent(event);
+          atlasNameInput.focus();
         }
         showNotification(`Atlas "${atlasName}" deleted successfully!`, 'success');
       } else {
