@@ -246,8 +246,8 @@ export class DFDAtlas {
         this.editCard(card);
         break;
       case 'delete':
-        if (confirm('Are you sure you want to delete this card?')) {
-          deleteDFACard(card.field);
+        const deleted = deleteDFACard(card.field);
+        if (deleted) {
           showNotification('Card deleted successfully', 'success');
           this.renderAtlas();
           this.updateStats();
