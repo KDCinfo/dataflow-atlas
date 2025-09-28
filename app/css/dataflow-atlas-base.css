@@ -3,7 +3,8 @@
 :root {
     --color-primary: #00ffff;
     --color-primary-dark: darkblue;
-    --color-secondary: #64748b;
+    --color-secondary: #115577;
+    /* --color-secondary: #64748b; */
     --color-success: #059669;
     --color-danger: #dc2626;
     --color-warning: #d97706;
@@ -336,43 +337,56 @@ header img.logo-img:hover {
 .btn-danger {
     border: none;
     border-radius: var(--radius-all1);
-    cursor: pointer;
     font-weight: 500;
     padding: var(--spacing-sm) var(--spacing-lg);
     transition: all 0.2s ease;
 }
 
-.btn-primary {
-    /* background-color: var(--color-primary); */
+.btn-primary:not(:disabled) {
     background-color: var(--color-primary-dark);
     border: 1px solid var(--color-border);
-    /* color: white; */
     color: var(--color-primary);
 }
 
-.btn-primary:hover {
+.btn-primary:not(:disabled):hover {
     background-color: var(--color-primary-dark);
     box-shadow: 0 0 15px cyan;
+    cursor: pointer;
 }
 
-.btn-secondary {
+.btn-secondary:not(:disabled) {
     background-color: var(--color-secondary);
+    border: 1px solid var(--color-text);
     color: white;
 }
 
-.btn-secondary:hover {
-    background-color: #475569;
-    color: cyan;
+.btn-secondary:not(:disabled):hover {
+    background-color: #0a3a5a; /* Derived from #115577 */
+    box-shadow: 0 0 7px cyan;
+    cursor: pointer;
     outline: 1px solid cyan;
 }
 
-.btn-danger {
+.btn-danger:not(:disabled) {
     background-color: var(--color-danger);
     color: white;
 }
 
-.btn-danger:hover {
+.btn-danger:not(:disabled):hover {
     background-color: #b91c1c;
+    box-shadow: 0 0 7px white;
+    cursor: pointer;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
+  background-color: rgba(239, 239, 239, 0.7);
+  box-shadow: none;
+  color: #444444;
+  cursor: default;
+  font-weight: normal;
+  outline: none;
 }
 
 /* Atlas View Styles */
@@ -838,6 +852,12 @@ button.card-action-btn.mini.no-back {
     color: var(--color-danger);
 }
 
+.danger-zone .danger-zone-section {
+    border: 1px dotted var(--color-success);
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-md);
+}
+
 .export-group p,
 .import-group p,
 .danger-zone p {
@@ -890,7 +910,8 @@ button.card-action-btn.mini.no-back {
     background: var(--color-surface);
     border-radius: var(--radius-all1);
     box-shadow: 0px 0px 9px cyan;
-    max-height: 90vh;
+    margin: var(--spacing-xl) 0 0;
+    max-height: 95vh;
     max-width: 800px;
     overflow-y: auto;
     padding: var(--spacing-lg) var(--spacing-xl);

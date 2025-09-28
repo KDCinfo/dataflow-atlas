@@ -23,7 +23,8 @@ import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
 import { initializeSettingsPanel } from './components/settingsPanel.js';
 import { AtlasSelector } from './components/atlasSelector.js';
-import { initializeDefaultAtlas, saveCards } from './utils/atlasManagerOptimized.js';
+import { initializeDefaultAtlas, saveCards, restoreFromBackup, getActiveAtlas } from './utils/atlasManagerOptimized.js';
+import { updateBackupButtonState } from './components/settingsPanel.js';
 
 /**
  * Main Data Flow Atlas application class.
@@ -46,6 +47,7 @@ export class DFDAtlas {
     // Render the active atlas (loads only the cards we need).
     this.renderAtlas();
     this.updateStats();
+    updateBackupButtonState(); // Initialize backup button state
   }
 
   /**
@@ -130,11 +132,13 @@ export class DFDAtlas {
     const importBtn = document.getElementById('import-btn') as HTMLButtonElement;
     const importFile = document.getElementById('import-file') as HTMLInputElement;
     const clearAllBtn = document.getElementById('clear-all-btn') as HTMLButtonElement;
+    const manageRestoreBackupBtn = document.getElementById('manage-restore-backup-btn') as HTMLButtonElement;
 
     if (exportBtn) exportBtn.addEventListener('click', () => this.exportData());
     if (importBtn) importBtn.addEventListener('click', () => this.triggerImport());
     if (importFile) importFile.addEventListener('change', (e) => this.handleImport(e));
     if (clearAllBtn) clearAllBtn.addEventListener('click', () => this.clearAllData());
+    if (manageRestoreBackupBtn) manageRestoreBackupBtn.addEventListener('click', () => this.restoreFromBackup());
 
     // Modal.
     const editModal = document.getElementById('edit-modal') as HTMLElement;
@@ -220,6 +224,7 @@ export class DFDAtlas {
       this.renderAtlas();
       this.updateStats();
       this.refreshAtlasSelector();
+      updateBackupButtonState();
     } catch (error) {
       console.error('Error handling form submission:', error);
       showNotification('Error saving card', 'error');
@@ -247,6 +252,7 @@ export class DFDAtlas {
           this.renderAtlas();
           this.updateStats();
           this.refreshAtlasSelector();
+          updateBackupButtonState();
         }
         break;
       case 'relationships':
@@ -1051,6 +1057,35 @@ export class DFDAtlas {
       this.renderAtlas();
       this.updateStats();
       this.refreshAtlasSelector();
+    }
+  }
+
+  /**
+   * Restore from backup.
+   */
+  private restoreFromBackup(): void {
+    const activeAtlas = getActiveAtlas();
+    const backupWarning = `\n!!! WARNING !!! All current data WILL BE REPLACED!
+          \nActive atlas: ${activeAtlas}
+          \nThis will restore from the auto-backup created before your last edit.
+          \nYou can also consider using the import/export options.\n`;
+
+    if (confirm(backupWarning)) {
+      try {
+        const success = restoreFromBackup();
+        if (success) {
+          showNotification('Atlas restored from backup successfully!', 'success');
+          this.renderAtlas();
+          this.updateStats();
+          this.refreshAtlasSelector();
+          updateBackupButtonState(); // Update backup button state after restore
+        } else {
+          showNotification('Failed to restore from backup. No backup available.', 'error');
+        }
+      } catch (error) {
+        console.error('Error restoring backup:', error);
+        showNotification('Failed to restore from backup.', 'error');
+      }
     }
   }
 

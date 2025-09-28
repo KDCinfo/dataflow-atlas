@@ -3,7 +3,7 @@
 /* Settings Modal Styles */
 .settings-content {
     margin-bottom: var(--spacing-lg);
-    max-height: 60vh;
+    max-height: 65vh;
     overflow-y: auto;
 }
 .settings-content {
@@ -316,14 +316,28 @@
     text-align: center;
 }
 
+.atlas-activate-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.8rem;
+}
+.atlas-activate-btn.btn-active:not(:disabled) {
+    background: var(--color-primary);
+    color: black;
+}
+
 /* Borrowed from [dataflow-modal.css] */
+.atlas-activate-btn:disabled,
 .storage-buttons-modal button:disabled {
-  background-color: rgba(239, 239, 239, 0.7);
-  box-shadow: none;
-  color: #444444;
-  cursor: default;
-  font-weight: normal;
-  outline: none;
+    background-color: rgba(239, 239, 239, 0.7);
+    box-shadow: none;
+    color: #444444;
+    cursor: default;
+    font-weight: normal;
+    outline: none;
+}
+.atlas-activate-btn:disabled {
+    cursor: not-allowed;
+    /* opacity: 0.6; */
 }
 
 /* Legacy Layer Manager Styles */
@@ -471,16 +485,6 @@
     outline: none;
 }
 
-.atlas-activate-btn {
-    font-size: 0.8rem;
-    padding: var(--spacing-xs) var(--spacing-sm);
-}
-
-.atlas-activate-btn.btn-active {
-    background: var(--color-primary);
-    color: black;
-}
-
 /* Help Icon Styles */
 .help-icon {
     color: var(--color-text-muted);
@@ -506,11 +510,6 @@
     /* transform: translateY(-50%); */
     width: 18px;
     z-index: 10;
-}
-
-.atlas-activate-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
 }
 
 /* Input Validation Styles */

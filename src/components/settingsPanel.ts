@@ -146,19 +146,19 @@ function generateAtlasManagementSection(): string {
             <button id="cancel-atlas-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help full-width text-right">
-            <small>Atlas names must use camelCase or snake_case format, starting with a lowercase letter.</small>
+            <small>Atlas names must use either <code>snake_case</code> or <code>camelCase</code>.</small>
           </div>
         </div>
 
-        <div class="settings-item">
+        <div class="settings-item hidden">
           <label>Auto-Backup:</label>
           <div class="settings-flex-row">
-            <button id="restore-backup-btn" class="btn-secondary" disabled title="No backup available for the active atlas">
-              Restore Active Auto-Backup
+            <button id="restore-backup-btn" class="btn-danger" disabled title="No backup available for the active atlas">
+              Restore Auto-Backup
             </button>
           </div>
-          <div class="input-help">
-            <small>Auto-backups are created each time you edit cards (not when creating). Only available for the currently active atlas.</small>
+          <div class="input-help full-width text-right">
+            <small>A backup is performed automatically each time a card is added or edited. This will overwrite <span class="no-wrap">the currently active atlas.</span></small>
           </div>
         </div>
 
@@ -1104,13 +1104,25 @@ function attachEditHandlers(): void {
 /**
  * Update the backup button state based on whether active atlas has backup.
  */
-function updateBackupButtonState(): void {
+export function updateBackupButtonState(): void {
+  const hasBackup = hasActiveBackup();
+  const activeAtlas = getActiveAtlas();
+
+  // Update settings panel button
   const restoreBackupBtn = document.getElementById('restore-backup-btn') as HTMLButtonElement;
   if (restoreBackupBtn) {
-    const hasBackup = hasActiveBackup();
     restoreBackupBtn.disabled = !hasBackup;
     restoreBackupBtn.title = hasBackup
-      ? `Restore ${getActiveAtlas()} from auto-backup`
+      ? `Restore ${activeAtlas} from auto-backup`
+      : 'No backup available for the active atlas';
+  }
+
+  // Update main page button
+  const manageRestoreBackupBtn = document.getElementById('manage-restore-backup-btn') as HTMLButtonElement;
+  if (manageRestoreBackupBtn) {
+    manageRestoreBackupBtn.disabled = !hasBackup;
+    manageRestoreBackupBtn.title = hasBackup
+      ? `Restore ${activeAtlas} from auto-backup`
       : 'No backup available for the active atlas';
   }
 }

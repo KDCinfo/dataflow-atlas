@@ -34,7 +34,7 @@
     <nav class="main-nav">
       <button id="nav-add" class="nav-btn active">Add DFA Card</button>
       <button id="nav-view" class="nav-btn">View Atlas</button>
-      <button id="nav-import" class="nav-btn">Import/Export</button>
+      <button id="nav-import" class="nav-btn">Manage Data</button>
 
       <!-- Atlas Selector -->
       <div class="atlas-selector">
@@ -143,7 +143,7 @@
 
     <!-- Import/Export Section -->
     <section id="import-section" class="section">
-      <h2>Import/Export Data</h2>
+      <!-- <h2>Import/Export</h2> -->
       <div class="import-export-grid">
         <div class="export-group">
           <h3>Export Atlas Data</h3>
@@ -172,8 +172,18 @@
         </div>
         <div class="danger-zone">
           <h3>Danger Zone</h3>
-          <p>This will permanently delete all DFA cards from your atlas.</p>
-          <button id="clear-all-btn" class="btn-danger">Clear All Data</button>
+          <div class="danger-zone-section">
+            <p>This will <b>permanently delete</b> all DFA cards in this atlas.</p>
+            <button id="clear-all-btn" class="btn-danger">Clear All Data</button>
+          </div>
+          <div class="danger-zone-section">
+            <p>This will <b>permanently replace</b> all DFA cards in this atlas.</p>
+            <p>A backup of each atlas is performed automatically when cards are added or updated.</p>
+            <!-- <button id="manage-restore-backup-btn" class="btn-warning" title="Restore..."> -->
+            <button id="manage-restore-backup-btn" class="btn-danger" disabled title="No backup available for the active atlas">
+              Restore Auto-Backup
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -204,7 +214,7 @@
       <div id="settings-content" class="settings-content">
         <!-- Settings tabs and panels will be populated dynamically -->
       </div>
-      <div class="form-actions">
+      <div class="form-actions hidden">
         <button id="settings-save" class="btn-primary modal-save hidden">Save Settings</button>
         <button id="settings-cancel" class="btn-secondary modal-cancel">Close</button>
       </div>
