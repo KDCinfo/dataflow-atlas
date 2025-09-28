@@ -57,21 +57,23 @@ export function importCards(jsonData: string, mode: ImportMode): DFACard[] {
       // Merge mode: combine existing with imported, imported takes precedence for duplicates.
       const existingCards = loadCards();
 
-      // Start with existing cards
+      // Start with existing cards.
       finalCards = [...existingCards];
 
-      // Track ID mappings for updating linkedTo references and which cards were imported
+      // Track ID mappings for updating linkedTo references and which cards were imported.
       const idMappings = new Map<string, string>();
       const importedCardIds = new Set<string>();
 
-      // Process imported cards
+      // Process imported cards.
       importedCards.forEach(importedCard => {
-        // In merge mode, only add cards that don't already exist by field name
-        // This prevents duplicates while preserving existing (possibly modified) cards
-        const existingIndex = finalCards.findIndex(card => card.field === importedCard.field);
+        // In merge mode, only add cards that don't already exist by field name.
+        // This prevents duplicates while preserving existing (possibly modified) cards.
+        const existingIndex = finalCards.findIndex(
+          card => card.field.toLowerCase() === importedCard.field.toLowerCase()
+        );
 
         if (existingIndex < 0) {
-          // Field name doesn't exist - add as new card
+          // Field name doesn't exist - add as new card.
           const newId = `dfa-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
           const newCard = {
             ...importedCard,
@@ -81,16 +83,16 @@ export function importCards(jsonData: string, mode: ImportMode): DFACard[] {
           idMappings.set(importedCard.id, newId);
           importedCardIds.add(newId);
         } else {
-          // Field name exists - skip this imported card to avoid duplicates
-          // Map the old ID to the existing card's ID for linkedTo reference updates
+          // Field name exists - skip this imported card to avoid duplicates.
+          // Map the old ID to the existing card's ID for linkedTo reference updates.
           const existingCard = finalCards[existingIndex];
           idMappings.set(importedCard.id, existingCard.id);
         }
       });
 
-      // Update linkedTo references ONLY for imported cards, not existing ones
+      // Update linkedTo references ONLY for imported cards, not existing ones.
       finalCards.forEach(card => {
-        // Only update linkedTo references for cards that were just imported
+        // Only update linkedTo references for cards that were just imported.
         if (importedCardIds.has(card.id) && card.linkedTo && idMappings.has(card.linkedTo)) {
           card.linkedTo = idMappings.get(card.linkedTo)!;
         }
