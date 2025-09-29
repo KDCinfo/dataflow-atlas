@@ -369,6 +369,8 @@ export function populateSettingsContent(): void {
   container.innerHTML = `
     ${generateAtlasManagementSection()}
 
+    ${generateDataLayerManagementSection()}
+
     <div class="settings-section">
       <h4 class="collapsible-header" data-target="layer-names">
         <span class="expand-icon ${isLocationsExpanded ? 'expanded' : ''}">${isLocationsExpanded ? '▼' : '►'}</span>
@@ -411,8 +413,6 @@ export function populateSettingsContent(): void {
         ` : ''}
       </div>
     </div>
-
-    ${generateDataLayerManagementSection()}
 
     ${generateScopeManagementSection()}
 
