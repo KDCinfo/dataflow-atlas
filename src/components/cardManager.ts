@@ -1,7 +1,7 @@
 import type { DFACard, AtlasFilter, ContentCategory, DataScope } from '../types/dfa.js';
 import { isDataLayer, isDataScope, isContentCategory } from '../types/dfa.js';
 import { loadCards, saveCards } from '../utils/storage.js';
-import { addLocation, getSettings, getDataLayersByType } from '../utils/settings.js';
+import { addLocation, getCurrentAtlasSettings, getDataLayersByType } from '../utils/settings.js';
 import { showNotification, updateLocationOptions, updateConnectionOptions } from './ui.js';
 
 /**
@@ -38,7 +38,7 @@ export function createDFACardFromForm(formData: FormData, existingCard?: DFACard
   const category = formData.get('category') as string;
 
   // Get valid layer names from current settings.
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   const validLayerNames = settings.dataLayers.map(layer => layer.name);
 
   // Validate types at runtime.
@@ -327,7 +327,9 @@ export function getFilteredCards(filters: AtlasFilter): DFACard[] {
     }
     return true;
   });
-}/**
+}
+
+/**
  * Clear all DFA cards after confirmation.
  */
 export function clearAllCards(): boolean {

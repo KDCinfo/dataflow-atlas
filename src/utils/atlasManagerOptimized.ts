@@ -146,7 +146,8 @@ export function getAllAtlases(): string[] {
     if (key &&
       key.startsWith(ATLAS_PREFIX) &&
       !key.startsWith('dfa__') &&
-      !key.includes('_backup')
+      !key.includes('_backup') &&
+      !key.includes('_settings')
     ) {
       // Extract atlas name from key (remove prefix)
       const atlasName = key.substring(ATLAS_PREFIX.length);

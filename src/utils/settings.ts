@@ -1,9 +1,8 @@
 /**
- * Settings management utility for Data Flow Atlas.
- * Handles localStorage and sessionStorage for various application settings.
+ * Clean Settings Management for Data Flow Atlas.
+ * Atlas-specific settings with global app preferences.
  */
-
-import { STORAGE_KEY, loadCards, saveCards } from './storage.js';
+import { getActiveAtlas } from './atlasManagerOptimized.js';
 
 export enum DataLayerType {
   Endpoint = 'endpoint',
@@ -22,20 +21,24 @@ export interface FormVisibilitySettings {
   showPersistsIn: boolean;
 }
 
-export interface SettingsConfig {
-  locations: string[];
-  dataLayers: DataLayer[];
-  scopes: string[];
-  categories: string[];
-  scopeLabels: Record<string, string>; // Custom labels for scope keys
-  categoryLabels: Record<string, string>; // Custom labels for category keys
-  locationLabels: Record<string, string>; // Custom labels for location keys
-  dataTypes: string[];
+// Global app-level settings (stored in dfa_settings)
+export interface GlobalSettings {
   formVisibility: FormVisibilitySettings;
 }
 
-const SETTINGS_KEY = 'dfa__settings';
-const TEMP_SETTINGS_KEY = 'dfa__temp_settings';
+// Atlas-specific settings (stored in dfa_[atlasName]_settings)
+export interface AtlasSettings {
+  dataLayers: DataLayer[];
+  dataTypes: string[];
+  locations: string[]; // Layer names (files/classes) - simple identifiers
+  scopes: string[];
+  scopeLabels: Record<string, string>; // Custom labels for scope keys
+  categories: string[];
+  categoryLabels: Record<string, string>; // Custom labels for category keys
+}
+
+// Storage keys
+const GLOBAL_SETTINGS_KEY = 'dfa__settings';
 
 // Default scope and category definitions with display labels
 const DEFAULT_SCOPES_MAP: Record<string, string> = {
@@ -56,56 +59,14 @@ const DEFAULT_CATEGORIES_MAP: Record<string, string> = {
 const getDefaultScopes = (): string[] => Object.keys(DEFAULT_SCOPES_MAP);
 const getDefaultCategories = (): string[] => Object.keys(DEFAULT_CATEGORIES_MAP);
 
-/**
- * Get display label for a scope value.
- */
-export function getScopeLabel(scope: string): string {
-  const settings = getSettings();
-  // Check custom labels first, then defaults, then auto-generate
-  return settings.scopeLabels[scope] ||
-         DEFAULT_SCOPES_MAP[scope] ||
-         scope.charAt(0).toUpperCase() + scope.slice(1);
-}
-
-/**
- * Get display label for a category value.
- */
-export function getCategoryLabel(category: string): string {
-  const settings = getSettings();
-  // Check custom labels first, then defaults, then auto-generate
-  return settings.categoryLabels[category] ||
-         DEFAULT_CATEGORIES_MAP[category] ||
-         category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
-
-// Default location definitions with display labels
-const DEFAULT_LOCATIONS_MAP: Record<string, string> = {
-  'app-state': 'Application State',
-  'user-store': 'User Store',
-  'session-storage': 'Session Storage',
-  'local-storage': 'Local Storage',
-  'api-endpoint': 'API Endpoint',
-  'database': 'Database',
-};
-
-/**
- * Get default location keys.
- */
-export function getDefaultLocations(): string[] {
-  return Object.keys(DEFAULT_LOCATIONS_MAP);
-}
-
-/**
- * Get display label for a location value.
- */
-export function getLocationLabel(location: string): string {
-  const settings = getSettings();
-  // Check custom labels first, then defaults, then auto-generate
-  return settings.locationLabels[location] ||
-         DEFAULT_LOCATIONS_MAP[location] ||
-         location;
-        //  location.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
+// Default locations (layer names)
+const getDefaultLocations = (): string[] => [
+  'Component.tsx',
+  'Store.ts',
+  'Service.ts',
+  'Controller.ts',
+  'Repository.ts'
+];
 
 /**
  * Default form visibility settings - all optional fields hidden by default.
@@ -116,218 +77,239 @@ const DEFAULT_FORM_VISIBILITY: FormVisibilitySettings = {
   showPersistsIn: false,
 };
 
-/**
- * Generate a unique ID for data layers based on name.
- */
-export function generateLayerId(name: string): string {
-  return name.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-/**
- * Default data layers with endpoint/throughpoint classification.
- */
+// Default data layers.
 const DEFAULT_DATA_LAYERS: DataLayer[] = [
-  // Endpoints - final destinations for data
-  { name: 'Model', id: 'model', type: DataLayerType.Endpoint },
+  // Endpoints - where data ultimately starts or ends up
   { name: 'Pinia Store', id: 'pinia-store', type: DataLayerType.Endpoint },
-  { name: 'Local Storage', id: 'local-storage', type: DataLayerType.Endpoint },
-  { name: 'Session Storage', id: 'session-storage', type: DataLayerType.Endpoint },
-  { name: 'Database Table', id: 'database-table', type: DataLayerType.Endpoint },
+  { name: 'localStorage', id: 'localstorage', type: DataLayerType.Endpoint },
+  { name: 'sessionStorage', id: 'sessionstorage', type: DataLayerType.Endpoint },
+  { name: 'Database', id: 'database', type: DataLayerType.Endpoint },
+  { name: 'File System', id: 'filesystem', type: DataLayerType.Endpoint },
 
   // Throughpoints - intermediate processing layers
   { name: 'Repository', id: 'repository', type: DataLayerType.Throughpoint },
   { name: 'ViewController', id: 'view-controller', type: DataLayerType.Throughpoint },
   { name: 'Backend API', id: 'backend-api', type: DataLayerType.Throughpoint },
-];/**
- * Get current settings from localStorage.
+];
+
+/**
+ * Get atlas-specific settings storage key.
  */
-export function getSettings(): SettingsConfig {
+function getAtlasSettingsKey(atlasName: string): string {
+  return `dfa_${atlasName}_settings`;
+}
+
+/**
+ * Get global app-level settings.
+ */
+export function getGlobalSettings(): GlobalSettings {
   try {
-    const stored = localStorage.getItem(SETTINGS_KEY);
+    const stored = localStorage.getItem(GLOBAL_SETTINGS_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored) as SettingsConfig;
-
-      // Ensure we have default layers if none exist
-      const dataLayers = parsed.dataLayers?.length > 0 ? parsed.dataLayers : [...DEFAULT_DATA_LAYERS];
-
+      const parsed = JSON.parse(stored) as GlobalSettings;
       return {
-        locations: (parsed.locations && parsed.locations.length > 0) ? parsed.locations : getDefaultLocations(),
-        dataLayers,
-        scopes: (parsed.scopes && parsed.scopes.length > 0) ? parsed.scopes : getDefaultScopes(),
-        categories: (parsed.categories && parsed.categories.length > 0) ? parsed.categories : getDefaultCategories(),
-        scopeLabels: parsed.scopeLabels || {},
-        categoryLabels: parsed.categoryLabels || {},
-        locationLabels: parsed.locationLabels || {},
-        dataTypes: parsed.dataTypes || [],
         formVisibility: parsed.formVisibility || { ...DEFAULT_FORM_VISIBILITY },
       };
     }
   } catch (error) {
-    console.warn('Failed to load settings:', error);
+    console.warn('Failed to load global settings:', error);
   }
 
-  // Return default settings.
   return {
-    locations: getDefaultLocations(),
-    dataLayers: [...DEFAULT_DATA_LAYERS],
-    scopes: getDefaultScopes(),
-    categories: getDefaultCategories(),
-    scopeLabels: {},
-    categoryLabels: {},
-    locationLabels: {},
-    dataTypes: [],
     formVisibility: { ...DEFAULT_FORM_VISIBILITY },
   };
 }
 
 /**
- * Save settings to localStorage.
+ * Save global app-level settings.
  */
-export function saveSettings(settings: SettingsConfig): void {
+export function saveGlobalSettings(settings: GlobalSettings): void {
   try {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    localStorage.setItem(GLOBAL_SETTINGS_KEY, JSON.stringify(settings));
   } catch (error) {
-    console.error('Failed to save settings:', error);
+    console.error('Failed to save global settings:', error);
   }
+}
+
+/**
+ * Get atlas-specific settings.
+ */
+export function getAtlasSettings(atlasName: string): AtlasSettings {
+  try {
+    const key = getAtlasSettingsKey(atlasName);
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored) as AtlasSettings;
+      return {
+        dataLayers: parsed.dataLayers?.length > 0 ? parsed.dataLayers : [...DEFAULT_DATA_LAYERS],
+        dataTypes: parsed.dataTypes || [],
+        locations: parsed.locations?.length > 0 ? parsed.locations : getDefaultLocations(),
+        scopes: parsed.scopes?.length > 0 ? parsed.scopes : getDefaultScopes(),
+        scopeLabels: parsed.scopeLabels || {},
+        categories: parsed.categories?.length > 0 ? parsed.categories : getDefaultCategories(),
+        categoryLabels: parsed.categoryLabels || {},
+      };
+    }
+  } catch (error) {
+    console.warn(`Failed to load atlas settings for ${atlasName}:`, error);
+  }
+
+  // Return default atlas settings
+  return {
+    dataLayers: [...DEFAULT_DATA_LAYERS],
+    dataTypes: [],
+    locations: getDefaultLocations(),
+    scopes: getDefaultScopes(),
+    scopeLabels: {},
+    categories: getDefaultCategories(),
+    categoryLabels: {},
+  };
+}
+
+/**
+ * Save atlas-specific settings.
+ */
+export function saveAtlasSettings(atlasName: string, settings: AtlasSettings): void {
+  try {
+    const key = getAtlasSettingsKey(atlasName);
+    localStorage.setItem(key, JSON.stringify(settings));
+  } catch (error) {
+    console.error(`Failed to save atlas settings for ${atlasName}:`, error);
+  }
+}
+
+/**
+ * Get current atlas settings for the active atlas.
+ */
+export function getCurrentAtlasSettings(): AtlasSettings {
+  const activeAtlas = getActiveAtlas();
+  return getAtlasSettings(activeAtlas);
+}
+
+/**
+ * Save current atlas settings for the active atlas.
+ */
+export function saveCurrentAtlasSettings(settings: AtlasSettings): void {
+  const activeAtlas = getActiveAtlas();
+  saveAtlasSettings(activeAtlas, settings);
+}
+
+// =============================================================================
+// CONVENIENCE FUNCTIONS FOR SPECIFIC SETTINGS
+// =============================================================================
+
+/**
+ * Get display label for a scope value.
+ */
+export function getScopeLabel(scope: string): string {
+  const settings = getCurrentAtlasSettings();
+  // Check custom labels first, then defaults, then auto-generate
+  return settings.scopeLabels[scope] ||
+         DEFAULT_SCOPES_MAP[scope] ||
+         scope.charAt(0).toUpperCase() + scope.slice(1);
+}
+
+/**
+ * Get display label for a category value.
+ */
+export function getCategoryLabel(category: string): string {
+  const settings = getCurrentAtlasSettings();
+  // Check custom labels first, then defaults, then auto-generate
+  return settings.categoryLabels[category] ||
+         DEFAULT_CATEGORIES_MAP[category] ||
+         category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 /**
  * Get unique locations from existing cards and settings.
  */
 export function getUniqueLocations(): string[] {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   const existingLocations = new Set(settings.locations);
 
-  // Add locations from existing cards.
+  // Add locations from existing cards in the current atlas
   try {
-    const cards = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    cards.cards?.forEach((card: any) => {
-      if (card.location && card.location.trim()) {
-        existingLocations.add(card.location.trim());
+    const activeAtlas = getActiveAtlas();
+    const atlasKey = `dfa_${activeAtlas}`;
+    const atlasData = localStorage.getItem(atlasKey);
+    if (atlasData) {
+      const parsed = JSON.parse(atlasData);
+      const cards = parsed.cards || parsed; // Handle both new and legacy formats
+      if (Array.isArray(cards)) {
+        cards.forEach((card: any) => {
+          if (card.location && card.location.trim()) {
+            existingLocations.add(card.location.trim());
+          }
+        });
       }
-    });
+    }
   } catch (error) {
-    console.warn('Failed to load cards for location extraction:', error);
+    console.warn('Failed to load card locations:', error);
   }
 
   return Array.from(existingLocations).sort();
 }
 
 /**
- * Add a new location to settings.
+ * Add a new location (layer name).
  */
 export function addLocation(location: string): void {
   const trimmed = location.trim();
   if (!trimmed) return;
 
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   if (!settings.locations.includes(trimmed)) {
     settings.locations.push(trimmed);
     settings.locations.sort();
-    saveSettings(settings);
+    saveCurrentAtlasSettings(settings);
   }
 }
 
 /**
- * Add a new location with custom label to settings.
- */
-export function addLocationWithLabel(location: string, label: string): void {
-  const trimmedLocation = location.trim();
-  const trimmedLabel = label.trim();
-  if (!trimmedLocation) return;
-
-  const settings = getSettings();
-  if (!settings.locations.includes(trimmedLocation)) {
-    settings.locations.push(trimmedLocation);
-    settings.locations.sort();
-
-    // Add custom label if provided and different from auto-generated
-    if (trimmedLabel && trimmedLabel !== trimmedLocation.charAt(0).toUpperCase() + trimmedLocation.slice(1)) {
-      settings.locationLabels[trimmedLocation] = trimmedLabel;
-    }
-
-    saveSettings(settings);
-  }
-}
-
-/**
- * Helper function to remove a field value from all cards that use it.
- * This makes affected cards appear in the Orphans filter.
- */
-function removeFieldFromCards(fieldName: 'location' | 'scope' | 'category', valueToRemove: string): void {
-  const cards = loadCards();
-  let hasChanges = false;
-
-  const updatedCards = cards.map(card => {
-    if (card[fieldName] === valueToRemove) {
-      hasChanges = true;
-      return {
-        ...card,
-        [fieldName]: undefined // Remove the field value, making it orphaned
-      };
-    }
-    return card;
-  });
-
-  if (hasChanges) {
-    saveCards(updatedCards);
-
-    // Refresh the UI to show the changes
-    const dfdAtlas = (window as any).dfdAtlas;
-    if (dfdAtlas && typeof dfdAtlas.refreshDisplay === 'function') {
-      dfdAtlas.refreshDisplay();
-    }
-  }
-}
-
-/**
- * Remove a location from settings and clean up any cards using this location.
+ * Remove a location.
  */
 export function removeLocation(location: string): void {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   settings.locations = settings.locations.filter(loc => loc !== location);
-  // Also remove custom label if it exists
-  delete settings.locationLabels[location];
-  saveSettings(settings);
-
-  // Remove this location from any cards that use it
-  removeFieldFromCards('location', location);
+  saveCurrentAtlasSettings(settings);
 }
 
 /**
- * Get all available scopes from settings.
+ * Edit a location name.
  */
-export function getScopes(): string[] {
-  const settings = getSettings();
-  return [...settings.scopes].sort();
-}
+export function editLocation(oldLocation: string, newLocation: string): void {
+  const trimmed = newLocation.trim();
+  if (!trimmed || trimmed === oldLocation) return;
 
-/**
- * Add a new scope to settings.
- */
-export function addScope(scope: string): void {
-  const trimmed = scope.trim();
-  if (!trimmed) return;
-
-  const settings = getSettings();
-  if (!settings.scopes.includes(trimmed)) {
-    settings.scopes.push(trimmed);
-    settings.scopes.sort();
-    saveSettings(settings);
+  const settings = getCurrentAtlasSettings();
+  const index = settings.locations.indexOf(oldLocation);
+  if (index !== -1) {
+    settings.locations[index] = trimmed;
+    settings.locations.sort();
+    saveCurrentAtlasSettings(settings);
   }
 }
 
+// =============================================================================
+// SCOPE MANAGEMENT
+// =============================================================================
+
 /**
- * Add a new scope with custom label to settings.
+ * Get all available scopes.
+ */
+export function getScopes(): string[] {
+  return getCurrentAtlasSettings().scopes;
+}
+
+/**
+ * Add a new scope with optional custom label.
  */
 export function addScopeWithLabel(scope: string, label: string): void {
   const trimmedScope = scope.trim();
   const trimmedLabel = label.trim();
   if (!trimmedScope) return;
 
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   if (!settings.scopes.includes(trimmedScope)) {
     settings.scopes.push(trimmedScope);
     settings.scopes.sort();
@@ -337,226 +319,134 @@ export function addScopeWithLabel(scope: string, label: string): void {
       settings.scopeLabels[trimmedScope] = trimmedLabel;
     }
 
-    saveSettings(settings);
+    saveCurrentAtlasSettings(settings);
   }
 }
 
 /**
- * Remove a scope from settings and clean up any cards using this scope.
+ * Remove a scope.
  */
 export function removeScope(scope: string): void {
-  const settings = getSettings();
-  const index = settings.scopes.indexOf(scope);
-  if (index !== -1) {
-    settings.scopes.splice(index, 1);
-    // Also remove custom label if it exists
+  const settings = getCurrentAtlasSettings();
+  settings.scopes = settings.scopes.filter(s => s !== scope);
+  // Remove custom label if it exists
+  if (settings.scopeLabels[scope]) {
     delete settings.scopeLabels[scope];
-    saveSettings(settings);
-
-    // Remove this scope from any cards that use it
-    removeFieldFromCards('scope', scope);
   }
+  saveCurrentAtlasSettings(settings);
 }
 
 /**
- * Get all available categories from settings.
+ * Edit a scope.
+ */
+export function editScope(oldScope: string, newScope: string, newLabel: string): void {
+  const trimmedScope = newScope.trim();
+  const trimmedLabel = newLabel.trim();
+  if (!trimmedScope || trimmedScope === oldScope) return;
+
+  const settings = getCurrentAtlasSettings();
+  const index = settings.scopes.indexOf(oldScope);
+  if (index !== -1) {
+    settings.scopes[index] = trimmedScope;
+    settings.scopes.sort();
+
+    // Handle label changes
+    if (settings.scopeLabels[oldScope]) {
+      delete settings.scopeLabels[oldScope];
+    }
+    if (trimmedLabel && trimmedLabel !== trimmedScope.charAt(0).toUpperCase() + trimmedScope.slice(1)) {
+      settings.scopeLabels[trimmedScope] = trimmedLabel;
+    }
+
+    saveCurrentAtlasSettings(settings);
+  }
+}
+
+// =============================================================================
+// CATEGORY MANAGEMENT
+// =============================================================================
+
+/**
+ * Get all available categories.
  */
 export function getCategories(): string[] {
-  const settings = getSettings();
-  return [...settings.categories].sort();
+  return getCurrentAtlasSettings().categories;
 }
 
 /**
- * Add a new category to settings.
- */
-export function addCategory(category: string): void {
-  const trimmed = category.trim();
-  if (!trimmed) return;
-
-  const settings = getSettings();
-  if (!settings.categories.includes(trimmed)) {
-    settings.categories.push(trimmed);
-    settings.categories.sort();
-    saveSettings(settings);
-  }
-}
-
-/**
- * Add a new category with custom label to settings.
+ * Add a new category with optional custom label.
  */
 export function addCategoryWithLabel(category: string, label: string): void {
   const trimmedCategory = category.trim();
   const trimmedLabel = label.trim();
   if (!trimmedCategory) return;
 
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   if (!settings.categories.includes(trimmedCategory)) {
     settings.categories.push(trimmedCategory);
     settings.categories.sort();
 
     // Add custom label if provided and different from auto-generated
-    if (trimmedLabel && trimmedLabel !== trimmedCategory.charAt(0).toUpperCase() + trimmedCategory.slice(1)) {
+    const autoLabel = trimmedCategory.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    if (trimmedLabel && trimmedLabel !== autoLabel) {
       settings.categoryLabels[trimmedCategory] = trimmedLabel;
     }
 
-    saveSettings(settings);
+    saveCurrentAtlasSettings(settings);
   }
 }
 
 /**
- * Remove a category from settings and clean up any cards using this category.
+ * Remove a category.
  */
 export function removeCategory(category: string): void {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   settings.categories = settings.categories.filter(c => c !== category);
-  // Also remove custom label if it exists
-  delete settings.categoryLabels[category];
-  saveSettings(settings);
-
-  // Remove this category from any cards that use it
-  removeFieldFromCards('category', category);
+  // Remove custom label if it exists
+  if (settings.categoryLabels[category]) {
+    delete settings.categoryLabels[category];
+  }
+  saveCurrentAtlasSettings(settings);
 }
 
 /**
- * Edit an existing scope with new key and label.
+ * Edit a category.
  */
-export function editScope(oldKey: string, newKey: string, newLabel: string): boolean {
-  const trimmedOldKey = oldKey.trim();
-  const trimmedNewKey = newKey.trim();
-  const trimmedNewLabel = newLabel.trim();
-
-  if (!trimmedOldKey || !trimmedNewKey) return false;
-
-  const settings = getSettings();
-  const oldIndex = settings.scopes.indexOf(trimmedOldKey);
-
-  if (oldIndex === -1) return false;
-
-  // Check if new key already exists (and is different from old key)
-  if (trimmedNewKey !== trimmedOldKey && settings.scopes.includes(trimmedNewKey)) {
-    return false;
-  }
-
-  // Update the scope key
-  settings.scopes[oldIndex] = trimmedNewKey;
-  settings.scopes.sort();
-
-  // Remove old label if it exists
-  delete settings.scopeLabels[trimmedOldKey];
-
-  // Add new label if provided and different from auto-generated
-  if (trimmedNewLabel && trimmedNewLabel !== trimmedNewKey.charAt(0).toUpperCase() + trimmedNewKey.slice(1)) {
-    settings.scopeLabels[trimmedNewKey] = trimmedNewLabel;
-  }
-
-  saveSettings(settings);
-  return true;
-}
-
-/**
- * Edit an existing category with new key and label.
- */
-export function editCategory(oldKey: string, newKey: string, newLabel: string): boolean {
-  const trimmedOldKey = oldKey.trim();
-  const trimmedNewKey = newKey.trim();
-  const trimmedNewLabel = newLabel.trim();
-
-  if (!trimmedOldKey || !trimmedNewKey) return false;
-
-  const settings = getSettings();
-  const oldIndex = settings.categories.indexOf(trimmedOldKey);
-
-  if (oldIndex === -1) return false;
-
-  // Check if new key already exists (and is different from old key)
-  if (trimmedNewKey !== trimmedOldKey && settings.categories.includes(trimmedNewKey)) {
-    return false;
-  }
-
-  // Update the category key
-  settings.categories[oldIndex] = trimmedNewKey;
-  settings.categories.sort();
-
-  // Remove old label if it exists
-  delete settings.categoryLabels[trimmedOldKey];
-
-  // Add new label if provided and different from auto-generated
-  if (trimmedNewLabel && trimmedNewLabel !== trimmedNewKey.charAt(0).toUpperCase() + trimmedNewKey.slice(1)) {
-    settings.categoryLabels[trimmedNewKey] = trimmedNewLabel;
-  }
-
-  saveSettings(settings);
-  return true;
-}
-
-/**
- * Edit an existing location label (key stays the same for efficiency).
- */
-export function editLocation(locationKey: string, newLabel: string): boolean {
-  const trimmedKey = locationKey.trim();
+export function editCategory(oldCategory: string, newCategory: string, newLabel: string): void {
+  const trimmedCategory = newCategory.trim();
   const trimmedLabel = newLabel.trim();
+  if (!trimmedCategory || trimmedCategory === oldCategory) return;
 
-  if (!trimmedKey) return false;
+  const settings = getCurrentAtlasSettings();
+  const index = settings.categories.indexOf(oldCategory);
+  if (index !== -1) {
+    settings.categories[index] = trimmedCategory;
+    settings.categories.sort();
 
-  const settings = getSettings();
+    // Handle label changes
+    if (settings.categoryLabels[oldCategory]) {
+      delete settings.categoryLabels[oldCategory];
+    }
+    const autoLabel = trimmedCategory.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    if (trimmedLabel && trimmedLabel !== autoLabel) {
+      settings.categoryLabels[trimmedCategory] = trimmedLabel;
+    }
 
-  if (!settings.locations.includes(trimmedKey)) return false;
-
-  // Update the label (key remains unchanged for efficiency)
-  if (trimmedLabel && trimmedLabel !== trimmedKey.charAt(0).toUpperCase() + trimmedKey.slice(1)) {
-    settings.locationLabels[trimmedKey] = trimmedLabel;
-  } else {
-    // Remove custom label if it matches the auto-generated one
-    delete settings.locationLabels[trimmedKey];
-  }
-
-  saveSettings(settings);
-  return true;
-}
-
-/**
- * Get temporary settings from sessionStorage (for dialog state).
- */
-export function getTempSettings(): Partial<SettingsConfig> {
-  try {
-    const stored = sessionStorage.getItem(TEMP_SETTINGS_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch (error) {
-    console.warn('Failed to load temp settings:', error);
-    return {};
+    saveCurrentAtlasSettings(settings);
   }
 }
 
-/**
- * Save temporary settings to sessionStorage.
- */
-export function saveTempSettings(settings: Partial<SettingsConfig>): void {
-  try {
-    sessionStorage.setItem(TEMP_SETTINGS_KEY, JSON.stringify(settings));
-  } catch (error) {
-    console.error('Failed to save temp settings:', error);
-  }
-}
+// =============================================================================
+// DATA LAYER MANAGEMENT
+// =============================================================================
 
 /**
- * Clear temporary settings.
- */
-export function clearTempSettings(): void {
-  try {
-    sessionStorage.removeItem(TEMP_SETTINGS_KEY);
-  } catch (error) {
-    console.warn('Failed to clear temp settings:', error);
-  }
-}
-
-/**
- * Get data layers grouped by type.
+ * Get data layers by type.
  */
 export function getDataLayersByType(): { endpoints: DataLayer[]; throughpoints: DataLayer[] } {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   const endpoints = settings.dataLayers.filter(layer => layer.type === DataLayerType.Endpoint);
   const throughpoints = settings.dataLayers.filter(layer => layer.type === DataLayerType.Throughpoint);
-
   return { endpoints, throughpoints };
 }
 
@@ -564,65 +454,99 @@ export function getDataLayersByType(): { endpoints: DataLayer[]; throughpoints: 
  * Add or update a data layer.
  */
 export function saveDataLayer(layer: DataLayer, originalId?: string): void {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
 
-  // If originalId is provided, we're updating an existing layer
-  if (originalId) {
+  if (originalId && originalId !== layer.id) {
+    // Update existing layer (ID changed)
     const index = settings.dataLayers.findIndex(l => l.id === originalId);
     if (index !== -1) {
       settings.dataLayers[index] = layer;
     }
   } else {
-    // Adding a new layer - generate ID if not provided
-    if (!layer.id) {
-      layer.id = generateLayerId(layer.name);
+    // Add new or update existing with same ID
+    const existingIndex = settings.dataLayers.findIndex(l => l.id === layer.id);
+    if (existingIndex !== -1) {
+      settings.dataLayers[existingIndex] = layer;
+    } else {
+      settings.dataLayers.push(layer);
     }
-    settings.dataLayers.push(layer);
   }
 
-  saveSettings(settings);
+  saveCurrentAtlasSettings(settings);
 }
 
 /**
  * Delete a data layer.
  */
 export function deleteDataLayer(layerId: string): void {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   settings.dataLayers = settings.dataLayers.filter(layer => layer.id !== layerId);
-  saveSettings(settings);
+  saveCurrentAtlasSettings(settings);
 }
 
 /**
  * Check if a data layer ID already exists.
  */
-/**
- * Check if a data layer ID already exists.
- */
 export function dataLayerExists(id: string, excludeId?: string): boolean {
-  const settings = getSettings();
+  const settings = getCurrentAtlasSettings();
   return settings.dataLayers.some(layer =>
     layer.id === id && layer.id !== excludeId
   );
 }
 
 /**
- * Update form visibility settings.
+ * Generate a unique layer ID based on name.
+ */
+export function generateLayerId(name: string): string {
+  return name.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+}
+
+// =============================================================================
+// FORM VISIBILITY MANAGEMENT
+// =============================================================================
+
+/**
+ * Update form visibility settings (global app-level).
  */
 export function updateFormVisibility(visibility: Partial<FormVisibilitySettings>): void {
-  const settings = getSettings();
-  const updatedSettings: SettingsConfig = {
-    ...settings,
+  const globalSettings = getGlobalSettings();
+  const updatedGlobalSettings: GlobalSettings = {
     formVisibility: {
-      ...settings.formVisibility,
+      ...globalSettings.formVisibility,
       ...visibility,
     },
   };
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedSettings));
+  saveGlobalSettings(updatedGlobalSettings);
 }
 
 /**
- * Get current form visibility settings.
+ * Get current form visibility settings (global app-level).
  */
 export function getFormVisibility(): FormVisibilitySettings {
-  return getSettings().formVisibility;
+  return getGlobalSettings().formVisibility;
+}
+
+// =============================================================================
+// INITIALIZATION
+// =============================================================================
+
+/**
+ * Initialize settings system.
+ * Ensures default atlas has settings.
+ */
+export function initializeSettings(): void {
+  // Ensure default atlas has settings
+  const activeAtlas = getActiveAtlas();
+  const atlasSettings = getAtlasSettings(activeAtlas);
+
+  // Save back to ensure it exists in storage
+  saveAtlasSettings(activeAtlas, atlasSettings);
+
+  // Ensure global settings exist
+  const globalSettings = getGlobalSettings();
+  saveGlobalSettings(globalSettings);
 }

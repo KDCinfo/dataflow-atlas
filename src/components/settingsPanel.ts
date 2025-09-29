@@ -1,9 +1,8 @@
 import {
   getUniqueLocations,
-  addLocationWithLabel,
+  addLocation,
   removeLocation,
   editLocation,
-  getLocationLabel,
   getScopes,
   addScopeWithLabel,
   removeScope,
@@ -400,7 +399,6 @@ export function populateSettingsContent(): void {
                 <div class="location-item">
                   <div class="location-details">
                     <span class="location-key">${escapeHtml(location)}</span>
-                    <span class="location-label">${escapeHtml(getLocationLabel(location))}</span>
                   </div>
                   <div class="item-actions">
                     <button class="location-edit edit-btn btn-compact" data-location="${escapeHtml(location)}">Edit</button>
@@ -472,28 +470,24 @@ function setupSettingsEventListeners(): void {
         return;
       }
 
-      let success = false;
-      if (currentEditState && currentEditState.type === 'location') {
-        // Edit mode - only update the label, keep the original key
-        success = editLocation(currentEditState.originalKey, label);
-        if (success) {
+      try {
+        if (currentEditState && currentEditState.type === 'location') {
+          // Edit mode - update the location name
+          editLocation(currentEditState.originalKey, label);
           exitEditMode();
         } else {
-          alert('Failed to update location.');
-          return;
+          // Add mode - just add the location name (no separate label)
+          addLocation(key);
+          locationKeyInput.value = '';
+          locationLabelInput.value = '';
         }
-      } else {
-        // Add mode
-        addLocationWithLabel(key, label);
-        locationKeyInput.value = '';
-        locationLabelInput.value = '';
-        success = true;
+      } catch (error) {
+        alert('Failed to update location.');
+        return;
       }
 
-      if (success) {
-        populateSettingsContent(); // Refresh the content.
-        updateLocationOptions(); // Update main form options.
-      }
+      populateSettingsContent(); // Refresh the content.
+      updateLocationOptions(); // Update main form options.
 
       locationKeyInput.focus();
     };
@@ -543,27 +537,23 @@ function setupSettingsEventListeners(): void {
         return;
       }
 
-      let success = false;
-      if (currentEditState && currentEditState.type === 'scope') {
-        // Edit mode - only update the label, keep the original key
-        success = editScope(currentEditState.originalKey, currentEditState.originalKey, label);
-        if (success) {
+      try {
+        if (currentEditState && currentEditState.type === 'scope') {
+          // Edit mode - update the scope label
+          editScope(currentEditState.originalKey, currentEditState.originalKey, label);
           exitEditMode();
         } else {
-          alert('Failed to update scope.');
-          return;
+          // Add mode
+          addScopeWithLabel(key, label);
+          scopeKeyInput.value = '';
+          scopeLabelInput.value = '';
         }
-      } else {
-        // Add mode
-        addScopeWithLabel(key, label);
-        scopeKeyInput.value = '';
-        scopeLabelInput.value = '';
-        success = true;
-      }
 
-      if (success) {
         populateSettingsContent(); // Refresh the content.
         updateScopeOptions(); // Update main form scope options.
+      } catch (error) {
+        alert('Failed to update scope.');
+        return;
       }
 
       scopeKeyInput.focus();
@@ -614,27 +604,23 @@ function setupSettingsEventListeners(): void {
         return;
       }
 
-      let success = false;
-      if (currentEditState && currentEditState.type === 'category') {
-        // Edit mode - only update the label, keep the original key
-        success = editCategory(currentEditState.originalKey, currentEditState.originalKey, label);
-        if (success) {
+      try {
+        if (currentEditState && currentEditState.type === 'category') {
+          // Edit mode - update the category label
+          editCategory(currentEditState.originalKey, currentEditState.originalKey, label);
           exitEditMode();
         } else {
-          alert('Failed to update category.');
-          return;
+          // Add mode
+          addCategoryWithLabel(key, label);
+          categoryKeyInput.value = '';
+          categoryLabelInput.value = '';
         }
-      } else {
-        // Add mode
-        addCategoryWithLabel(key, label);
-        categoryKeyInput.value = '';
-        categoryLabelInput.value = '';
-        success = true;
-      }
 
-      if (success) {
         populateSettingsContent(); // Refresh the content.
         updateCategoryOptions(); // Update main form category options.
+      } catch (error) {
+        alert('Failed to update category.');
+        return;
       }
 
       categoryKeyInput.focus();
@@ -1093,8 +1079,7 @@ function attachEditHandlers(): void {
       const target = e.target as HTMLElement;
       const location = target.getAttribute('data-location');
       if (location) {
-        const currentLabel = getLocationLabel(location);
-        enterEditMode('location', location, currentLabel);
+        enterEditMode('location', location, location); // Use location as its own label
       }
     });
   });

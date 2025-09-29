@@ -1,6 +1,6 @@
 import type { DFACard, AtlasFilter, CardSize, ImportMode } from './types/dfa.js';
 import { loadCards, importCards } from './utils/storage.js';
-import { getDataLayersByType, type DataLayer } from './utils/settings.js';
+import { getDataLayersByType, type DataLayer, initializeSettings } from './utils/settings.js';
 import {
   showNotification,
   renderDFACard,
@@ -40,6 +40,9 @@ export class DFDAtlas {
   constructor() {
     this.initializeEventListeners();
     this.initializeUI();
+
+    // Initialize settings system (includes migration if needed)
+    initializeSettings();
 
     // Initialize atlas system and load active atlas.
     initializeDefaultAtlas(); // Lightweight: only creates empty storage if needed
