@@ -694,10 +694,12 @@ function setupSettingsEventListeners(): void {
       const layer: DataLayer = { name, id, type };
       saveDataLayer(layer);
 
-      // Update dropdowns in real-time
-      updateLayerOptions();
-      updateLayerFilterOptions();
-      updateConnectionOptions();
+      // Update dropdowns in real-time with a small delay to ensure storage is updated
+      setTimeout(() => {
+        updateLayerOptions();
+        updateLayerFilterOptions();
+        updateConnectionOptions();
+      }, 50);
 
       // Clear inputs
       layerNameInput.value = '';
@@ -830,10 +832,12 @@ function handleEditDataLayer(layerId: string): void {
 
   saveDataLayer(updatedLayer, layer.id);
 
-  // Update dropdowns in real-time
-  updateLayerOptions();
-  updateLayerFilterOptions();
-  updateConnectionOptions();
+  // Update dropdowns in real-time with a small delay to ensure storage is updated
+  setTimeout(() => {
+    updateLayerOptions();
+    updateLayerFilterOptions();
+    updateConnectionOptions();
+  }, 50);
 
   // Refresh the settings panel
   populateSettingsContent();
@@ -851,10 +855,12 @@ function handleDeleteDataLayer(layerId: string): void {
   if (confirm(`Delete data layer "${layer.name}"?`)) {
     deleteDataLayer(layerId);
 
-    // Update dropdowns in real-time
-    updateLayerOptions();
-    updateLayerFilterOptions();
-    updateConnectionOptions();
+    // Update dropdowns in real-time with a small delay to ensure storage is updated
+    setTimeout(() => {
+      updateLayerOptions();
+      updateLayerFilterOptions();
+      updateConnectionOptions();
+    }, 50);
 
     // Refresh the settings panel
     populateSettingsContent();
@@ -1221,9 +1227,12 @@ async function setupAtlasManagementHandlers(): Promise<void> {
           if (success) {
             exitEditMode();
             refreshAtlasList();
-            // Refresh the main atlas selector if we're on the main page
-            if (window.location.pathname.includes('app') && (window as any).app) {
-              (window as any).app.refreshAtlasSelector();
+            // Refresh the main atlas selector
+            if ((window as any).dfdAtlas) {
+              // Add small delay to ensure localStorage is fully updated
+              setTimeout(() => {
+                (window as any).dfdAtlas.refreshAtlasSelector();
+              }, 50);
             }
             showNotification(`Atlas renamed to "${name}" successfully!`, 'success');
           } else {
@@ -1236,9 +1245,12 @@ async function setupAtlasManagementHandlers(): Promise<void> {
             atlasNameInput.value = '';
             updateAtlasButtonStates(); // Reset button states after clearing input
             refreshAtlasList();
-            // Refresh the main atlas selector if we're on the main page
-            if (window.location.pathname.includes('app') && (window as any).app) {
-              (window as any).app.refreshAtlasSelector();
+            // Refresh the main atlas selector
+            if ((window as any).dfdAtlas) {
+              // Add small delay to ensure localStorage is fully updated
+              setTimeout(() => {
+                (window as any).dfdAtlas.refreshAtlasSelector();
+              }, 50);
             }
             showNotification(`Atlas "${name}" created successfully!`, 'success');
           } else {
@@ -1542,9 +1554,12 @@ function handleDeleteAtlas(atlasName: string): void {
       const success = deleteAtlas(atlasName);
       if (success) {
         refreshAtlasList();
-        // Refresh the main atlas selector if we're on the main page
-        if (window.location.pathname.includes('app') && (window as any).app) {
-          (window as any).app.refreshAtlasSelector();
+        // Refresh the main atlas selector
+        if ((window as any).dfdAtlas) {
+          // Add small delay to ensure localStorage is fully updated
+          setTimeout(() => {
+            (window as any).dfdAtlas.refreshAtlasSelector();
+          }, 50);
         }
         // Trigger re-validation of input field to update button state
         const atlasNameInput = document.getElementById('new-atlas-name-input') as HTMLInputElement;
