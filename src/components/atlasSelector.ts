@@ -2,7 +2,7 @@
  * Atlas Selector Component for managing multiple atlases in the navigation bar.
  */
 
-import { getAllAtlases, getActiveAtlas, setActiveAtlas, getAtlasCardCount } from '../utils/atlasManagerOptimized.js';
+import { getAllAtlases, getActiveAtlas, setActiveAtlas, getAtlasCardCount } from '../utils/atlasManager.js';
 
 export class AtlasSelector {
   private dropdownElement: HTMLSelectElement | null = null;

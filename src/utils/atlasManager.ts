@@ -1,103 +1,132 @@
 /**
- * Atlas Management utility for Data Flow Atlas.
- * Handles multiple atlas instances with localStorage persistence.
- * /
+ * Improved Atlas Manager with consolidated storage and auto-backup.
+ * Replaces the current atlasManager.ts with optimized storage structure.
+ */
 
+import { DFACard } from '../types/dfa';
+import { AtlasStorageData, AtlasMetadata, AtlasInfo } from '../types/atlasStorage';
 import AppConstants from './appConstants.js';
+import { getActiveAtlas as getActiveAtlasFromSettings, setActiveAtlas as setActiveAtlasInSettings } from './settings.js';
 
-export const ATLAS_PREFIX = AppConstants.atlasPrefix;
-export const DEFAULT_ATLAS_NAME = AppConstants.defaultAtlasName;
-export const ATLAS_LIST_KEY = 'dataflow_atlas_list';
-
-// Regex pattern for valid atlas names (matches AppConstants.keyNamePattern from reference app)
-export const ATLAS_NAME_PATTERN = AppConstants.keyNamePattern;
-
-/**
- * Interface for atlas management settings.
- * /
-export interface AtlasInfo {
-  name: string;           // Display name (without prefix)
-  storageKey: string;     // Full storage key (with prefix)
-  created: string;        // ISO date string
-  lastModified: string;   // ISO date string
-  cardCount: number;      // Number of cards in this atlas
-}
+const ATLAS_PREFIX = AppConstants.atlasPrefix;
+const DEFAULT_ATLAS_NAME = AppConstants.defaultAtlasName;
 
 /**
  * Get the current active atlas name from settings.
- * /
+ */
 export function getActiveAtlas(): string {
-  return localStorage.getItem('active_atlas') || DEFAULT_ATLAS_NAME;
+  return getActiveAtlasFromSettings();
 }
 
 /**
  * Set the active atlas name.
- * /
+ */
 export function setActiveAtlas(atlasName: string): void {
-  localStorage.setItem('active_atlas', atlasName);
+  setActiveAtlasInSettings(atlasName);
 }
 
 /**
  * Get the full storage key for an atlas name.
- * /
+ */
 export function getAtlasStorageKey(atlasName: string): string {
   return `${ATLAS_PREFIX}${atlasName}`;
 }
 
 /**
- * Get the display name from a storage key.
- * /
-export function getAtlasDisplayName(storageKey: string): string {
-  return storageKey.startsWith(ATLAS_PREFIX) ? storageKey.slice(ATLAS_PREFIX.length) : storageKey;
+ * Create default atlas metadata.
+ */
+function createDefaultMetadata(): AtlasMetadata {
+  const now = new Date().toISOString();
+  return {
+    created: now,
+    lastModified: now,
+    cardCount: 0,
+    // The '_backup'  storage entry could be deleted manually, making this potentially invalid.
+    // hasBackup: false
+  };
 }
 
 /**
- * Validate an atlas name using the same pattern as the reference app.
- * /
-export function validateAtlasName(name: string): { valid: boolean; error?: string } {
-  if (!name || name.trim() === '') {
-    return { valid: false, error: AppConstants.atlasNameErrTextNameEmpty };
+ * Get atlas data from storage (consolidated format).
+ */
+function getAtlasData(atlasName: string): AtlasStorageData | null {
+  try {
+    const storageKey = getAtlasStorageKey(atlasName);
+    const stored = localStorage.getItem(storageKey);
+    if (!stored) return null;
+
+    const parsed = JSON.parse(stored);
+
+    // Ensure proper structure
+    if (!parsed.cards || !parsed.metadata) {
+      console.warn(`[Atlas] Invalid data structure for: ${atlasName}`);
+      return null;
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error(`[Atlas] Failed to parse data for ${atlasName}:`, error);
+    return null;
   }
-
-  const trimmedName = name.trim();
-
-  if (!ATLAS_NAME_PATTERN.test(trimmedName)) {
-    return {
-      valid: false,
-      error: AppConstants.atlasNameErrTextInvalid
-    };
-  }
-
-  if (atlasExists(trimmedName)) {
-    return { valid: false, error: AppConstants.atlasNameErrTextNameExists };
-  }
-
-  return { valid: true };
 }
 
 /**
- * Check if an atlas exists.
- * /
-export function atlasExists(atlasName: string): boolean {
-  const storageKey = getAtlasStorageKey(atlasName);
-  return localStorage.getItem(storageKey) !== null;
+ * Get atlas backup data from storage.
+ */
+function getAtlasBackupData(atlasName: string): AtlasStorageData | null {
+  try {
+    const backupKey = `${getAtlasStorageKey(atlasName)}_backup`;
+    const stored = localStorage.getItem(backupKey);
+    if (!stored) return null;
+
+    const parsed = JSON.parse(stored);
+
+    // Ensure proper structure
+    if (!parsed.cards || !parsed.metadata) {
+      console.warn(`[Atlas] Invalid backup data structure for: ${atlasName}`);
+      return null;
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error(`[Atlas] Failed to parse backup data for ${atlasName}:`, error);
+    return null;
+  }
+}/**
+ * Save atlas data to storage (consolidated format).
+ */
+function setAtlasData(atlasName: string, data: AtlasStorageData): void {
+  try {
+    const storageKey = getAtlasStorageKey(atlasName);
+    // Update metadata
+    data.metadata.lastModified = new Date().toISOString();
+    data.metadata.cardCount = data.cards.length;
+
+    localStorage.setItem(storageKey, JSON.stringify(data, null, 2));
+    console.log(`[Atlas] Saved ${atlasName} with ${data.cards.length} cards`);
+  } catch (error) {
+    console.error(`[Atlas] Failed to save ${atlasName}:`, error);
+    throw error;
+  }
 }
 
 /**
  * Initialize default atlas if it doesn't exist.
- * /
+ */
 export function initializeDefaultAtlas(): void {
-  const defaultStorageKey = getAtlasStorageKey(DEFAULT_ATLAS_NAME);
-  if (!localStorage.getItem(defaultStorageKey)) {
-    const now = new Date().toISOString();
-    localStorage.setItem(defaultStorageKey, JSON.stringify([], null, 2));
-    setAtlasMetadata(DEFAULT_ATLAS_NAME, 'created', now);
-    setAtlasMetadata(DEFAULT_ATLAS_NAME, 'lastModified', now);
+  const defaultData = getAtlasData(DEFAULT_ATLAS_NAME);
+  if (!defaultData) {
+    const newData: AtlasStorageData = {
+      cards: [],
+      metadata: createDefaultMetadata()
+    };
+    setAtlasData(DEFAULT_ATLAS_NAME, newData);
     console.log('[Atlas] Default atlas initialized');
   }
 
-  // Ensure active atlas is set if none exists
-  if (!localStorage.getItem('active_atlas')) {
+  // Ensure active atlas is set through global settings
+  const currentActive = getActiveAtlas();
+  if (!currentActive || currentActive === DEFAULT_ATLAS_NAME) {
     setActiveAtlas(DEFAULT_ATLAS_NAME);
     console.log('[Atlas] Active atlas set to default');
   }
@@ -105,7 +134,7 @@ export function initializeDefaultAtlas(): void {
 
 /**
  * Get all available atlas names.
- * /
+ */
 export function getAllAtlases(): string[] {
   // Ensure default atlas exists
   initializeDefaultAtlas();
@@ -115,187 +144,273 @@ export function getAllAtlases(): string[] {
   // Scan localStorage for keys that start with our prefix
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith(ATLAS_PREFIX) && !key.startsWith('dfa__')) {
-      // Only include keys that start with 'dfa_' but not 'dfa__' (settings keys)
-      const displayName = getAtlasDisplayName(key);
-      // Also exclude any metadata keys (they have additional suffixes)
-      if (!displayName.includes('_created') && !displayName.includes('_lastModified')) {
-        atlasNames.push(displayName);
+    // if (key && key.startsWith(ATLAS_PREFIX) && !key.includes('_backup')) {
+    if (key &&
+      key.startsWith(ATLAS_PREFIX) &&
+      !key.startsWith('dfa__') &&
+      !key.includes('_backup') &&
+      !key.includes('_settings')
+    ) {
+      // Extract atlas name from key (remove prefix)
+      const atlasName = key.substring(ATLAS_PREFIX.length);
+      // Skip legacy metadata keys
+      if (!atlasName.includes('_created') && !atlasName.includes('_lastModified')) {
+        atlasNames.push(atlasName);
       }
     }
   }
 
-  // Always ensure default exists in the list
-  if (!atlasNames.includes(DEFAULT_ATLAS_NAME)) {
-    atlasNames.push(DEFAULT_ATLAS_NAME);
-  }
-
-  return sortAtlasNames(atlasNames);
+  return atlasNames.sort();
 }
 
 /**
- * Sort atlas names alphabetically, but keep 'default' first.
- * /
-export function sortAtlasNames(names: string[]): string[] {
-  const sorted = [...names].sort((a, b) => a.localeCompare(b));
-  const defaultIndex = sorted.indexOf(DEFAULT_ATLAS_NAME);
-
-  if (defaultIndex > 0) {
-    sorted.splice(defaultIndex, 1);
-    sorted.unshift(DEFAULT_ATLAS_NAME);
-  }
-
-  return sorted;
+ * Get card count for a specific atlas.
+ */
+export function getAtlasCardCount(atlasName: string): number {
+  const data = getAtlasData(atlasName);
+  return data ? data.cards.length : 0;
 }
 
 /**
- * Get detailed information about all atlases.
- * /
+ * Get atlas information list for display.
+ */
 export function getAtlasInfoList(): AtlasInfo[] {
   const atlasNames = getAllAtlases();
+  const activeAtlas = getActiveAtlas();
 
   return atlasNames.map(name => {
-    const storageKey = getAtlasStorageKey(name);
-    const data = localStorage.getItem(storageKey);
-    let cardCount = 0;
-
-    if (data) {
-      try {
-        const cards = JSON.parse(data);
-        cardCount = Array.isArray(cards) ? cards.length : 0;
-      } catch (error) {
-        console.warn(`Failed to parse atlas data for ${name}:`, error);
-      }
-    }
+    const data = getAtlasData(name);
+    const defaultMetadata = createDefaultMetadata();
+    const hasBackup = getAtlasBackupData(name) !== null;
 
     return {
       name,
-      storageKey,
-      created: getAtlasMetadata(name, 'created') || new Date().toISOString(),
-      lastModified: getAtlasMetadata(name, 'lastModified') || new Date().toISOString(),
-      cardCount
+      cardCount: data?.metadata.cardCount || 0,
+      created: data?.metadata.created || defaultMetadata.created,
+      lastModified: data?.metadata.lastModified || defaultMetadata.lastModified,
+      hasBackup,
+      isActive: name === activeAtlas
     };
   });
 }
 
 /**
  * Create a new atlas.
- * /
-export function createAtlas(name: string): boolean {
-  const validation = validateAtlasName(name);
-  if (!validation.valid) {
+ */
+export function createAtlas(atlasName: string): boolean {
+  try {
+    // Check if atlas already exists
+    if (getAtlasData(atlasName)) {
+      console.warn(`[Atlas] Atlas ${atlasName} already exists`);
+      return false;
+    }
+
+    const newData: AtlasStorageData = {
+      cards: [],
+      metadata: createDefaultMetadata()
+    };
+
+    setAtlasData(atlasName, newData);
+    console.log(`[Atlas] Created atlas: ${atlasName}`);
+    return true;
+  } catch (error) {
+    console.error(`[Atlas] Failed to create atlas ${atlasName}:`, error);
     return false;
   }
-
-  const storageKey = getAtlasStorageKey(name);
-  const now = new Date().toISOString();
-
-  // Initialize with empty array
-  localStorage.setItem(storageKey, JSON.stringify([], null, 2));
-
-  // Set metadata
-  setAtlasMetadata(name, 'created', now);
-  setAtlasMetadata(name, 'lastModified', now);
-
-  return true;
 }
 
 /**
  * Rename an atlas.
- * /
+ */
 export function renameAtlas(oldName: string, newName: string): boolean {
-  if (oldName === DEFAULT_ATLAS_NAME) {
-    return false; // Cannot rename default
-  }
+  try {
+    const oldData = getAtlasData(oldName);
+    if (!oldData) {
+      console.warn(`[Atlas] Source atlas ${oldName} not found`);
+      return false;
+    }
 
-  if (oldName === getActiveAtlas()) {
-    return false; // Cannot rename active atlas
-  }
+    // Check if new name already exists
+    if (getAtlasData(newName)) {
+      console.warn(`[Atlas] Target atlas ${newName} already exists`);
+      return false;
+    }
 
-  const validation = validateAtlasName(newName);
-  if (!validation.valid) {
+    // Copy to new name
+    setAtlasData(newName, oldData);
+
+    // Update active atlas if it was the renamed one
+    if (getActiveAtlas() === oldName) {
+      setActiveAtlas(newName);
+    }
+
+    // Remove old atlas
+    deleteAtlas(oldName);
+
+    console.log(`[Atlas] Renamed ${oldName} to ${newName}`);
+    return true;
+  } catch (error) {
+    console.error(`[Atlas] Failed to rename atlas ${oldName} to ${newName}:`, error);
     return false;
   }
-
-  const oldStorageKey = getAtlasStorageKey(oldName);
-  const newStorageKey = getAtlasStorageKey(newName);
-
-  // Copy data to new key
-  const data = localStorage.getItem(oldStorageKey);
-  if (!data) {
-    return false;
-  }
-
-  localStorage.setItem(newStorageKey, data);
-
-  // Copy metadata
-  const created = getAtlasMetadata(oldName, 'created');
-  const lastModified = new Date().toISOString();
-
-  setAtlasMetadata(newName, 'created', created || lastModified);
-  setAtlasMetadata(newName, 'lastModified', lastModified);
-
-  // Remove old data and metadata
-  localStorage.removeItem(oldStorageKey);
-  removeAtlasMetadata(oldName);
-
-  return true;
 }
 
 /**
  * Delete an atlas.
- * /
-export function deleteAtlas(name: string): boolean {
-  if (name === DEFAULT_ATLAS_NAME) {
-    return false; // Cannot delete default
+ */
+export function deleteAtlas(atlasName: string): boolean {
+  try {
+    const storageKey = getAtlasStorageKey(atlasName);
+    localStorage.removeItem(storageKey);
+
+    // Clean up any legacy metadata that might exist
+    localStorage.removeItem(`${storageKey}_created`);
+    localStorage.removeItem(`${storageKey}_lastModified`);
+    localStorage.removeItem(`${storageKey}_backup`);
+
+    console.log(`[Atlas] Deleted atlas: ${atlasName}`);
+    return true;
+  } catch (error) {
+    console.error(`[Atlas] Failed to delete atlas ${atlasName}:`, error);
+    return false;
   }
-
-  if (name === getActiveAtlas()) {
-    return false; // Cannot delete active atlas
-  }
-
-  const storageKey = getAtlasStorageKey(name);
-  localStorage.removeItem(storageKey);
-  removeAtlasMetadata(name);
-
-  return true;
 }
 
 /**
- * Get atlas metadata.
- * /
-function getAtlasMetadata(atlasName: string, key: string): string | null {
-  return localStorage.getItem(`${getAtlasStorageKey(atlasName)}_${key}`);
+ * Load cards from the active atlas.
+ */
+export function loadCards(): DFACard[] {
+  const activeAtlas = getActiveAtlas();
+  const data = getAtlasData(activeAtlas);
+  return data?.cards || [];
 }
 
 /**
- * Remove all metadata for an atlas.
- * /
-function removeAtlasMetadata(atlasName: string): void {
-  const prefix = `${getAtlasStorageKey(atlasName)}_`;
-  const keysToRemove: string[] = [];
+ * Save cards to the active atlas with full atlas backup.
+ */
+export function saveCards(cards: DFACard[], createBackup: boolean = true): void {
+  const activeAtlas = getActiveAtlas();
+  let data = getAtlasData(activeAtlas);
 
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(prefix)) {
-      keysToRemove.push(key);
+  if (!data) {
+    // Create new atlas data if it doesn't exist
+    data = {
+      cards: [],
+      metadata: createDefaultMetadata()
+    };
+  }
+
+  // Create full atlas backup before modifying (if existing data and createBackup is true)
+  if (createBackup && data.cards.length > 0) {
+    const backupKey = `${getAtlasStorageKey(activeAtlas)}_backup`;
+
+    // Create complete backup of current atlas state
+    const backupData: AtlasStorageData = {
+      cards: [...data.cards],
+      metadata: { ...data.metadata }
+    };
+
+    try {
+      localStorage.setItem(backupKey, JSON.stringify(backupData, null, 2));
+      // data.metadata.hasBackup = true;
+      console.log(`[Atlas] Created full atlas backup for ${activeAtlas} (${backupData.cards.length} cards)`);
+    } catch (error) {
+      console.error(`[Atlas] Failed to create backup for ${activeAtlas}:`, error);
     }
   }
 
-  keysToRemove.forEach(key => localStorage.removeItem(key));
+  // Update cards and save
+  data.cards = cards;
+  setAtlasData(activeAtlas, data);
+}
+
+/**
+ * Restore from full atlas backup for the active atlas.
+ */
+export function restoreFromBackup(): boolean {
+  try {
+    const activeAtlas = getActiveAtlas();
+    const backupData = getAtlasBackupData(activeAtlas);
+
+    if (!backupData) {
+      console.warn(`[Atlas] No backup found for ${activeAtlas}`);
+      return false;
+    }
+
+    // Restore the entire backup atlas data
+    setAtlasData(activeAtlas, backupData);
+
+    // Remove the backup entry and update metadata
+    const backupKey = `${getAtlasStorageKey(activeAtlas)}_backup`;
+    localStorage.removeItem(backupKey);
+
+    // ~~Update hasBackup flag~~
+    const currentData = getAtlasData(activeAtlas);
+    if (currentData) {
+      // currentData.metadata.hasBackup = false;
+      setAtlasData(activeAtlas, currentData);
+    }
+
+    console.log(`[Atlas] Restored ${activeAtlas} from full atlas backup (${backupData.cards.length} cards)`);
+    return true;
+  } catch (error) {
+    console.error(`[Atlas] Failed to restore backup:`, error);
+    return false;
+  }
+}
+
+/**
+ * Check if active atlas has a backup available.
+ */
+export function hasActiveBackup(): boolean {
+  const activeAtlas = getActiveAtlas();
+  const backupData = getAtlasBackupData(activeAtlas);
+  return backupData !== null;
+}
+
+/**
+ * Validate atlas name using the same pattern as the reference app.
+ */
+export function validateAtlasName(name: string): { valid: boolean; error?: string } {
+  if (!name || name.trim() === '') {
+    return { valid: false, error: AppConstants.atlasNameErrTextNameEmpty };
+  }
+
+  const trimmedName = name.trim();
+
+  // Check if name already exists
+  if (getAtlasData(trimmedName)) {
+    return { valid: false, error: AppConstants.atlasNameErrTextNameExists };
+  }
+
+  // Check against regex pattern
+  if (!AppConstants.keyNamePattern.test(trimmedName)) {
+    return { valid: false, error: AppConstants.atlasNameErrTextInvalid };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Update the last modified timestamp for an atlas.
+ */
+export function updateAtlasTimestamp(atlasName: string): void {
+  const data = getAtlasData(atlasName);
+  if (data) {
+    setAtlasData(atlasName, data); // This will update lastModified automatically
+  }
 }
 
 /**
  * Set atlas metadata.
- * /
+ */
 export function setAtlasMetadata(atlasName: string, key: string, value: string): void {
   localStorage.setItem(`${getAtlasStorageKey(atlasName)}_${key}`, value);
 }
 
 /**
  * Update the last modified timestamp for an atlas.
- * /
+ */
 export function touchAtlas(atlasName: string): void {
   setAtlasMetadata(atlasName, 'lastModified', new Date().toISOString());
 }
-*/

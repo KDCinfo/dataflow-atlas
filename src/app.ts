@@ -24,7 +24,7 @@ import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
 import { initializeSettingsPanel } from './components/settingsPanel.js';
 import { AtlasSelector } from './components/atlasSelector.js';
-import { initializeDefaultAtlas, saveCards, restoreFromBackup, getActiveAtlas } from './utils/atlasManagerOptimized.js';
+import { initializeDefaultAtlas, saveCards, restoreFromBackup, getActiveAtlas } from './utils/atlasManager.js';
 import { updateBackupButtonState } from './components/settingsPanel.js';
 
 /**

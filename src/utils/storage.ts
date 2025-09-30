@@ -4,7 +4,7 @@ import {
   getAtlasStorageKey,
   loadCards as atlasLoadCards,
   saveCards as atlasSaveCards
-} from './atlasManagerOptimized.js';
+} from './atlasManager.js';
 
 /**
  * Storage key for DFA cards in localStorage (legacy).

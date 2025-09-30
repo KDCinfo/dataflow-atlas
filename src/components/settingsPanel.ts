@@ -43,7 +43,7 @@ import {
   initializeDefaultAtlas,
   restoreFromBackup,
   hasActiveBackup,
-} from '../utils/atlasManagerOptimized.js';
+} from '../utils/atlasManager.js';
 import AppConstants from '../utils/appConstants.js';
 
 /**
