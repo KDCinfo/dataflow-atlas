@@ -318,7 +318,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
 
       <!-- Where (Layer) -->
       <div class="form-group">
-        <label class="required" for="${idPrefix}layer">Data Layer: *</label>
+        <label class="required" for="${idPrefix}layer">Data Source: *</label>
         <select class="required-input" id="${idPrefix}layer" name="layer" required>
           ${generateLayerOptions(c?.layer)}
         </select>

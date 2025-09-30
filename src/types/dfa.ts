@@ -40,8 +40,8 @@ export type DataType = typeof DATA_TYPES[number];
 export interface DFACard {
   id: string; // Unique identifier (string is optimal for flexibility and web standards)
   field: string;
-  layer: string; // Data layer name - kept as string for compatibility with existing form handling
-  location: string;
+  layer: string; // Data source type - kept as string for compatibility with existing form handling
+  location: string; // Data source name
   type: string;
   scope?: DataScope; // Made optional to match current form layout
   category?: ContentCategory;
@@ -55,7 +55,7 @@ export interface DFACard {
 }
 
 /**
- * Available data layers in the application architecture.
+ * Available data sources in the application architecture.
  */
 export type DataLayer =
   | 'store'

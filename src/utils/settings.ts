@@ -80,7 +80,7 @@ const DEFAULT_FORM_VISIBILITY: FormVisibilitySettings = {
   showPersistsIn: false,
 };
 
-// Default data layers.
+// Default data sources.
 const DEFAULT_DATA_LAYERS: DataLayer[] = [
   // Endpoints - where data ultimately starts or ends up
   { name: 'Pinia Store', id: 'pinia-store', type: DataLayerType.Endpoint },
@@ -442,11 +442,11 @@ export function editCategory(oldCategory: string, newCategory: string, newLabel:
 }
 
 // =============================================================================
-// DATA LAYER MANAGEMENT
+// DATA SOURCE (LAYER/LOCATION) MANAGEMENT
 // =============================================================================
 
 /**
- * Get data layers by type.
+ * Get data sources by type.
  */
 export function getDataLayersByType(): { endpoints: DataLayer[]; throughpoints: DataLayer[] } {
   const settings = getCurrentAtlasSettings();
@@ -456,7 +456,7 @@ export function getDataLayersByType(): { endpoints: DataLayer[]; throughpoints: 
 }
 
 /**
- * Add or update a data layer.
+ * Add or update a data source.
  */
 export function saveDataLayer(layer: DataLayer, originalId?: string): void {
   const settings = getCurrentAtlasSettings();
@@ -481,7 +481,7 @@ export function saveDataLayer(layer: DataLayer, originalId?: string): void {
 }
 
 /**
- * Delete a data layer.
+ * Delete a data source.
  */
 export function deleteDataLayer(layerId: string): void {
   const settings = getCurrentAtlasSettings();
@@ -490,7 +490,7 @@ export function deleteDataLayer(layerId: string): void {
 }
 
 /**
- * Check if a data layer ID already exists.
+ * Check if a data source ID already exists.
  */
 export function dataLayerExists(id: string, excludeId?: string): boolean {
   const settings = getCurrentAtlasSettings();

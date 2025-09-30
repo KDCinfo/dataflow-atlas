@@ -195,13 +195,13 @@ function generateDataLayerManagementSection(): string {
     <div class="settings-section">
       <h4 class="collapsible-header" data-target="layer-management">
         <span class="expand-icon ${isExpanded ? 'expanded' : ''}">${isExpanded ? '▼' : '►'}</span>
-        Data Layer Management
+        Data Source Types
       </h4>
       <div id="layer-management" class="collapsible-content ${isExpanded ? 'expanded' : ''}">
-        <p class="setting-description">Manage the data layers available when creating DFA cards. Layers are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
+        <p class="setting-description">Manage the data source types available when creating DFA cards. Sources are organized as Endpoints (final destinations) and Throughpoints (intermediate processing).</p>
 
         <div class="settings-item">
-          <label>Add New Data Layer:</label>
+          <label>Add New Data Source Type:</label>
           <div class="data-layer-form">
             <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name ('Pinia Store')" title="Display name (e.g., 'Pinia Store')">
                         <select id="new-layer-type-select" class="form-control">
@@ -209,7 +209,7 @@ function generateDataLayerManagementSection(): string {
               <option value="${DataLayerType.Endpoint}">Endpoint - Data belongs to...</option>
               <option value="${DataLayerType.Throughpoint}">Throughpoint - Data passes through...</option>
             </select>
-            <button id="add-layer-btn" class="btn-secondary">Add Layer</button>
+            <button id="add-layer-btn" class="btn-secondary">Add Source Type</button>
           </div>
         </div>
 
@@ -373,27 +373,26 @@ export function populateSettingsContent(): void {
     <div class="settings-section">
       <h4 class="collapsible-header" data-target="layer-names">
         <span class="expand-icon ${isLocationsExpanded ? 'expanded' : ''}">${isLocationsExpanded ? '▼' : '►'}</span>
-        Layer Names
+        Data Source Names
       </h4>
       <div id="layer-names" class="collapsible-content ${isLocationsExpanded ? 'expanded' : ''}">
-        <p class="setting-description">Manage the list of 'layer names' (data locations) for your DFA cards. These will appear as dropdown options when creating or editing cards.</p>
+        <p class="setting-description">Manage specific data source names for your DFA cards. These are the actual instance names (like 'appStateStore', 'useAuthFormData') that appear as dropdown options in the "Where" field when creating or editing cards.</p>
 
         <div class="settings-item">
-          <label id="location-form-label">Add New Location:</label>
+          <label id="location-form-label">Add New Data Source Name:</label>
           <div class="settings-flex-row">
-            <input type="text" required id="new-location-key-input" class="settings-input settings-flex-item" placeholder="Key (userStore)" title="Key (e.g., user-store)">
-            <input type="text" required id="new-location-label-input" class="settings-input settings-flex-item" placeholder="Display Label (User Store)" title="Display Label (e.g., User Store)">
+            <input type="text" required id="new-location-name-input" class="settings-input settings-flex-item" placeholder="Source name (e.g., 'appStateStore')" title="Specific name of the data source instance">
             <button id="add-location-btn" class="btn-secondary">Add</button>
             <button id="cancel-location-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
-            <small>Key is used internally, label is shown in forms. If label is empty, key will be auto-capitalized.</small>
+            <small>Keys are auto-generated from the source name to ensure stable references in cards.</small>
           </div>
         </div>
 
         ${locations.length > 0 ? `
           <div class="settings-item">
-            <label>Existing Names:</label>
+            <label>Existing Source Names:</label>
             <div class="location-manager">
               ${locations.map(location => `
                 <div class="location-item">
@@ -457,49 +456,41 @@ export function populateSettingsContent(): void {
 function setupSettingsEventListeners(): void {
   // Location management.
   const addLocationBtn = getElement('add-location-btn');
-  const locationKeyInput = getElement<HTMLInputElement>('new-location-key-input');
-  const locationLabelInput = getElement<HTMLInputElement>('new-location-label-input');
+  const locationNameInput = getElement<HTMLInputElement>('new-location-name-input');
 
-  if (addLocationBtn && locationKeyInput && locationLabelInput) {
+  if (addLocationBtn && locationNameInput) {
     const handleAddOrUpdateLocation = (): void => {
-      const key = locationKeyInput.value.trim();
-      const label = locationLabelInput.value.trim();
+      const name = locationNameInput.value.trim();
 
-      if (!key) {
-        alert('Please provide a key for the location.');
+      if (!name) {
+        alert('Please provide a name for the data source.');
         return;
       }
 
       try {
         if (currentEditState && currentEditState.type === 'location') {
           // Edit mode - update the location name
-          editLocation(currentEditState.originalKey, label);
+          editLocation(currentEditState.originalKey, name);
           exitEditMode();
         } else {
-          // Add mode - just add the location name (no separate label)
+          // Add mode - generate key from name and add location
+          const key = generateLayerId(name);
           addLocation(key);
-          locationKeyInput.value = '';
-          locationLabelInput.value = '';
+          locationNameInput.value = '';
         }
       } catch (error) {
-        alert('Failed to update location.');
+        alert('Failed to update data source name.');
         return;
       }
 
       populateSettingsContent(); // Refresh the content.
       updateLocationOptions(); // Update main form options.
 
-      locationKeyInput.focus();
+      locationNameInput.focus();
     };
 
     addLocationBtn.addEventListener('click', handleAddOrUpdateLocation);
-    locationKeyInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleAddOrUpdateLocation();
-      }
-    });
-    locationLabelInput.addEventListener('keypress', (e) => {
+    locationNameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         handleAddOrUpdateLocation();
@@ -517,8 +508,8 @@ function setupSettingsEventListeners(): void {
         populateSettingsContent(); // Refresh the content.
         updateLocationOptions(); // Update main form options.
       }
-      const locationKeyInput = getElement<HTMLInputElement>('new-location-key-input');
-      locationKeyInput?.focus();
+      const locationNameInput = getElement<HTMLInputElement>('new-location-name-input');
+      locationNameInput?.focus();
     });
   });
 
@@ -667,13 +658,13 @@ function setupSettingsEventListeners(): void {
       const type = layerTypeSelect.value as DataLayerType;
 
       if (!name || !type) {
-        alert('Please fill in all fields for the new data layer.');
+        alert('Please fill in all fields for the new data source.');
         return;
       }
 
       const id = generateLayerId(name);
       if (dataLayerExists(id)) {
-        alert(`A data layer with this name already exists. Please choose a different name.`);
+        alert(`A data source with this name already exists. Please choose a different name.`);
         return;
       }
 
@@ -806,7 +797,7 @@ function handleEditDataLayer(layerId: string): void {
 
   const newId = generateLayerId(newName.trim());
   if (newId !== layer.id && dataLayerExists(newId)) {
-    alert(`A data layer with this name already exists. Please choose a different name.`);
+    alert(`A data source with this name already exists. Please choose a different name.`);
     return;
   }
 
@@ -838,7 +829,7 @@ function handleDeleteDataLayer(layerId: string): void {
 
   if (!layer) return;
 
-  if (confirm(`Delete data layer "${layer.name}"?`)) {
+  if (confirm(`Delete data source "${layer.name}"?`)) {
     deleteDataLayer(layerId);
 
     // Update dropdowns in real-time with a small delay to ensure storage is updated
@@ -940,21 +931,18 @@ function enterEditMode(type: 'scope' | 'category' | 'location' | 'atlas', key: s
       labelInput.focus(); // Focus on label since key is disabled
     }
   } else if (type === 'location') {
-    const keyInput = getElement<HTMLInputElement>('new-location-key-input');
-    const labelInput = getElement<HTMLInputElement>('new-location-label-input');
+    const nameInput = getElement<HTMLInputElement>('new-location-name-input');
     const addBtn = getElement('add-location-btn');
     const cancelBtn = getElement('cancel-location-btn');
     const formLabel = getElement('location-form-label');
 
-    if (keyInput && labelInput && addBtn && cancelBtn && formLabel) {
-      keyInput.value = key;
-      keyInput.disabled = true; // Disable key editing
-      labelInput.value = label || '';
+    if (nameInput && addBtn && cancelBtn && formLabel) {
+      nameInput.value = key; // Use the existing key as display name for editing
       addBtn.textContent = 'Update';
       addBtn.className = 'btn-primary';
       cancelBtn.classList.remove('settings-hidden-btn');
-      formLabel.textContent = 'Edit Location:';
-      labelInput.focus(); // Focus on label since key is disabled
+      formLabel.textContent = 'Edit Data Source Name:';
+      nameInput.focus();
     }
   } else if (type === 'atlas') {
     const nameInput = getElement<HTMLInputElement>('new-atlas-name-input');
@@ -1014,20 +1002,17 @@ function exitEditMode(): void {
   }
 
   // Reset location form
-  const locationKeyInput = getElement<HTMLInputElement>('new-location-key-input');
-  const locationLabelInput = getElement<HTMLInputElement>('new-location-label-input');
+  const locationNameInput = getElement<HTMLInputElement>('new-location-name-input');
   const locationAddBtn = getElement('add-location-btn');
   const locationCancelBtn = getElement('cancel-location-btn');
   const locationFormLabel = getElement('location-form-label');
 
-  if (locationKeyInput && locationLabelInput && locationAddBtn && locationCancelBtn && locationFormLabel) {
-    locationKeyInput.value = '';
-    locationKeyInput.disabled = false; // Re-enable key input
-    locationLabelInput.value = '';
+  if (locationNameInput && locationAddBtn && locationCancelBtn && locationFormLabel) {
+    locationNameInput.value = '';
     locationAddBtn.textContent = 'Add';
     locationAddBtn.className = 'btn-secondary';
     locationCancelBtn.classList.add('settings-hidden-btn');
-    locationFormLabel.textContent = 'Add New Location:';
+    locationFormLabel.textContent = 'Add New Data Source Name:';
   }
 
   // Reset atlas form
@@ -1138,10 +1123,8 @@ function attachEditHandlers(): void {
     locationCancelBtn.addEventListener('click', (e) => {
       e.preventDefault();
       exitEditMode();
-      const target = e.target as HTMLElement;
-      if (target.parentElement) {
-        setFocus(target.parentElement as HTMLElement); // Button and input are siblings.
-      }
+      const locationNameInput = getElement<HTMLInputElement>('new-location-name-input');
+      locationNameInput?.focus();
     });
   }
 
