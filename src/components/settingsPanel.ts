@@ -133,7 +133,8 @@ function generateAtlasManagementSection(): string {
   // For now, we'll import them dynamically to avoid circular dependencies
   // Import atlas management functions at the top level.
 
-  const isExpanded = isPanelExpanded('atlas-management', true); // Default to expanded
+  // Defaulting all collapsed so user can see the entire list of settings.
+  const isExpanded = isPanelExpanded('atlas-management', false);
 
   return `
     <div class="settings-section">
