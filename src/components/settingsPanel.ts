@@ -210,7 +210,7 @@ function generateDataLayerManagementSection(): string {
               <option value="${DataLayerType.Endpoint}">Endpoint - Data belongs to...</option>
               <option value="${DataLayerType.Throughpoint}">Throughpoint - Data passes through...</option>
             </select>
-            <button id="add-layer-btn" class="btn-secondary">Add Source Type</button>
+            <button id="add-layer-btn" class="btn-secondary" disabled>Add Source Type</button>
           </div>
         </div>
 
@@ -271,7 +271,7 @@ function generateScopeManagementSection(): string {
           <div class="settings-flex-row">
             <input type="text" required id="new-scope-key-input" class="settings-input settings-flex-item" placeholder="Key (global)" title="Key (e.g., global)">
             <input type="text" required id="new-scope-label-input" class="settings-input settings-flex-item" placeholder="Display Label (Global)" title="Display Label (e.g., Global)">
-            <button id="add-scope-btn" class="btn-secondary">Add</button>
+            <button id="add-scope-btn" class="btn-secondary" disabled>Add</button>
             <button id="cancel-scope-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
@@ -324,7 +324,7 @@ function generateCategoryManagementSection(): string {
           <div class="settings-flex-row">
             <input type="text" required id="new-category-key-input" class="settings-input settings-flex-item" placeholder="Key (ui-state)" title="Key (e.g., ui-state)">
             <input type="text" required id="new-category-label-input" class="settings-input settings-flex-item" placeholder="Display Label (UI State)" title="Display Label (e.g., UI State)">
-            <button id="add-category-btn" class="btn-secondary">Add</button>
+            <button id="add-category-btn" class="btn-secondary" disabled>Add</button>
             <button id="cancel-category-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
@@ -383,7 +383,7 @@ export function populateSettingsContent(): void {
           <label id="location-form-label">Add New Data Source Name:</label>
           <div class="settings-flex-row">
             <input type="text" required id="new-location-name-input" class="settings-input settings-flex-item" placeholder="Source name (e.g., 'appStateStore')" title="Specific name of the data source instance">
-            <button id="add-location-btn" class="btn-secondary">Add</button>
+            <button id="add-location-btn" class="btn-secondary" disabled>Add</button>
             <button id="cancel-location-btn" class="btn-secondary settings-hidden-btn">Cancel</button>
           </div>
           <div class="input-help">
@@ -452,6 +452,107 @@ export function populateSettingsContent(): void {
 }
 
 /**
+ * Validation functions for form buttons.
+ */
+function updateDataSourceNamesButtonState(): void {
+  const nameInput = getElement<HTMLInputElement>('new-location-name-input');
+  const addBtn = getElement<HTMLButtonElement>('add-location-btn');
+
+  if (!nameInput || !addBtn) return;
+
+  const hasName = nameInput.value.trim().length > 0;
+  addBtn.disabled = !hasName;
+}
+
+function updateDataSourceTypesButtonState(): void {
+  const nameInput = getElement<HTMLInputElement>('new-layer-name-input');
+  const typeSelect = getElement<HTMLSelectElement>('new-layer-type-select');
+  const addBtn = getElement<HTMLButtonElement>('add-layer-btn');
+
+  if (!nameInput || !typeSelect || !addBtn) return;
+
+  const hasName = nameInput.value.trim().length > 0;
+  const hasType = typeSelect.value.length > 0;
+  addBtn.disabled = !(hasName && hasType);
+}
+
+function updateScopeManagementButtonState(): void {
+  const keyInput = getElement<HTMLInputElement>('new-scope-key-input');
+  const labelInput = getElement<HTMLInputElement>('new-scope-label-input');
+  const addBtn = getElement<HTMLButtonElement>('add-scope-btn');
+
+  if (!keyInput || !addBtn) return;
+
+  // Check if we're in edit mode (button text is "Update" and key field is disabled)
+  const isEditMode = addBtn.textContent === 'Update' && keyInput.disabled;
+
+  if (isEditMode) {
+    // In edit mode, require the label field to have content since key is disabled
+    if (!labelInput) return;
+    const hasLabel = labelInput.value.trim().length > 0;
+    addBtn.disabled = !hasLabel;
+  } else {
+    // In add mode, only require key to be filled (label is optional)
+    const hasKey = keyInput.value.trim().length > 0;
+    addBtn.disabled = !hasKey;
+  }
+}
+
+function updateCategoryManagementButtonState(): void {
+  const keyInput = getElement<HTMLInputElement>('new-category-key-input');
+  const labelInput = getElement<HTMLInputElement>('new-category-label-input');
+  const addBtn = getElement<HTMLButtonElement>('add-category-btn');
+
+  if (!keyInput || !addBtn) return;
+
+  // Check if we're in edit mode (button text is "Update" and key field is disabled)
+  const isEditMode = addBtn.textContent === 'Update' && keyInput.disabled;
+
+  if (isEditMode) {
+    // In edit mode, require the label field to have content since key is disabled
+    if (!labelInput) return;
+    const hasLabel = labelInput.value.trim().length > 0;
+    addBtn.disabled = !hasLabel;
+  } else {
+    // In add mode, only require key to be filled (label is optional)
+    const hasKey = keyInput.value.trim().length > 0;
+    addBtn.disabled = !hasKey;
+  }
+}
+
+/**
+ * Set up input validation for edit mode buttons.
+ */
+function setupEditModeValidation(type: 'scope' | 'category' | 'location'): void {
+  if (type === 'scope') {
+    const keyInput = getElement<HTMLInputElement>('new-scope-key-input');
+    const labelInput = getElement<HTMLInputElement>('new-scope-label-input');
+    if (keyInput && labelInput) {
+      const validateEdit = () => updateScopeManagementButtonState();
+      keyInput.addEventListener('input', validateEdit);
+      labelInput.addEventListener('input', validateEdit);
+      validateEdit(); // Initial validation
+    }
+  } else if (type === 'category') {
+    const keyInput = getElement<HTMLInputElement>('new-category-key-input');
+    const labelInput = getElement<HTMLInputElement>('new-category-label-input');
+    if (keyInput && labelInput) {
+      const validateEdit = () => updateCategoryManagementButtonState();
+      keyInput.addEventListener('input', validateEdit);
+      labelInput.addEventListener('input', validateEdit);
+      validateEdit(); // Initial validation
+    }
+  } else if (type === 'location') {
+    const nameInput = getElement<HTMLInputElement>('new-location-name-input');
+    if (nameInput) {
+      const validateEdit = () => updateDataSourceNamesButtonState();
+      nameInput.addEventListener('input', validateEdit);
+      validateEdit(); // Initial validation
+    }
+  }
+}
+
+/**
  * Setup event listeners for settings interactions.
  */
 function setupSettingsEventListeners(): void {
@@ -494,9 +595,17 @@ function setupSettingsEventListeners(): void {
     locationNameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddOrUpdateLocation();
+        if (!(addLocationBtn as HTMLButtonElement).disabled) {
+          handleAddOrUpdateLocation();
+        }
       }
     });
+
+    // Add input validation
+    locationNameInput.addEventListener('input', updateDataSourceNamesButtonState);
+
+    // Set initial button state
+    updateDataSourceNamesButtonState();
   }
 
   // Remove location buttons.
@@ -555,15 +664,26 @@ function setupSettingsEventListeners(): void {
     scopeKeyInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddOrUpdateScope();
+        if (!(addScopeBtn as HTMLButtonElement).disabled) {
+          handleAddOrUpdateScope();
+        }
       }
     });
     scopeLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddOrUpdateScope();
+        if (!(addScopeBtn as HTMLButtonElement).disabled) {
+          handleAddOrUpdateScope();
+        }
       }
     });
+
+    // Add input validation
+    scopeKeyInput.addEventListener('input', updateScopeManagementButtonState);
+    scopeLabelInput.addEventListener('input', updateScopeManagementButtonState);
+
+    // Set initial button state
+    updateScopeManagementButtonState();
   }
 
   // Remove scope buttons.
@@ -622,15 +742,26 @@ function setupSettingsEventListeners(): void {
     categoryKeyInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddOrUpdateCategory();
+        if (!(addCategoryBtn as HTMLButtonElement).disabled) {
+          handleAddOrUpdateCategory();
+        }
       }
     });
     categoryLabelInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleAddOrUpdateCategory();
+        if (!(addCategoryBtn as HTMLButtonElement).disabled) {
+          handleAddOrUpdateCategory();
+        }
       }
     });
+
+    // Add input validation
+    categoryKeyInput.addEventListener('input', updateCategoryManagementButtonState);
+    categoryLabelInput.addEventListener('input', updateCategoryManagementButtonState);
+
+    // Set initial button state
+    updateCategoryManagementButtonState();
   }
 
   // Remove category buttons.
@@ -690,6 +821,13 @@ function setupSettingsEventListeners(): void {
     };
 
     addLayerBtn.addEventListener('click', handleAddLayer);
+
+    // Add input validation
+    layerNameInput.addEventListener('input', updateDataSourceTypesButtonState);
+    layerTypeSelect.addEventListener('change', updateDataSourceTypesButtonState);
+
+    // Set initial button state
+    updateDataSourceTypesButtonState();
   }
 
   // Edit/Delete layer buttons.
@@ -913,6 +1051,9 @@ function enterEditMode(type: 'scope' | 'category' | 'location' | 'atlas', key: s
       cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Scope:';
       labelInput.focus(); // Focus on label since key is disabled
+
+      // Set up validation for edit mode
+      setupEditModeValidation('scope');
     }
   } else if (type === 'category') {
     const keyInput = getElement<HTMLInputElement>('new-category-key-input');
@@ -930,6 +1071,9 @@ function enterEditMode(type: 'scope' | 'category' | 'location' | 'atlas', key: s
       cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Category:';
       labelInput.focus(); // Focus on label since key is disabled
+
+      // Set up validation for edit mode
+      setupEditModeValidation('category');
     }
   } else if (type === 'location') {
     const nameInput = getElement<HTMLInputElement>('new-location-name-input');
@@ -944,6 +1088,9 @@ function enterEditMode(type: 'scope' | 'category' | 'location' | 'atlas', key: s
       cancelBtn.classList.remove('settings-hidden-btn');
       formLabel.textContent = 'Edit Data Source Name:';
       nameInput.focus();
+
+      // Set up validation for edit mode
+      setupEditModeValidation('location');
     }
   } else if (type === 'atlas') {
     const nameInput = getElement<HTMLInputElement>('new-atlas-name-input');
@@ -983,6 +1130,9 @@ function exitEditMode(): void {
     scopeAddBtn.className = 'btn-secondary';
     scopeCancelBtn.classList.add('settings-hidden-btn');
     scopeFormLabel.textContent = 'Add New Scope:';
+
+    // Reset validation state
+    updateScopeManagementButtonState();
   }
 
   // Reset category form
@@ -1000,6 +1150,9 @@ function exitEditMode(): void {
     categoryAddBtn.className = 'btn-secondary';
     categoryCancelBtn.classList.add('settings-hidden-btn');
     categoryFormLabel.textContent = 'Add New Category:';
+
+    // Reset validation state
+    updateCategoryManagementButtonState();
   }
 
   // Reset location form
@@ -1014,6 +1167,9 @@ function exitEditMode(): void {
     locationAddBtn.className = 'btn-secondary';
     locationCancelBtn.classList.add('settings-hidden-btn');
     locationFormLabel.textContent = 'Add New Data Source Name:';
+
+    // Reset validation state
+    updateDataSourceNamesButtonState();
   }
 
   // Reset atlas form

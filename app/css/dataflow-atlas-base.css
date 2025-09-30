@@ -1057,7 +1057,6 @@ code {
     position: relative;
     text-align: center;
     width: 20px;
-    z-index: 9998;
 }
 .tip-note {
     background-color: var(--color-background);
@@ -1067,7 +1066,6 @@ code {
     padding: 1rem 2rem;
     position: absolute;
     width: max-content;
-    z-index: 9999;
 }
 
 .sr-only {
