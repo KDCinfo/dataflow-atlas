@@ -1,6 +1,16 @@
 import type { DFACard, CardSize } from '../types/dfa.js';
 import { DATA_TYPES } from '../types/dfa.js';
-import { getUniqueLocations, getDataLayersByType, getScopes, getCategories, getScopeLabel, getCategoryLabel, getFormVisibility, updateFormVisibility } from '../utils/settings.js';
+import {
+  getUniqueLocations,
+  getDataLayersByType,
+  getScopes,
+  getCategories,
+  getScopeLabel,
+  getCategoryLabel,
+  getFormVisibility,
+  updateFormVisibility,
+  exampleLocations
+} from '../utils/settings.js';
 import { loadCards } from '../utils/storage.js';
 
 /**
@@ -299,6 +309,8 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
   const idPrefix = isEdit ? 'edit-' : '';
   const c = card || {} as Partial<DFACard>; // Use card data or empty object
 
+  const exampleLocationList = exampleLocations();
+
   return `
     <div class="form-grid">
       <!-- What (Content Type) -->
@@ -334,7 +346,14 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       </div>
 
       <div class="form-group">
-        <label class="required" for="${idPrefix}location">Source Name: * <span id="tip-examples-source-names" class="tip-icon">?</span></label>
+        <label class="required" for="${idPrefix}location">
+          Source Name: * <span id="tip-icon-source-names" class="tip-icon">?</span>
+          <span class="tip-note hidden">
+            ${exampleLocationList.length > 0
+              ? `Common examples:<br>&bull;&nbsp;${exampleLocationList.join('<br>&bull;&nbsp;')}`
+              : 'E.g., a class name or file name.'}
+          </span>
+        </label>
         <input class="required-input" type="text" id="${idPrefix}location" name="location"
                title="E.g., a class name or file name."
                ${isEdit ? `value="${escapeHtml(c.sourceName || '')}"` : ''}
@@ -415,8 +434,15 @@ export function initializeCodeSectionToggle(): void {
   const setterNameInput = getElement<HTMLInputElement>('setter_name');
   const getterCodeSection = getElement<HTMLElement>('getter-code-section');
   const setterCodeSection = getElement<HTMLElement>('setter-code-section');
+  const tipExamplesIcon = getElement<HTMLElement>('tip-icon-source-names');
 
-  if (!getterNameInput || !setterNameInput || !getterCodeSection || !setterCodeSection) {
+  if (
+    !getterNameInput ||
+    !setterNameInput ||
+    !getterCodeSection ||
+    !setterCodeSection ||
+    !tipExamplesIcon
+  ) {
     return;
   }
 
@@ -452,9 +478,20 @@ export function initializeCodeSectionToggle(): void {
     }, 500);
   };
 
+  const handleShowTip = (e: any): void => {
+    const note = e.target?.parentElement?.querySelector('.tip-note');
+    if (note && note.classList.contains('hidden')) {
+      note.classList.remove('hidden');
+    } else {
+      note.classList.add('hidden');
+    }
+  };
+
   // Add event listeners.
   getterNameInput.addEventListener('input', handleGetterChange);
   setterNameInput.addEventListener('input', handleSetterChange);
+  tipExamplesIcon.addEventListener('mouseenter', handleShowTip, false);
+  tipExamplesIcon.addEventListener('mouseleave', handleShowTip, false);
 
   // Initial check.
   handleGetterChange();

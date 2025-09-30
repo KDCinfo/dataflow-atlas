@@ -58,14 +58,14 @@ const DEFAULT_CATEGORIES_MAP: Record<string, string> = {
   'app_preference': 'App Preference'
 };
 
-// Helper functions to get arrays from the maps
+// Helper functions to get arrays from the maps.
 const getDefaultScopes = (): string[] => Object.keys(DEFAULT_SCOPES_MAP);
 const getDefaultCategories = (): string[] => Object.keys(DEFAULT_CATEGORIES_MAP);
 
 // Default locations (layer names)
 const getDefaultLocations = (): string[] => [
-  'useAppStore',
-  'appStore.ts',
+  'useAppStore', // Class name
+  'appStore.ts', // File name
   'useServiceApi.ts',
   'Component.vue',
   'network_service_api.dart',
@@ -73,6 +73,13 @@ const getDefaultLocations = (): string[] => [
   'app_bar_container.dart',
   'AppBarContainer',
 ];
+
+// Use 'getDefaultLocations' as a base, and append a string to the first two strings:
+export const exampleLocations = (): string[] => getDefaultLocations().map((loc, idx) => {
+  if (idx === 0) return loc + ' (class name)';
+  if (idx === 1) return loc + ' (file name)';
+  return loc;
+});
 
 /**
  * Default form visibility settings - all optional fields hidden by default.
@@ -151,7 +158,7 @@ export function getAtlasSettings(atlasName: string): AtlasSettings {
       return {
         dataLayers: parsed.dataLayers?.length > 0 ? parsed.dataLayers : [...DEFAULT_DATA_LAYERS],
         dataTypes: parsed.dataTypes || [],
-        locations: parsed.locations?.length > 0 ? parsed.locations : getDefaultLocations(),
+        locations: parsed.locations?.length > 0 ? parsed.locations : [], // || getDefaultLocations(),
         scopes: parsed.scopes?.length > 0 ? parsed.scopes : getDefaultScopes(),
         scopeLabels: parsed.scopeLabels || {},
         categories: parsed.categories?.length > 0 ? parsed.categories : getDefaultCategories(),
@@ -166,7 +173,7 @@ export function getAtlasSettings(atlasName: string): AtlasSettings {
   return {
     dataLayers: [...DEFAULT_DATA_LAYERS],
     dataTypes: [],
-    locations: getDefaultLocations(),
+    locations: [], // getDefaultLocations(),
     scopes: getDefaultScopes(),
     scopeLabels: {},
     categories: getDefaultCategories(),
