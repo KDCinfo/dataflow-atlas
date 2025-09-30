@@ -202,14 +202,14 @@ function generateConnectionOptions(currentCardId?: string, selectedConnection?: 
   }
 
   // Group by endpoints and throughpoints
-  const endpointCards = availableCards.filter(card => endpointNames.includes(card.layer));
-  const throughpointCards = availableCards.filter(card => throughpointNames.includes(card.layer));
+  const endpointCards = availableCards.filter(card => endpointNames.includes(card.sourceTypeName));
+  const throughpointCards = availableCards.filter(card => throughpointNames.includes(card.sourceTypeName));
 
   if (endpointCards.length > 0) {
     html += '<optgroup label="Endpoints">';
     endpointCards.forEach(card => {
       const selected = selectedConnection === card.id ? 'selected' : '';
-      const locationLabel = card.location || '';
+      const locationLabel = card.sourceName || '';
       const displayName = locationLabel ? `${card.field} (${locationLabel})` : card.field;
       html += `<option value="${card.id}" ${selected}>${escapeHtml(displayName)}</option>`;
     });
@@ -220,7 +220,7 @@ function generateConnectionOptions(currentCardId?: string, selectedConnection?: 
     html += '<optgroup label="Throughpoints">';
     throughpointCards.forEach(card => {
       const selected = selectedConnection === card.id ? 'selected' : '';
-      const locationLabel = card.location || '';
+      const locationLabel = card.sourceName || '';
       const displayName = locationLabel ? `${card.field} (${locationLabel})` : card.field;
       html += `<option value="${card.id}" ${selected}>${escapeHtml(displayName)}</option>`;
     });
@@ -320,7 +320,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       <div class="form-group">
         <label class="required" for="${idPrefix}layer">Data Source: *</label>
         <select class="required-input" id="${idPrefix}layer" name="layer" required>
-          ${generateLayerOptions(c?.layer)}
+          ${generateLayerOptions(c?.sourceTypeName)}
         </select>
 
         <!-- Connected To (for throughpoints) -->
@@ -334,9 +334,12 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
       </div>
 
       <div class="form-group">
-        <label class="required" for="${idPrefix}location">Layer Name: *</label>
-        <input class="required-input" type="text" id="${idPrefix}location" name="location" ${isEdit ? `value="${escapeHtml(c.location || '')}"` : ''} list="${idPrefix}location-options"
-               placeholder="e.g., appStateStore, userStore, authStore" required>
+        <label class="required" for="${idPrefix}location">Source Name: * <span id="tip-examples-source-names" class="tip-icon">?</span></label>
+        <input class="required-input" type="text" id="${idPrefix}location" name="location"
+               title="E.g., a class name or file name."
+               ${isEdit ? `value="${escapeHtml(c.sourceName || '')}"` : ''}
+               list="${idPrefix}location-options"
+               placeholder="useAppStore, AuthForm.vue" required>
         <datalist id="${idPrefix}location-options">
           ${getUniqueLocations().map(location => `<option value="${escapeHtml(location)}"></option>`).join('')}
         </datalist>
@@ -730,10 +733,10 @@ export function renderDFACard(card: DFACard, size: CardSize = 'mini'): string {
         </div>
 
         <div class="dfa-card-meta">
-          <div class="dfa-card-label">Layer:</div>
-          <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
-          <div class="dfa-card-label">Location:</div>
-          <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>
+          <div class="dfa-card-label">Source Type:</div>
+          <div class="dfa-card-value">${escapeHtml(card.sourceTypeName)}</div>
+          <div class="dfa-card-label">Source Name:</div>
+          <div class="dfa-card-value">${escapeHtml(card.sourceName || 'Not specified')}</div>
           ${linkedToSection}
         </div>
 
@@ -746,10 +749,10 @@ export function renderDFACard(card: DFACard, size: CardSize = 'mini'): string {
 
   // Core fields (always shown for standard and compact)
   const coreFields = `
-    <div class="dfa-card-label">Layer:</div>
-    <div class="dfa-card-value">${escapeHtml(card.layer)}</div>
-    <div class="dfa-card-label">Location:</div>
-    <div class="dfa-card-value">${escapeHtml(card.location || 'Not specified')}</div>`;
+    <div class="dfa-card-label">Source Type:</div>
+    <div class="dfa-card-value">${escapeHtml(card.sourceTypeName)}</div>
+    <div class="dfa-card-label">Source Name:</div>
+    <div class="dfa-card-value">${escapeHtml(card.sourceName || 'Not specified')}</div>`;
 
   // Standard fields (shown in standard and compact)
   // const standardFields = (showAllFields || showCompactFields) ? `

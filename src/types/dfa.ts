@@ -40,8 +40,8 @@ export type DataType = typeof DATA_TYPES[number];
 export interface DFACard {
   id: string; // Unique identifier (string is optimal for flexibility and web standards)
   field: string;
-  layer: string; // Data source type - kept as string for compatibility with existing form handling
-  location: string; // Data source name
+  sourceTypeName: string; // Data source type name (e.g., "Pinia Store", "Vue Composable")
+  sourceName: string; // Specific data source name (e.g., "appStateStore", "useAuthFormData")
   type: string;
   scope?: DataScope; // Made optional to match current form layout
   category?: ContentCategory;
@@ -76,11 +76,11 @@ export type DataScope =
  * Content type categories for data classification.
  */
 export type ContentCategory =
-  | 'user-preference'
-  | 'account-setting'
-  | 'runtime-state'
-  | 'feature-data'
-  | 'app-preference';
+  | 'user_preference'
+  | 'account_setting'
+  | 'runtime_state'
+  | 'feature_data'
+  | 'app_preference';
 
 /**
  * Import operation modes for data merging.
@@ -120,7 +120,13 @@ export function isDataScope(value: string): value is DataScope {
 }
 
 export function isContentCategory(value: string): value is ContentCategory {
-  return ['user-preference', 'account-setting', 'runtime-state', 'feature-data', 'app-preference'].includes(value);
+  return [
+    'user_preference',
+    'account_setting',
+    'runtime_state',
+    'feature_data',
+    'app_preference',
+  ].includes(value);
 }
 
 /**

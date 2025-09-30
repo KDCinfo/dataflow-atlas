@@ -219,7 +219,7 @@ export class DFDAtlas {
         showNotification('Card added successfully', 'success');
         resetCreateForm();
       } else if (mode === 'edit' && this.currentEditCard) {
-        const updatedCard = createDFACardFromForm(formData, this.currentEditCard);
+        const updatedCard = createDFACardFromForm(formData);
         updateDFACard(this.currentEditCard.field, updatedCard);
         showNotification('Card updated successfully', 'success');
         this.hideModal();
@@ -853,7 +853,7 @@ export class DFDAtlas {
     const filters = this.getCurrentFilters();
     return cards.filter((card: DFACard) => {
       // Basic filters
-      if (filters.layer && card.layer !== filters.layer) return false;
+      if (filters.layer && card.sourceTypeName !== filters.layer) return false;
       if (filters.scope && card.scope !== filters.scope) return false;
       if (filters.category && card.category !== filters.category) return false;
 
@@ -861,7 +861,7 @@ export class DFDAtlas {
       if (filters.orphans === 'endpoints') {
         // For endpoints: show only cards that are NOT being linked to by any other card
         const { endpoints } = getDataLayersByType();
-        const isEndpointLayer = endpoints.some((layer: DataLayer) => layer.name === card.layer);
+        const isEndpointLayer = endpoints.some((layer: DataLayer) => layer.name === card.sourceTypeName);
         if (!isEndpointLayer) return false; // Only show endpoint layer cards
 
         // Check if any other card links to this card
@@ -876,7 +876,7 @@ export class DFDAtlas {
       if (filters.orphans === 'throughpoints') {
         // For throughpoints: show only cards that have empty linkedTo property
         const { throughpoints } = getDataLayersByType();
-        const isThroughpointLayer = throughpoints.some((layer: DataLayer) => layer.name === card.layer);
+        const isThroughpointLayer = throughpoints.some((layer: DataLayer) => layer.name === card.sourceTypeName);
         if (!isThroughpointLayer) return false; // Only show throughpoint layer cards
 
         // Show only cards with empty linkedTo
@@ -888,7 +888,7 @@ export class DFDAtlas {
         const searchTerm = filters.searchTerm.toLowerCase();
         const searchableText = [
           card.field,
-          card.location,
+          card.sourceName,
           card.notes,
           card.type
         ].filter(Boolean).join(' ').toLowerCase();

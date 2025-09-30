@@ -26,7 +26,7 @@ interface ValidationResult {
 /**
  * Create a DFA card from form data with proper type validation.
  */
-export function createDFACardFromForm(formData: FormData, existingCard?: DFACard): DFACard {
+export function createDFACardFromForm(formData: FormData): DFACard {
   const persistsIn = (formData.get('persists_in') as string || '')
     .split('\n')
     .map(line => line.trim())
@@ -65,15 +65,15 @@ export function createDFACardFromForm(formData: FormData, existingCard?: DFACard
   const linkedTo = (formData.get('linkedTo') as string || '').trim();
 
   const card: DFACard = {
-    id: existingCard?.id || generateCardId(), // Preserve existing ID or generate new one
+    id: generateCardId(),
     field,
-    layer,
-    location,
+    sourceTypeName: layer,
+    sourceName: location,
     type,
   };
 
   // Only add optional properties if they have values.
-  if (location) card.location = location;
+  if (location) card.sourceName = location;
   if (type) card.type = type;
   if (validScope) card.scope = validScope;
   if (validCategory) card.category = validCategory;
@@ -98,12 +98,12 @@ export function validateDFACard(card: DFACard, existingCards: DFACard[] = []): V
     errors.push('Field name is required');
   }
 
-  if (!card.layer) {
-    errors.push('Layer is required');
+  if (!card.sourceTypeName) {
+    errors.push('Source type is required');
   }
 
-  if (!card.location) {
-    errors.push('Location is required');
+  if (!card.sourceName) {
+    errors.push('Source name is required');
   }
 
   if (!card.type) {
@@ -137,8 +137,8 @@ export function addDFACard(card: DFACard): boolean {
   saveCards(newCards);
 
   // Save location to settings if provided.
-  if (card.location) {
-    addLocation(card.location);
+  if (card.sourceName) {
+    addLocation(card.sourceName);
     updateLocationOptions();
   }
 
@@ -174,8 +174,8 @@ export function updateDFACard(originalField: string, updatedCard: DFACard): bool
   saveCards(existingCards);
 
   // Save location to settings if provided.
-  if (updatedCard.location) {
-    addLocation(updatedCard.location);
+  if (updatedCard.sourceName) {
+    addLocation(updatedCard.sourceName);
     updateLocationOptions();
   }
 
@@ -268,7 +268,7 @@ export function getFilteredCards(filters: AtlasFilter): DFACard[] {
   }
 
   return allCards.filter(card => {
-    if (filters.layer && card.layer !== filters.layer) return false;
+    if (filters.layer && card.sourceTypeName !== filters.layer) return false;
     if (filters.scope && card.scope !== filters.scope) return false;
     if (filters.category && card.category !== filters.category) return false;
 
@@ -284,12 +284,12 @@ export function getFilteredCards(filters: AtlasFilter): DFACard[] {
       );
 
       // Check if card's layer is an endpoint or throughpoint type
-      const isEndpointLayer = endpoints.some((layer: any) => layer.name === card.layer);
-      const isThroughpointLayer = throughpoints.some((layer: any) => layer.name === card.layer);
+      const isEndpointLayer = endpoints.some((layer: any) => layer.name === card.sourceTypeName);
+      const isThroughpointLayer = throughpoints.some((layer: any) => layer.name === card.sourceTypeName);
 
       console.log(`Card ${card.field}:`, {
         cardId,
-        layer: card.layer,
+        layer: card.sourceTypeName,
         isEndpointLayer,
         isThroughpointLayer,
         hasOutgoingConnection,
@@ -316,7 +316,7 @@ export function getFilteredCards(filters: AtlasFilter): DFACard[] {
       const searchTerm = filters.searchTerm.toLowerCase();
       const searchableText = [
         card.field,
-        card.location,
+        card.sourceName,
         card.getter_name,
         card.setter_name,
         card.notes,

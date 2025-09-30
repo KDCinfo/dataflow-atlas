@@ -51,11 +51,11 @@ const DEFAULT_SCOPES_MAP: Record<string, string> = {
 };
 
 const DEFAULT_CATEGORIES_MAP: Record<string, string> = {
-  'user-preference': 'User Preference',
-  'account-setting': 'Account Setting',
-  'runtime-state': 'Runtime State',
-  'feature-data': 'Feature Data',
-  'app-preference': 'App Preference'
+  'user_preference': 'User Preference',
+  'account_setting': 'Account Setting',
+  'runtime_state': 'Runtime State',
+  'feature_data': 'Feature Data',
+  'app_preference': 'App Preference'
 };
 
 // Helper functions to get arrays from the maps
@@ -64,11 +64,14 @@ const getDefaultCategories = (): string[] => Object.keys(DEFAULT_CATEGORIES_MAP)
 
 // Default locations (layer names)
 const getDefaultLocations = (): string[] => [
-  'Component.tsx',
-  'Store.ts',
-  'Service.ts',
-  'Controller.ts',
-  'Repository.ts'
+  'useAppStore',
+  'appStore.ts',
+  'useServiceApi.ts',
+  'Component.vue',
+  'network_service_api.dart',
+  'NetworkServiceApi',
+  'app_bar_container.dart',
+  'AppBarContainer',
 ];
 
 /**
@@ -89,7 +92,7 @@ const DEFAULT_DATA_LAYERS: DataLayer[] = [
   { name: 'Database', id: 'database', type: DataLayerType.Endpoint },
   { name: 'File System', id: 'filesystem', type: DataLayerType.Endpoint },
 
-  // Throughpoints - intermediate processing layers
+  // Throughpoints/Consumers - intermediate processing layers
   { name: 'Repository', id: 'repository', type: DataLayerType.Throughpoint },
   { name: 'ViewController', id: 'view-controller', type: DataLayerType.Throughpoint },
   { name: 'Backend API', id: 'backend-api', type: DataLayerType.Throughpoint },
@@ -242,8 +245,10 @@ export function getUniqueLocations(): string[] {
       const cards = parsed.cards || parsed; // Handle both new and legacy formats
       if (Array.isArray(cards)) {
         cards.forEach((card: any) => {
-          if (card.location && card.location.trim()) {
-            existingLocations.add(card.location.trim());
+          // Handle both old and new property names for backward compatibility
+          const sourceName = card.sourceName || card.location;
+          if (sourceName && sourceName.trim()) {
+            existingLocations.add(sourceName.trim());
           }
         });
       }
