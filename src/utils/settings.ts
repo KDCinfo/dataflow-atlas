@@ -2,7 +2,6 @@
  * Clean Settings Management for Data Flow Atlas.
  * Atlas-specific settings with global app preferences.
  */
-import { getActiveAtlas } from './atlasManagerOptimized.js';
 
 export enum DataLayerType {
   Endpoint = 'endpoint',
@@ -21,9 +20,10 @@ export interface FormVisibilitySettings {
   showPersistsIn: boolean;
 }
 
-// Global app-level settings (stored in dfa_settings)
+// Global app-level settings (stored in dfa__settings)
 export interface GlobalSettings {
   formVisibility: FormVisibilitySettings;
+  activeAtlas: string;
 }
 
 // Atlas-specific settings (stored in dfa_[atlasName]_settings)
@@ -39,6 +39,9 @@ export interface AtlasSettings {
 
 // Storage keys
 const GLOBAL_SETTINGS_KEY = 'dfa__settings';
+
+// Default values
+const DEFAULT_ATLAS_NAME = 'default';
 
 // Default scope and category definitions with display labels
 const DEFAULT_SCOPES_MAP: Record<string, string> = {
@@ -109,6 +112,7 @@ export function getGlobalSettings(): GlobalSettings {
       const parsed = JSON.parse(stored) as GlobalSettings;
       return {
         formVisibility: parsed.formVisibility || { ...DEFAULT_FORM_VISIBILITY },
+        activeAtlas: parsed.activeAtlas || DEFAULT_ATLAS_NAME,
       };
     }
   } catch (error) {
@@ -117,6 +121,7 @@ export function getGlobalSettings(): GlobalSettings {
 
   return {
     formVisibility: { ...DEFAULT_FORM_VISIBILITY },
+    activeAtlas: DEFAULT_ATLAS_NAME,
   };
 }
 
@@ -519,6 +524,7 @@ export function updateFormVisibility(visibility: Partial<FormVisibilitySettings>
       ...globalSettings.formVisibility,
       ...visibility,
     },
+    activeAtlas: globalSettings.activeAtlas,
   };
   saveGlobalSettings(updatedGlobalSettings);
 }
@@ -528,6 +534,29 @@ export function updateFormVisibility(visibility: Partial<FormVisibilitySettings>
  */
 export function getFormVisibility(): FormVisibilitySettings {
   return getGlobalSettings().formVisibility;
+}
+
+// =============================================================================
+// ACTIVE ATLAS MANAGEMENT
+// =============================================================================
+
+/**
+ * Get the currently active atlas name from global settings.
+ */
+export function getActiveAtlas(): string {
+  return getGlobalSettings().activeAtlas;
+}
+
+/**
+ * Set the active atlas name in global settings.
+ */
+export function setActiveAtlas(atlasName: string): void {
+  const globalSettings = getGlobalSettings();
+  const updatedGlobalSettings: GlobalSettings = {
+    formVisibility: globalSettings.formVisibility,
+    activeAtlas: atlasName,
+  };
+  saveGlobalSettings(updatedGlobalSettings);
 }
 
 // =============================================================================

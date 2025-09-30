@@ -6,6 +6,7 @@
 import { DFACard } from '../types/dfa';
 import { AtlasStorageData, AtlasMetadata, AtlasInfo } from '../types/atlasStorage';
 import AppConstants from './appConstants.js';
+import { getActiveAtlas as getActiveAtlasFromSettings, setActiveAtlas as setActiveAtlasInSettings } from './settings.js';
 
 const ATLAS_PREFIX = AppConstants.atlasPrefix;
 const DEFAULT_ATLAS_NAME = AppConstants.defaultAtlasName;
@@ -14,14 +15,14 @@ const DEFAULT_ATLAS_NAME = AppConstants.defaultAtlasName;
  * Get the current active atlas name from settings.
  */
 export function getActiveAtlas(): string {
-  return localStorage.getItem('active_atlas') || DEFAULT_ATLAS_NAME;
+  return getActiveAtlasFromSettings();
 }
 
 /**
  * Set the active atlas name.
  */
 export function setActiveAtlas(atlasName: string): void {
-  localStorage.setItem('active_atlas', atlasName);
+  setActiveAtlasInSettings(atlasName);
 }
 
 /**
@@ -123,8 +124,9 @@ export function initializeDefaultAtlas(): void {
     console.log('[Atlas] Default atlas initialized');
   }
 
-  // Ensure active atlas is set if none exists
-  if (!localStorage.getItem('active_atlas')) {
+  // Ensure active atlas is set through global settings
+  const currentActive = getActiveAtlas();
+  if (!currentActive || currentActive === DEFAULT_ATLAS_NAME) {
     setActiveAtlas(DEFAULT_ATLAS_NAME);
     console.log('[Atlas] Active atlas set to default');
   }
