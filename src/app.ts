@@ -171,6 +171,7 @@ export class DFDAtlas {
     navLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         const targetTab = (e.target as HTMLElement).getAttribute('id');
 
         // Skip settings button - it has its own handler in settingsPanel.ts
@@ -192,6 +193,7 @@ export class DFDAtlas {
           target.classList.contains('code-view-btn') || target.classList.contains('code-close-btn') ||
           target.classList.contains('code-copy-btn')) {
         e.preventDefault();
+        e.stopPropagation();
         const action = target.getAttribute('data-action');
         const cardId = target.getAttribute('data-card-id');
         const codeType = target.getAttribute('data-code-type');
@@ -408,7 +410,12 @@ export class DFDAtlas {
     sections.forEach(section => {
       if (section.id === `${sectionName}-section`) {
         section.classList.add('active');
-        setFocus(section as HTMLElement);
+        if (section.id === 'view-section') {
+          // true: Skip first input because the 'search' input is the 2nd field.
+          setFocus(section as HTMLElement, true);
+        } else {
+          setFocus(section as HTMLElement);
+        }
       } else {
         section.classList.remove('active');
       }
@@ -889,8 +896,17 @@ export class DFDAtlas {
         const searchableText = [
           card.field,
           card.sourceName,
+          card.getter_name,
+          card.getter_code,
+          card.setter_name,
+          card.setter_code,
+          card.persists_in,
           card.notes,
-          card.type
+          // Separate filters
+          // card.sourceTypeName,
+          // card.type,
+          // card.scope,
+          // card.category,
         ].filter(Boolean).join(' ').toLowerCase();
 
         if (!searchableText.includes(searchTerm)) return false;

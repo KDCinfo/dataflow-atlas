@@ -1086,12 +1086,15 @@ export function downloadJson(data: any, filename: string): void {
 }
 
 /**
- * Sets focus on first form element found, if any.
+ * Sets focus on first (or second) form element found, if any.
  * @param section HTMLElement
+ * @param skipFirst boolean
  */
-export function setFocus(section: HTMLElement) {
-  // const textInput = section.querySelector('input[type="text"]') as HTMLInputElement;
-  const textInput = section.querySelector('input[type="text"], select, textarea') as HTMLElement;
+export function setFocus(section: HTMLElement, skipFirst: boolean = false) {
+  const textInputTarget = 'input[type="text"], select, textarea';
+  const textInput = skipFirst
+      ? (section.querySelectorAll(textInputTarget) as NodeListOf<Element>)[1] as HTMLElement
+      : section.querySelector(textInputTarget) as HTMLElement;
   if (textInput) {
     textInput.focus();
   }

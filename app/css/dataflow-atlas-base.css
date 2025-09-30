@@ -434,6 +434,14 @@ header img.logo-img:hover {
     min-width: 170px;
     padding: var(--spacing-xs) var(--spacing-sm);
 }
+.clear-filters {
+    min-height: 3rem;
+}
+.filter-emphasis {
+    background-color: var(--color-secondary);
+    border-radius: var(--radius-all1);
+    padding: 3px 10px 7px;
+}
 
 .atlas-container {
     position: relative;

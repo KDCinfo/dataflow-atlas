@@ -62,17 +62,35 @@
     <section id="view-section" class="section">
       <!-- <h2>Data Flow Atlas</h2> -->
       <div class="atlas-controls">
-        <div class="filter-group">
-          <label for="filter-search">Search Cards:</label>
-          <input type="text" autofocus id="filter-search" placeholder="Search by card name..." />
-        </div>
-        <div class="filter-group">
+        <div class="filter-group filter-emphasis">
           <!-- <label for="view-size">Card Size/<br>Relationship Filter <small>(via mini cards)</small>:</label> -->
           <label for="view-size">Card Size:</label>
           <select id="view-size">
             <option value="mini">Mini (relationship view)</option>
             <option value="compact">Compact</option>
             <option value="standard">Full</option>
+          </select>
+        </div>
+        <hr>
+        <div class="filter-group">
+          <label for="filter-search">Filter by text:</label>
+          <input
+            autofocus
+            type="text"
+            autofocus id="filter-search"
+            placeholder="Start typing to filter..."
+            title="This will search by\n[field name, source name, notes, persists in, getters and setters]..." />
+        </div>
+        <hr>
+        <div class="filter-group">
+          <label for="filter-layer">Filter by Source:</label>
+          <select id="filter-layer">
+            <option value="">All Layers</option>
+            <option value="store">Pinia Store</option>
+            <option value="localStorage">Local Storage</option>
+            <option value="sessionStorage">Session Storage</option>
+            <option value="api">Backend API</option>
+            <option value="database">Database</option>
           </select>
         </div>
         <div class="filter-group">
@@ -82,17 +100,6 @@
             <option value="endpoints">Endpoints (Not linked from anywhere)</option>
             <option value="throughpoints">Throughpoints (Not linked to anywhere)</option>
             <!-- <option value="all">All Orphaned Cards</option> -->
-          </select>
-        </div>
-        <div class="filter-group">
-          <label for="filter-layer">Filter by Layer:</label>
-          <select id="filter-layer">
-            <option value="">All Layers</option>
-            <option value="store">Pinia Store</option>
-            <option value="localStorage">Local Storage</option>
-            <option value="sessionStorage">Session Storage</option>
-            <option value="api">Backend API</option>
-            <option value="database">Database</option>
           </select>
         </div>
         <div class="filter-group">
@@ -116,7 +123,7 @@
             <option value="feature">Core/Feature Data</option>
           </select>
         </div>
-        <button id="clear-filters" class="btn-secondary">Clear Filters</button>
+        <button id="clear-filters" class="btn-secondary clear-filters">Clear Filters</button>
       </div>
       <div id="relationships-status" class="relationships-status hidden">
         <span class="status-text">Showing network connected to: <strong id="relationships-card-name"></strong></span>
