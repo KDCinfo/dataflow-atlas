@@ -71,10 +71,8 @@ export class AtlasSelector {
 
     if (isCurrentlyActive) {
       this.activateButtonElement.classList.add('btn-active');
-      this.activateButtonElement.classList.remove('btn-secondary');
     } else {
       this.activateButtonElement.classList.remove('btn-active');
-      this.activateButtonElement.classList.add('btn-secondary');
     }
   }
 
