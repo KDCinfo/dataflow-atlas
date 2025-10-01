@@ -347,7 +347,7 @@ export function createDFAForm(mode: 'create' | 'edit', card?: DFACard): string {
 
       <div class="form-group">
         <label class="required" for="${idPrefix}location">
-          Source Name: * <span id="tip-icon-source-names" class="tip-icon">?</span>
+          Source Name: * <span id="tip-icon-source-names" class="tip-icon" tabindex="0">?</span>
           <span class="tip-note hidden">
             ${exampleLocationList.length > 0
               ? `Common examples:<br>&bull;&nbsp;${exampleLocationList.join('<br>&bull;&nbsp;')}`
@@ -480,11 +480,30 @@ export function initializeCodeSectionToggle(): void {
 
   const handleShowTip = (e: any): void => {
     const note = e.target?.parentElement?.querySelector('.tip-note');
-    if (note && note.classList.contains('hidden')) {
-      note.classList.remove('hidden');
-    } else {
-      note.classList.add('hidden');
+    if (note) {
+      if (e.type === 'mouseenter') {
+        note.classList.remove('hidden');
+        return;
+      } else if (e.type === 'mouseleave') {
+        note.classList.add('hidden');
+        return;
+      }
+      // Else, just toggle it.
+      if (note && note.classList.contains('hidden')) {
+        note.classList.remove('hidden');
+      } else {
+        note.classList.add('hidden');
+      }
     }
+  };
+
+  const handleShowTipKey = (e: any): void => {
+    // if (e.key !== ' ') {
+    if (e.code !== 'Space') {
+      return;
+    }
+    e.preventDefault();
+    handleShowTip(e);
   };
 
   // Add event listeners.
@@ -492,6 +511,7 @@ export function initializeCodeSectionToggle(): void {
   setterNameInput.addEventListener('input', handleSetterChange);
   tipExamplesIcon.addEventListener('mouseenter', handleShowTip, false);
   tipExamplesIcon.addEventListener('mouseleave', handleShowTip, false);
+  tipExamplesIcon.addEventListener('keydown', handleShowTipKey, false);
 
   // Initial check.
   handleGetterChange();
