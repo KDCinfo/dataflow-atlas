@@ -24,7 +24,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "build:prod": "rm -rf app/js && tsc --sourceMap false --declaration false --declarationMap false",
+    "build:prodgo": "rm -rf app/js && tsc --sourceMap false --declaration false --declarationMap false",
+    "build:prod": "read -p 'Have versions been updated? (y/n): ' ans && [ \"$ans\" = \"y\" ] && rm -rf app/js && tsc --sourceMap false --declaration false --declarationMap false",
     "watch": "tsc --watch",
     "dev": "tsc --watch"
   },
