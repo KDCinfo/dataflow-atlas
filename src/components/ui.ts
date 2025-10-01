@@ -18,6 +18,41 @@ import { loadCards } from '../utils/storage.js';
  */
 
 /**
+ * Helper function to manage tabindex for form elements when showing/hiding sections.
+ * Sets tabindex to -1 when hidden to prevent tab navigation to invisible elements.
+ */
+function manageTabIndex(section: HTMLElement, show: boolean): void {
+  // Find all focusable elements in the section
+  const focusableElements = section.querySelectorAll(
+    'input, select, textarea, button, [tabindex]:not([tabindex="-1"])'
+  ) as NodeListOf<HTMLElement>;
+
+  focusableElements.forEach(element => {
+    if (show) {
+      // Remove tabindex=-1 to make element focusable again
+      if (element.getAttribute('tabindex') === '-1') {
+        element.removeAttribute('tabindex');
+      }
+    } else {
+      // Set tabindex=-1 to make element non-focusable when hidden
+      element.setAttribute('tabindex', '-1');
+    }
+  });
+}
+
+/**
+ * Enhanced toggle function that manages both visibility and tab navigation.
+ */
+function toggleSectionWithTabIndex(section: HTMLElement, show: boolean): void {
+  if (show) {
+    section.classList.add('show');
+  } else {
+    section.classList.remove('show');
+  }
+  manageTabIndex(section, show);
+}
+
+/**
  * Initialize data type dropdown with predefined options.
  */
 export function initializeDataTypeDropdown(): void {
@@ -451,11 +486,7 @@ export function initializeCodeSectionToggle(): void {
   let setterTimeout: number | undefined;
 
   const toggleSection = (section: HTMLElement, show: boolean): void => {
-    if (show) {
-      section.classList.add('show');
-    } else {
-      section.classList.remove('show');
-    }
+    toggleSectionWithTabIndex(section, show);
   };
 
   const handleGetterChange = (): void => {
@@ -537,8 +568,10 @@ export function initializeConnectionFieldToggle(mode: 'create' | 'edit' = 'creat
 
     if (isThroughpoint) {
       connectionGroup.classList.add('show');
+      manageTabIndex(connectionGroup, true);
     } else {
       connectionGroup.classList.remove('show');
+      manageTabIndex(connectionGroup, false);
       // Clear the linkedTo value if switching away from throughpoint
       const linkedToSelect = getElement<HTMLSelectElement>(`${prefix}linkedTo`);
       if (linkedToSelect) linkedToSelect.value = '';
@@ -570,11 +603,7 @@ export function initializeEditCodeSectionToggle(): void {
   let setterTimeout: number | undefined;
 
   const toggleSection = (section: HTMLElement, show: boolean): void => {
-    if (show) {
-      section.classList.add('show');
-    } else {
-      section.classList.remove('show');
-    }
+    toggleSectionWithTabIndex(section, show);
   };
 
   const handleGetterChange = (): void => {
@@ -901,6 +930,7 @@ export function resetCreateForm(): void {
 
   if (connectionGroup) {
     connectionGroup.classList.remove('show');
+    manageTabIndex(connectionGroup, false);
   }
 
   if (linkedToSelect) {
@@ -913,10 +943,12 @@ export function resetCreateForm(): void {
 
   if (getterCodeSection) {
     getterCodeSection.classList.remove('show');
+    manageTabIndex(getterCodeSection, false);
   }
 
   if (setterCodeSection) {
     setterCodeSection.classList.remove('show');
+    manageTabIndex(setterCodeSection, false);
   }
 }
 
