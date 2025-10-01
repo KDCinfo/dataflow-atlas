@@ -1055,6 +1055,20 @@ button.card-action-btn.mini.no-back {
 code {
     color: white;
 }
+
+.text-success,
+.success {
+    color: var(--color-success) !important;
+}
+.text-warning,
+.warning {
+    color: var(--color-warning) !important;
+}
+.text-danger,
+.danger {
+    color: var(--color-danger) !important;
+}
+
 .tip-icon {
     background-color: var(--color-alternate);
     border-radius: 50%;

@@ -45,6 +45,7 @@ import {
   hasActiveBackup,
 } from '../utils/atlasManager.js';
 import AppConstants from '../utils/appConstants.js';
+import AppUtils from '../utils/appUtils.js';
 
 /**
  * Settings panel management for Data Flow Atlas.
@@ -1305,7 +1306,9 @@ export function updateBackupButtonState(): void {
   const hasBackup = hasActiveBackup();
   const activeAtlas = getActiveAtlas();
 
-  // Update settings panel button
+  // Update Settings Panel button.
+  /** The CSS for this button is set to 'hidden'.
+   *  The import/export is available in the "Manage Data" section.
   const restoreBackupBtn = document.getElementById('restore-backup-btn') as HTMLButtonElement;
   if (restoreBackupBtn) {
     restoreBackupBtn.disabled = !hasBackup;
@@ -1313,14 +1316,23 @@ export function updateBackupButtonState(): void {
       ? `Restore ${activeAtlas} from auto-backup`
       : 'No backup available for the active atlas';
   }
+   */
 
-  // Update main page button
+  // Update Manage Data button.
   const manageRestoreBackupBtn = document.getElementById('manage-restore-backup-btn') as HTMLButtonElement;
-  if (manageRestoreBackupBtn) {
-    manageRestoreBackupBtn.disabled = !hasBackup;
-    manageRestoreBackupBtn.title = hasBackup
-      ? `Restore ${activeAtlas} from auto-backup`
-      : 'No backup available for the active atlas';
+  const restoreBackupBtnMsg = document.getElementById('restore-backup-btn-msg') as HTMLButtonElement;
+  if (manageRestoreBackupBtn && restoreBackupBtnMsg) {
+    if (hasBackup) {
+      manageRestoreBackupBtn.disabled = false;
+      manageRestoreBackupBtn.title = `Restore ${activeAtlas} from auto-backup`;
+      restoreBackupBtnMsg.innerText = `Restore ${activeAtlas} from auto-backup`;
+      AppUtils.classListChain(restoreBackupBtnMsg).add('success').remove('warning')
+    } else {
+      manageRestoreBackupBtn.disabled = true;
+      manageRestoreBackupBtn.title = 'No backup available for the active atlas';
+      restoreBackupBtnMsg.innerText = 'No backup available for the active atlas';
+      AppUtils.classListChain(restoreBackupBtnMsg).add('warning').remove('success')
+    }
   }
 }
 
