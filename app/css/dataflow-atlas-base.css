@@ -604,9 +604,8 @@ header img.logo-img:hover {
     display: inline-block;
     height: 24px;
     line-height: 0.4;
-    padding: 8px 3px;
+    padding: 8px 3px 8px 2px;
     vertical-align: baseline;
-    width: 24px;
 }
 
 .relationships-controls {
@@ -660,7 +659,6 @@ header img.logo-img:hover {
 button.card-action-btn.mini {
     background-color: blue;
     border-radius: 50%;
-    height: 20px;
     line-height: 1.0;
     vertical-align: middle;
 }
