@@ -22,7 +22,7 @@ import {
 } from './components/ui.js';
 import { TreeView } from './components/treeView.js';
 import { createDFACardFromForm, addDFACard, updateDFACard, deleteDFACard } from './components/cardManager.js';
-import { initializeSettingsPanel } from './components/settingsPanel.js';
+import { initializeSettingsPanel, closeSettingsModal } from './components/settingsPanel.js';
 import { AtlasSelector } from './components/atlasSelector.js';
 import { initializeDefaultAtlas, saveCards, restoreFromBackup, getActiveAtlas } from './utils/atlasManager.js';
 import { updateBackupButtonState } from './components/settingsPanel.js';
@@ -202,6 +202,11 @@ export class DFDAtlas {
           this.handleCardAction(action, cardId, codeType || undefined);
         }
       }
+    });
+
+    // Global keyboard shortcuts.
+    document.addEventListener('keydown', (e) => {
+      this.handleKeyboardShortcut(e);
     });
   }
 
@@ -430,7 +435,41 @@ export class DFDAtlas {
     // Simply refresh the current view since settings didn't change the active tab
     this.renderAtlas();
     this.updateStats();
-  }  /**
+  }
+
+  /**
+   * Handle global keyboard shortcuts.
+   */
+  private handleKeyboardShortcut(e: KeyboardEvent): void {
+    // Only handle Escape key for now
+    if (e.key !== 'Escape') {
+      return;
+    }
+
+    // Check if any modals are open and close them first
+    const editModal = document.getElementById('edit-modal') as HTMLElement;
+    const settingsModal = document.getElementById('settings-modal') as HTMLElement;
+
+    // Priority: Close edit modal first if open
+    if (editModal && editModal.style.display === 'flex') {
+      this.hideModal();
+      e.preventDefault();
+      return;
+    }
+
+    // Then close settings modal if open (uses classList instead of style.display)
+    if (settingsModal && settingsModal.classList.contains('active')) {
+      closeSettingsModal();
+      e.preventDefault();
+      return;
+    }
+
+    // If no modals are open, switch to Add a Card tab
+    this.switchTab('nav-add');
+    e.preventDefault();
+  }
+
+  /**
    * Apply current filter values to render filtered cards.
    */
   private applyFilters(): void {
