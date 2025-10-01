@@ -886,6 +886,18 @@ export function resetCreateForm(): void {
   if (linkedToSelect) {
     linkedToSelect.value = '';
   }
+
+  // Collapse getter and setter code sections since the name fields are now empty
+  const getterCodeSection = getElement<HTMLElement>('getter-code-section');
+  const setterCodeSection = getElement<HTMLElement>('setter-code-section');
+
+  if (getterCodeSection) {
+    getterCodeSection.classList.remove('show');
+  }
+
+  if (setterCodeSection) {
+    setterCodeSection.classList.remove('show');
+  }
 }
 
 /**
