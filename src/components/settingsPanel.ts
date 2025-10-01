@@ -1504,7 +1504,7 @@ async function setupAtlasManagementHandlers(): Promise<void> {
   if (storageCapacity) {
     const { usageMB, limitMB, percent, keysLength } = await AppConstants.getLocalStorageUsage();
     const localUsage = usageMB.toFixed(2);
-    const localRemaining = limitMB.toFixed(2);
+    const localRemaining = (limitMB - usageMB).toFixed(2);
     const localPercent = percent.toFixed(0);
     storageCapacity.innerHTML = `localStorage [${keysLength}] | Usage (MB): ${localUsage} | <span class="no-wrap">Remaining: ${localRemaining} | ${localPercent}%</span>`;
   }
