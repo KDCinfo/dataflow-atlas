@@ -316,7 +316,7 @@ function generateLayerOptions(selectedLayer?: string): string {
   let html = '<option value="">Select Layer</option>';
 
   if (endpoints.length > 0) {
-    html += '<optgroup label="Endpoints - Data belongs to...">';
+    html += '<optgroup label="Endpoints (persistent data)">';
     endpoints.forEach(layer => {
       const selected = selectedLayer === layer.name ? 'selected' : '';
       html += `<option value="${layer.name}" ${selected}>${layer.name}</option>`;
@@ -325,7 +325,7 @@ function generateLayerOptions(selectedLayer?: string): string {
   }
 
   if (throughpoints.length > 0) {
-    html += '<optgroup label="Throughpoints - Data passes through...">';
+    html += '<optgroup label="Throughpoints (transient data)">';
     throughpoints.forEach(layer => {
       const selected = selectedLayer === layer.name ? 'selected' : '';
       html += `<option value="${layer.name}" ${selected}>${layer.name}</option>`;

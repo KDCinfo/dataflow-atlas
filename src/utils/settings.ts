@@ -92,14 +92,17 @@ const DEFAULT_FORM_VISIBILITY: FormVisibilitySettings = {
 
 // Default data sources.
 const DEFAULT_DATA_LAYERS: DataLayer[] = [
-  // Endpoints - where data ultimately starts or ends up
-  { name: 'Pinia Store', id: 'pinia-store', type: DataLayerType.Endpoint },
-  { name: 'localStorage', id: 'localstorage', type: DataLayerType.Endpoint },
-  { name: 'sessionStorage', id: 'sessionstorage', type: DataLayerType.Endpoint },
+  // Endpoints - where data ultimately starts or ends up; 'Has data'
+  // Persistent data that is used to populate more transient data stores.
   { name: 'Database', id: 'database', type: DataLayerType.Endpoint },
+  { name: 'localStorage', id: 'localstorage', type: DataLayerType.Endpoint },
   { name: 'File System', id: 'filesystem', type: DataLayerType.Endpoint },
 
-  // Throughpoints/Consumers - intermediate processing layers
+  // Throughpoints/Consumers - intermediate processing layers; 'Gets data'
+  // Has data set from another source, or passes data through it.
+  // If the layer is empty when the app loads, it is a throughpoint (which could be categorized).
+  { name: 'Pinia Store', id: 'pinia-store', type: DataLayerType.Throughpoint },
+  { name: 'sessionStorage', id: 'sessionstorage', type: DataLayerType.Throughpoint },
   { name: 'Repository', id: 'repository', type: DataLayerType.Throughpoint },
   { name: 'ViewController', id: 'view-controller', type: DataLayerType.Throughpoint },
   { name: 'Backend API', id: 'backend-api', type: DataLayerType.Throughpoint },

@@ -208,8 +208,8 @@ function generateDataLayerManagementSection(): string {
             <input type="text" id="new-layer-name-input" class="settings-input" placeholder="Display name ('Pinia Store')" title="Display name (e.g., 'Pinia Store')">
                         <select id="new-layer-type-select" class="form-control">
               <option value="">Choose classification...</option>
-              <option value="${DataLayerType.Endpoint}">Endpoint - Data belongs to...</option>
-              <option value="${DataLayerType.Throughpoint}">Throughpoint - Data passes through...</option>
+              <option value="${DataLayerType.Endpoint}">Endpoint (persistent data)</option>
+              <option value="${DataLayerType.Throughpoint}">Throughpoint (transient data)</option>
             </select>
             <button id="add-layer-btn" class="btn-secondary" disabled>Add Source Type</button>
           </div>
@@ -217,7 +217,7 @@ function generateDataLayerManagementSection(): string {
 
         <div class="layers-grid">
           <div class="layers-column">
-            <h5>Endpoints - <span class="no-wrap">Data belongs to...</span></h5>
+            <h5>Endpoints <span class="no-wrap">(persistent data)</span></h5>
             <div class="layer-list">
               ${endpoints.length > 0 ? endpoints.map(layer => `
                 <div class="layer-item-compact" data-layer-id="${escapeHtml(layer.id)}">
@@ -232,7 +232,7 @@ function generateDataLayerManagementSection(): string {
           </div>
 
           <div class="layers-column">
-            <h5>Thrupoints - <span class="no-wrap">Data passes through...</span></h5>
+            <h5>Thrupoints <span class="no-wrap">(transient data)</span></h5>
             <div class="layer-list">
               ${throughpoints.length > 0 ? throughpoints.map(layer => `
                 <div class="layer-item-compact" data-layer-id="${escapeHtml(layer.id)}">
