@@ -269,6 +269,11 @@ header img.logo-img:hover {
     font-weight: bold;
     -webkit-text-fill-color: black;
 }
+.form-group input.required-input::placeholder,
+.form-group select.required-input::placeholder,
+.form-group textarea.required-input::placeholder {
+    font-weight: nromal;
+}
 
 .form-group input:focus,
 .form-group select:focus,
